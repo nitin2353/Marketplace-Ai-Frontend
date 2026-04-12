@@ -1,0 +1,396 @@
+/* ─── AddToCartModal.css ──────────────────────────────────────────────────── */
+
+/* Overlay */
+.atc-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(17, 24, 39, 0.62);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+/* Shell */
+.atc-shell {
+    background: #fff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 460px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+    animation: atcIn 0.22s ease;
+}
+
+@keyframes atcIn {
+    from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    to   { opacity: 1; transform: scale(1)   translateY(0);    }
+}
+
+/* ── Header ── */
+.atc-header {
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    padding: 18px 22px 16px;
+}
+
+.atc-header-img {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    flex-shrink: 0;
+}
+
+.atc-header-brand {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.75);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 2px;
+}
+
+.atc-header-title {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.35;
+    margin-bottom: 5px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.atc-header-price {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.atc-header-old {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+    text-decoration: line-through;
+    font-weight: 600;
+}
+
+.atc-header-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 900;
+    border-radius: 20px;
+    padding: 2px 8px;
+}
+
+.atc-close-btn {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: none !important;
+    color: #fff !important;
+    border-radius: 50% !important;
+    width: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.atc-close-btn:hover {
+    background: rgba(255, 255, 255, 0.32) !important;
+}
+
+/* ── Body ── */
+.atc-body {
+    padding: 20px 22px;
+}
+
+/* ── Section label ── */
+.atc-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+}
+
+/* ── Tag / Policy pills ── */
+.atc-pill {
+    font-size: 0.62rem;
+    font-weight: 800;
+    border-radius: 6px;
+    padding: 3px 9px;
+}
+.atc-pill-tag      { background: #ede9fe; color: #6d28d9; }
+.atc-pill-return   { background: #dcfce7; color: #166634; }
+.atc-pill-replace  { background: #dbeafe; color: #1d4ed8; }
+.atc-pill-custom   { background: #ede9fe; color: #7c3aed; }
+
+/* ── Color dots ── */
+.atc-color-dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2.5px solid #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+    transition: box-shadow 0.12s, transform 0.12s;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.atc-color-dot.active {
+    box-shadow: 0 0 0 2.5px #ff6b35;
+    transform: scale(1.15);
+}
+
+.atc-color-dot.oos {
+    opacity: 0.35;
+}
+
+.atc-oos-strike {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.atc-oos-strike::after {
+    content: "";
+    display: block;
+    width: 130%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.7);
+    transform: rotate(-45deg);
+}
+
+/* ── Size buttons ── */
+.atc-size-btn {
+    padding: 7px 18px !important;
+    border-radius: 9px !important;
+    border: 1.5px solid #e5e7eb !important;
+    background: #fff !important;
+    color: #374151 !important;
+    font-weight: 800 !important;
+    font-size: 13px !important;
+    cursor: pointer;
+    transition: all 0.12s !important;
+    position: relative;
+    line-height: 1 !important;
+}
+
+.atc-size-btn:hover:not(:disabled) {
+    border-color: #ff6b35 !important;
+    color: #ff6b35 !important;
+}
+
+.atc-size-btn.active {
+    background: #ff6b35 !important;
+    border-color: #ff6b35 !important;
+    color: #fff !important;
+}
+
+.atc-size-btn:disabled {
+    opacity: 0.4 !important;
+    text-decoration: line-through;
+    cursor: not-allowed !important;
+    color: #ccc !important;
+}
+
+.atc-low-dot {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #f59e0b;
+    border: 1.5px solid #fff;
+}
+
+/* ── Stock badge ── */
+.atc-stock {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 800;
+    border-radius: 8px;
+    padding: 4px 10px;
+}
+.atc-stock.ok   { background: #dcfce7; color: #166534; }
+.atc-stock.low  { background: #fff7ed; color: #92400e; }
+.atc-stock.out  { background: #fef2f2; color: #dc2626; }
+
+/* ── Qty stepper ── */
+.atc-stepper {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.atc-stepper-btn {
+    width: 38px !important;
+    height: 38px !important;
+    border: none !important;
+    background: #f9fafb !important;
+    color: #374151 !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    cursor: pointer;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: background 0.12s !important;
+}
+
+.atc-stepper-btn:hover:not(:disabled) {
+    background: #f3f4f6 !important;
+}
+
+.atc-stepper-btn:disabled {
+    opacity: 0.3 !important;
+    cursor: not-allowed !important;
+}
+
+.atc-stepper-val {
+    width: 48px;
+    text-align: center;
+    font-weight: 900;
+    font-size: 15px;
+    color: #1a1a2e;
+    border-left: 1px solid #e5e7eb;
+    border-right: 1px solid #e5e7eb;
+    height: 38px;
+    line-height: 38px;
+    user-select: none;
+}
+
+/* ── Divider ── */
+.atc-divider {
+    height: 1px;
+    background: #f1f4ff;
+    margin-bottom: 16px;
+}
+
+/* ── Combo warning ── */
+.atc-combo-warn {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 9px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #92400e;
+}
+
+/* ── CTA buttons ── */
+.atc-btn-primary {
+    width: 100%;
+    padding: 14px !important;
+    border-radius: 12px !important;
+    border: none !important;
+    background: linear-gradient(135deg, #ff6b35, #f7931e) !important;
+    color: #fff !important;
+    font-weight: 900 !important;
+    font-size: 15px !important;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.12s !important;
+    line-height: 1 !important;
+}
+
+.atc-btn-primary:hover:not(:disabled) {
+    opacity: 0.92 !important;
+    transform: translateY(-1px);
+}
+
+.atc-btn-primary:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+.atc-btn-secondary {
+    width: 100%;
+    padding: 11px !important;
+    border-radius: 12px !important;
+    border: 1.5px solid #e5e7eb !important;
+    background: #fff !important;
+    color: #6b7280 !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    cursor: pointer;
+    transition: background 0.12s !important;
+}
+
+.atc-btn-secondary:hover {
+    background: #f9fafb !important;
+}
+
+/* ── Success screen ── */
+.atc-success-ring {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #dcfce7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 14px;
+}
+
+.atc-success-size-chip {
+    background: #f1f4ff;
+    border-radius: 7px;
+    padding: 2px 10px;
+}
+
+.atc-success-color-dot {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0, 0, 0, 0.12);
+}
+
+.atc-btn-view-cart {
+    flex: 1;
+    padding: 12px !important;
+    border-radius: 12px !important;
+    border: none !important;
+    background: linear-gradient(135deg, #ff6b35, #f7931e) !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+    font-size: 14px !important;
+    cursor: pointer;
+}
+
+.atc-btn-keep {
+    flex: 1;
+    padding: 12px !important;
+    border-radius: 12px !important;
+    border: 1.5px solid #e5e7eb !important;
+    background: #fff !important;
+    color: #555 !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    cursor: pointer;
+}

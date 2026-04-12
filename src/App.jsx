@@ -1,0 +1,67 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./helper/AuthWrapper.jsx";
+import NavigationInitializer from "./config/NavigationInitializer.jsx";
+import ROUTE from "./helper/Route.jsx";
+import ProtectedRoute from "./helper/ProtectedRoute.jsx";
+import Toaster from "./components/Toaster.jsx";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import NotFound from './pages/errors/NotFound'
+import Dashboard from './pages/dashboard'
+import CustomerRegister from "./pages/auth/customer/Register.jsx";
+import SellerRegister from "./pages/auth/seller/Register.jsx";
+import AdminLogin from "./pages/auth/admin/login.jsx"
+import Login from "./pages/auth/Login.jsx";
+import MyRequirements from "./pages/requirement/Myrequirements.jsx";
+import RequirementListing from "./pages/requirement/Requirementlisting.jsx";
+import ProductDetailPage from "./pages/detail-page/ProductDetailPage.jsx";
+import CreateProduct from "./pages/product/CreateProduct";
+import SellerProducts from "./pages/seller-products/SellerDashboard.jsx";
+import LandingPage from "./pages/landing-page/LandingDashboard.jsx";
+import Cart from "./pages/cart";
+import WishlistPage from "./pages/wishlist";
+import CheckoutPage from "./pages/checkout/Checkoutpage";
+import OrdersPage from "./pages/customer-order-list/OrdersPage.jsx";
+import SettingsPage from "./pages/setting/Settings.jsx";
+import ChatPage from "./pages/requirements/ChatPage";
+import SellerDashboardHome from "./pages/seller-dashboard/Sellerdashboardhome.jsx";
+
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        {/* <NavigationInitializer /> */}
+        <Toaster />
+        <Routes>
+          <Route path={ROUTE.LOGIN} element={<Login />} />
+          <Route path={ROUTE.CUSTOMER_REGISTER} element={<CustomerRegister />} />
+          <Route path={ROUTE.SELLER_REGISTER} element={<SellerRegister />} />
+          <Route path={ROUTE.ADMIN_LOGIN} element={<AdminLogin />} />
+          <Route path={ROUTE.CART} element={<ProtectedRoute moduleName="cart"><Cart /></ProtectedRoute>} />
+          <Route path={ROUTE.ORDERS} element={<ProtectedRoute moduleName="orders"><OrdersPage /></ProtectedRoute>} />
+          <Route path={ROUTE.WISHLIST} element={<ProtectedRoute moduleName="wishlist"><WishlistPage /></ProtectedRoute>} />
+          <Route path={ROUTE.LANDING_PAGE} element={<ProtectedRoute moduleName="landing_page"><LandingPage /></ProtectedRoute>} />
+          <Route path={ROUTE.DASHBOARD} element={<ProtectedRoute moduleName="dashboard"><Dashboard /></ProtectedRoute>} />
+          <Route path={ROUTE.PRODUCT_DETAIL_PAGE} element={<ProtectedRoute moduleName="detail_page"><ProductDetailPage /></ProtectedRoute>} />
+          <Route path={ROUTE.CREATE_PRODUCT} element={<ProtectedRoute moduleName="create_product"><CreateProduct /></ProtectedRoute>} />
+          <Route path={ROUTE.SELLER_PRODUCTS} element={<ProtectedRoute moduleName="seller_products"><SellerProducts /></ProtectedRoute>} />
+          <Route path={ROUTE.CUSTOMER_REQUIREMENTS} element={<ProtectedRoute moduleName="curstomer_requirements"><MyRequirements /></ProtectedRoute>} />
+          <Route path={ROUTE.CHECKOUT} element={<ProtectedRoute moduleName="checkout"><CheckoutPage /></ProtectedRoute>} />
+          <Route path={ROUTE.SETTINGS} element={<ProtectedRoute moduleName="settings"><SettingsPage /></ProtectedRoute>} />
+          <Route path={ROUTE.SELLER_DASHBOARD} element={<ProtectedRoute moduleName="seller-dashboard"><SellerDashboardHome /></ProtectedRoute>} />
+          <Route path={ROUTE.CHAT} element={<ProtectedRoute moduleName="requirement"><ChatPage /></ProtectedRoute>} />
+          <Route path={ROUTE.CUSTOMER_REQUIREMENTS_LISTING} element={<ProtectedRoute moduleName="curstomer_requirements_list"><RequirementListing /></ProtectedRoute>} />
+          <Route element={<ProtectedRoute />}>
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+};
+
+export default App;

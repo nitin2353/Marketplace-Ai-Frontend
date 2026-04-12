@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+
+body {
+    font-family: 'Nunito', sans-serif !important;
+}
+
+.eco-hero {
+    background: linear-gradient(145deg, #ff6b35 0%, #f7931e 55%, #ffcd3c 100%) !important;
+}
+
+.eco-card {
+    border-radius: 24px !important;
+    border: none !important;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.13) !important;
+}
+
+.eco-input {
+    border-radius: 12px !important;
+    border: 2px solid #e8eaf6 !important;
+    padding: 12px 16px !important;
+    font-size: 0.95rem !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+.eco-input:focus {
+    border-color: #ff6b35 !important;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15) !important;
+    outline: none !important;
+}
+
+.eco-input.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+.eco-btn-main {
+    background: linear-gradient(135deg, #ff6b35, #f7931e) !important;
+    border: none !important;
+    border-radius: 14px !important;
+    font-weight: 800 !important;
+    font-size: 1.05rem !important;
+    padding: 13px !important;
+    letter-spacing: 0.4px !important;
+    transition: transform 0.15s, box-shadow 0.15s !important;
+}
+
+.eco-btn-main:hover:not(:disabled) {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 28px rgba(255, 107, 53, 0.4) !important;
+}
+
+.eco-btn-main:disabled {
+    opacity: 0.7 !important;
+    cursor: not-allowed !important;
+}
+
+.eco-social-btn {
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    font-size: 0.88rem !important;
+    padding: 10px !important;
+    border: 2px solid #e8eaf6 !important;
+    background: #fff !important;
+    color: #333 !important;
+    transition: border-color 0.2s, background 0.2s, color 0.2s !important;
+}
+
+.eco-social-btn:hover {
+    border-color: #ff6b35 !important;
+    background: #fff7f4 !important;
+    color: #ff6b35 !important;
+}
+
+.eco-feature-card {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(6px) !important;
+}
+
+.eco-divider {
+    position: relative;
+    text-align: center;
+    color: #aaa;
+    font-size: 0.82rem;
+}
+
+.eco-divider::before,
+.eco-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 44%;
+    height: 1px;
+    background: #e8eaf6;
+}
+
+.eco-divider::before {
+    left: 0;
+}
+
+.eco-divider::after {
+    right: 0;
+}
+
+.eco-success-ring {
+    width: 82px;
+    height: 82px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b35, #ffcd3c);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    margin: 0 auto;
+}
+
+.eco-progress-bar {
+    height: 6px !important;
+    border-radius: 8px !important;
+}
