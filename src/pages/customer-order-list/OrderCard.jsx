@@ -91,23 +91,18 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
             <div className="ord-card-body">
                 {/* Product image strip */}
                 <div className="ord-img-strip">
-                    {visItems.map((item) => {
-                        const img = Array.isArray(item.product_image_url)
-                            ? item.product_image_url[0]
-                            : item.product_image_url.replace(/[{}"]/g, '');
-                        return (
-                            <img
-                                key={item.id}
-                                src={img || `https://placehold.co/52x52/f1f4ff/ff6b35?text=${encodeURIComponent((item.product_title || "P").slice(0, 2))}`}
-                                alt={item.product_title || "Product"}
-                                className="ord-product-img"
-                                onError={(e) => {
-                                    e.target.onerror = null; // 🔥 prevent infinite loop
-                                    e.target.src = `https://placehold.co/52x52/f1f4ff/ff6b35?text=${encodeURIComponent((item.product_title || "P").slice(0, 2))}`;
-                                }}
-                            />
-                        );
-                    })}
+                    {console.log(items[0]?.product_image_url.split(',')[0].replaceAll('"{\\"', "").replaceAll('\\"', ""))}
+                    <img
+                        key={items.id}
+                        src={items[0]?.product_image_url.split(',')[0].replaceAll('{"', "").replaceAll('"', "")}
+                        alt={items.product_title || "Product"}
+                        className="ord-product-img"
+                        onError={(e) => {
+                            e.target.onerror = null; // 🔥 prevent infinite loop
+                            e.target.src = `https://placehold.co/52x52/f1f4ff/ff6b35?text=${encodeURIComponent((items.product_title || "P").slice(0, 2))}`;
+                        }}
+                    />
+
 
                     {moreQty > 0 && (
                         <div className="ord-product-img more">+{moreQty}</div>
@@ -195,9 +190,6 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
 
                                 {items?.length > 0 ? (
                                     items.map((item) => {
-                                        const img = Array.isArray(item.product_image_url)
-                                            ? item.product_image_url[0]
-                                            : item.product_image_url.replace(/[{}"]/g, '');
                                         return (
                                             <div
                                                 key={item.id}
@@ -208,14 +200,8 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
                                                     alignItems: "center"
                                                 }}
                                             >
-                                                {/* Image */}
                                                 <img
-                                                    src={
-                                                        img ||
-                                                        `https://placehold.co/44x44/f1f4ff/ff6b35?text=${encodeURIComponent(
-                                                            (item.product_title || "P").slice(0, 2)
-                                                        )}`
-                                                    }
+                                                    src={items[0]?.product_image_url.split(',')[0].replaceAll('{"', "").replaceAll('"', "")}
                                                     alt={item.product_title || "Product"}
                                                     style={{
                                                         width: 44,
@@ -225,12 +211,12 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
                                                         border: "1.5px solid #e8eaf6",
                                                         flexShrink: 0
                                                     }}
-                                                    onError={(e) => {
-                                                        e.target.onerror = null; // 🔥 prevent loop
-                                                        e.target.src = `https://placehold.co/44x44/f1f4ff/ff6b35?text=${encodeURIComponent(
-                                                            (item.product_title || "P").slice(0, 2)
-                                                        )}`;
-                                                    }}
+                                                onError={(e) => {
+                                                    e.target.onerror = null; // 🔥 prevent loop
+                                                    e.target.src = `https://placehold.co/44x44/f1f4ff/ff6b35?text=${encodeURIComponent(
+                                                        (item.product_title || "P").slice(0, 2)
+                                                    )}`;
+                                                }}
                                                 />
 
                                                 {/* Content */}

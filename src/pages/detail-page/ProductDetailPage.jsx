@@ -45,9 +45,7 @@ function DetailSkeleton() {
   );
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-//  ProductDetail
-// ════════════════════════════════════════════════════════════════════════════
+
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -97,35 +95,44 @@ export default function ProductDetail() {
   const fetchProduct = async () => {
     setLoading(true);
     setActiveImg(0);
+
     try {
-      const { data } = await productApi.getProductById(id);
+      const response = await productApi.getProductById(id);
+      const payload = response?.data ?? response;
 
+      const raw =
+        payload?.data?.[0] ??
+        payload?.data ??
+        payload?.rows?.[0] ??
+        payload?.row ??
+        payload ??
+        null;
 
-      const raw = data?.rows?.[0] ?? data?.row ?? data ?? null;
       if (raw) {
-        const p = GlobalHelper.API_FIELDS_MAP['products'](raw);
+        const p = GlobalHelper.API_FIELDS_MAP["products"](raw);
         setProduct(p);
-        setActiveColor(p.colors[0] || null);
-        setActiveColor(p.variants?.[0]?.color || null);
-        setActiveSize(p.variants?.[0]?.size || null);
-        setActiveVariant(p.variants?.[0] || null);
 
-
+        setActiveColor(p?.variants?.[0]?.color || p?.colors?.[0] || null);
+        setActiveSize(p?.variants?.[0]?.size || null);
+        setActiveVariant(p?.variants?.[0] || null);
 
         try {
-          const rel = await productApi.getAllProducts();
-          const rows = Array.isArray(rel) ? rel
-            : Array.isArray(rel?.rows) ? rel.rows
-              : Array.isArray(rel?.data) ? rel.data
-                : Array.isArray(rel?.data?.rows) ? rel.data.rows
-                  : [];
+          const relResponse = await productApi.getAllProducts();
+          const relPayload = relResponse?.data ?? relResponse;
+
+          const rows =
+            relPayload?.data ??
+            relPayload?.rows ??
+            relPayload?.data?.rows ??
+            (Array.isArray(relPayload) ? relPayload : []);
+
           setRelated(
-            rows
-              .map(GlobalHelper.API_FIELDS_MAP['products'])
-              .filter(r => r.id !== p.id)
+            (Array.isArray(rows) ? rows : [])
+              .map(GlobalHelper.API_FIELDS_MAP["products"])
+              .filter((r) => r.id !== p.id)
               .slice(0, 4)
           );
-        } catch (_) { /* related is optional */ }
+        } catch (_) { }
       } else {
         toast.error("Product not found.");
       }
@@ -295,10 +302,10 @@ export default function ProductDetail() {
                     alt={product.title}
                     className={`pd-hero-img ${imgLoading ? "loading" : ""}`}
                     onLoad={() => setImgLoading(false)}
-                    onError={e => {
-                      e.target.src = `https://placehold.co/600x600/f1f4ff/ff6b35?text=${encodeURIComponent(product.title.slice(0, 2))}`;
-                      setImgLoading(false);
-                    }}
+                  // onError={e => {
+                  //   e.target.src = `https://placehold.co/600x600/f1f4ff/ff6b35?text=${encodeURIComponent(product.title.slice(0, 2))}`;
+                  //   setImgLoading(false);
+                  // }}
                   />
                 </div>
 

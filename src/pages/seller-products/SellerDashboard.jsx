@@ -129,7 +129,7 @@ export default function SellerProducts() {
 
 
 
-    
+
     const confirmDelete = async (id) => {
         setDeleteLoading(true);
         const response = await productApi.deleteProduct(deleteModal.id)
@@ -275,7 +275,7 @@ export default function SellerProducts() {
                     {viewMode === "grid" && filtered.length > 0 && (
                         <Row className="g-3">
                             {filtered.map(product => (
-                                <Col xs={12} sm={6} xl={4} key={product.id}>
+                                <Col xs={12} sm={6} xl={3} key={product.id}>
                                     <Card className="product-card h-100">
                                         {product.image_url
                                             ? <img src={product.image_url[0]} alt={product.title} className="product-img" />
@@ -284,7 +284,9 @@ export default function SellerProducts() {
                                         <Card.Body className="p-3">
                                             <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
                                                 <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.04em" }}>{product.brand}</span>
-                                                {product.tag.map(t => <Badge key={t} className="eco-badge-tag">{t.trim()}</Badge>)}
+                                                {product.tag.map((t, idx) => {
+                                                    return idx < 1 ? <Badge key={t} className="eco-badge-tag">{t.trim()}</Badge> : null;
+                                                })}
                                                 {product.is_customizable && <Badge className="eco-badge-tag">✏️ Custom</Badge>}
                                             </div>
                                             <div className="fw-bold mb-2" style={{ fontSize: "0.92rem", color: "#1a1a2e", lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>

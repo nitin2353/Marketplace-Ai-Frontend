@@ -50,7 +50,7 @@ export default function Login() {
         toast.success(res.message || "Logged In Successfully");
         let { role } = JWTService.decodeTokenDetails(res?.token)
         if (role == 'seller') {
-          navigate('/seller/product')
+          navigate('/seller/products')
         } else {
           navigate('/dashboard')
         }

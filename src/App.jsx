@@ -27,7 +27,9 @@ import CheckoutPage from "./pages/checkout/Checkoutpage";
 import OrdersPage from "./pages/customer-order-list/OrdersPage.jsx";
 import SettingsPage from "./pages/setting/Settings.jsx";
 import ChatPage from "./pages/requirements/ChatPage";
-import SellerDashboardHome from "./pages/seller-dashboard/Sellerdashboardhome.jsx";
+import SellerProductDetail from "./pages/seller-detail-page/SellerProductDetail";
+import SellerDashboardHome from "./pages/seller-dashboard/Sellerdashboardhome";
+import SellerOrders from "./pages/seller-orders/SellerOrders";
 
 
 const App = () => {
@@ -53,6 +55,9 @@ const App = () => {
           <Route path={ROUTE.CHECKOUT} element={<ProtectedRoute moduleName="checkout"><CheckoutPage /></ProtectedRoute>} />
           <Route path={ROUTE.SETTINGS} element={<ProtectedRoute moduleName="settings"><SettingsPage /></ProtectedRoute>} />
           <Route path={ROUTE.SELLER_DASHBOARD} element={<ProtectedRoute moduleName="seller-dashboard"><SellerDashboardHome /></ProtectedRoute>} />
+          <Route path={ROUTE.SELLER_ORDER} element={<ProtectedRoute moduleName="seller-orders"><SellerOrders /></ProtectedRoute>} />
+          <Route path={ROUTE.SELLER_ORDER_BY_ID} element={<ProtectedRoute moduleName="seller-orders"><SellerOrders /></ProtectedRoute>} />
+          <Route path={ROUTE.SELLER_PRODUCT_DETAIL_PAGE} element={<ProtectedRoute moduleName="seller-product-detail-page"><SellerProductDetail /></ProtectedRoute>} />
           <Route path={ROUTE.CHAT} element={<ProtectedRoute moduleName="requirement"><ChatPage /></ProtectedRoute>} />
           <Route path={ROUTE.CUSTOMER_REQUIREMENTS_LISTING} element={<ProtectedRoute moduleName="curstomer_requirements_list"><RequirementListing /></ProtectedRoute>} />
           <Route element={<ProtectedRoute />}>

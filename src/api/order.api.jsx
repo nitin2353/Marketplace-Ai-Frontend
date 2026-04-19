@@ -10,7 +10,6 @@ const createOrder = async (data) => {
     }
 };
 
-// GET CUSTOMER ORDERS
 const getCustomerOrders = async (userId) => {
     try {
         const response = await API.get(`/order/customer/${userId}`);
@@ -20,7 +19,6 @@ const getCustomerOrders = async (userId) => {
     }
 };
 
-// GET CUSTOMER ORDER BY ID
 const getCustomerOrderById = async (userId, orderId) => {
     try {
         const response = await API.get(`/order/customer/${userId}/${orderId}`);
@@ -30,7 +28,6 @@ const getCustomerOrderById = async (userId, orderId) => {
     }
 };
 
-// GET SELLER ORDERS
 const getSellerOrders = async (sellerId) => {
     try {
         const response = await API.get(`/order/seller/${sellerId}`);
@@ -40,7 +37,6 @@ const getSellerOrders = async (sellerId) => {
     }
 };
 
-// GET SELLER ORDER BY ID
 const getSellerOrderById = async (sellerId, orderId) => {
     try {
         const response = await API.get(`/order/seller/${sellerId}/${orderId}`);
@@ -50,7 +46,6 @@ const getSellerOrderById = async (sellerId, orderId) => {
     }
 };
 
-// GET ORDER BY ID
 const getOrderById = async (orderId) => {
     try {
         const response = await API.get(`/order/${orderId}`);

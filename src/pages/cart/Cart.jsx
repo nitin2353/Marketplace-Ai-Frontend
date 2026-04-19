@@ -35,10 +35,9 @@ export default function CartPage() {
             const { data } = await cartApi.getAllCart();
 
             if (data.success && Array.isArray(data.data)) {
-
                 setItems(data.data.map(GlobalHelper.API_FIELDS_MAP['cart']));
             } else {
-                setItems([]);
+                setItems(data.data[0].GlobalHelper.API_FIELDS_MAP['cart']);
             }
         } catch (error) {
             console.error("Cart fetch error:", error.message);
@@ -49,7 +48,7 @@ export default function CartPage() {
     };
 
     useEffect(() => { fetchCart(); }, []);
-
+    
 
     const updateQty = async (cartId, delta) => {
 
@@ -138,7 +137,6 @@ export default function CartPage() {
     return (
         <div style={{ minHeight: "100vh", background: "#f1f4ff" }}>
             {loading && <GlobalLoader />}
-
             <Toolbar
                 searchRef={searchRef}
                 cart={cart}
@@ -223,10 +221,10 @@ export default function CartPage() {
                                         className={`cart-item fu ${removing === item.id ? "opacity-25" : ""}`}
                                         style={{ animationDelay: `${i * 0.06}s`, transition: "opacity .3s" }}
                                     >
-
+                                        {console.log("itemitem", )}
                                         <div style={{ position: "relative", flexShrink: 0 }}>
                                             {item.image_url
-                                                ? <img src={item.image_url} alt={item.title} className="cart-img"
+                                                ? <img src={item.image_url.split(',')[0].replaceAll('"{\\"', "").replaceAll('\\"', "")} alt={item.title} className="cart-img"
                                                     onError={e => { e.target.src = `https://placehold.co/100x100/f1f4ff/ff6b35?text=${encodeURIComponent(item.title.slice(0, 2))}`; }}
                                                     style={{ cursor: "pointer" }}
                                                     onClick={() => navigate(`/product/${item.product_id}`)}

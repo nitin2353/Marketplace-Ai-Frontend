@@ -1,9 +1,3 @@
-// ════════════════════════════════════════════════════════════
-//  SellerDashboardHome.jsx  —  Complete Seller Analytics
-//  Charts: Revenue, Orders, Category, Rating, Stock, Funnel
-//  Data:   computed live from products prop + mock orders
-// ════════════════════════════════════════════════════════════
-
 import { useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import {
@@ -18,47 +12,46 @@ import GlobalLoader from "../../components/GlobalLoader";
 import productApi from "../../api/product.api";
 import "./SellerDashboardHome.css";
 
-// ── Helpers ────────────────────────────────────────────────
-const fmt   = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
-const fmtL  = (n) => n >= 100000 ? `₹${(n / 100000).toFixed(1)}L` : n >= 1000 ? `₹${(n / 1000).toFixed(1)}K` : `₹${n}`;
+
+const fmt = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
+const fmtL = (n) => n >= 100000 ? `₹${(n / 100000).toFixed(1)}L` : n >= 1000 ? `₹${(n / 1000).toFixed(1)}K` : `₹${n}`;
 const today = new Date();
 
-// ── Mock order statuses (replace with real API) ───────────
 const ORDER_STATUSES = ["delivered", "pending", "processing", "cancelled", "returned"];
 const MOCK_ORDERS = Array.from({ length: 18 }, (_, i) => ({
-  id:      `ORD-${1000 + i}`,
+  id: `ORD-${1000 + i}`,
   product: ["Morpankh Wall Art", "Silk Dupatta", "Cotton Kurta", "Handmade Lamp", "Jute Bag"][i % 5],
-  amount:  Math.floor(Math.random() * 4800 + 200),
-  status:  ORDER_STATUSES[Math.floor(Math.random() * ORDER_STATUSES.length)],
-  date:    new Date(today - (i * 24 * 3600000)).toLocaleDateString("en-IN"),
-  qty:     Math.floor(Math.random() * 4 + 1),
+  amount: Math.floor(Math.random() * 4800 + 200),
+  status: ORDER_STATUSES[Math.floor(Math.random() * ORDER_STATUSES.length)],
+  date: new Date(today - (i * 24 * 3600000)).toLocaleDateString("en-IN"),
+  qty: Math.floor(Math.random() * 4 + 1),
 }));
 
-// ── Generate monthly revenue data ─────────────────────────
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const buildRevenueData = (products) => {
   const base = products.reduce((s, p) => s + p.base_price * p.sold, 0) / 12;
   return MONTHS.map((m, i) => ({
-    month:    m,
-    revenue:  Math.round(base * (0.6 + Math.random() * 0.8)),
-    orders:   Math.round(20 + Math.random() * 60),
-    returns:  Math.round(Math.random() * 8),
+    month: m,
+    revenue: Math.round(base * (0.6 + Math.random() * 0.8)),
+    orders: Math.round(20 + Math.random() * 60),
+    returns: Math.round(Math.random() * 8),
   }));
 };
 
-// ── Build weekly data ──────────────────────────────────────
-const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const buildWeeklyData = (products) => {
   const base = products.reduce((s, p) => s + p.base_price * p.sold, 0) / 52 / 7;
   return DAYS.map((d) => ({
-    day:     d,
+    day: d,
     revenue: Math.round(base * (0.5 + Math.random())),
-    orders:  Math.round(3 + Math.random() * 12),
-    visitors:Math.round(50 + Math.random() * 200),
+    orders: Math.round(3 + Math.random() * 12),
+    visitors: Math.round(50 + Math.random() * 200),
   }));
 };
 
-// ── Custom Tooltip ─────────────────────────────────────────
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -76,13 +69,13 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-// ── Pie custom label ───────────────────────────────────────
+
 const RADIAN = Math.PI / 180;
 const PieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }) => {
   if (percent < 0.06) return null;
-  const r  = innerRadius + (outerRadius - innerRadius) * 0.5;
-  const x  = cx + r * Math.cos(-midAngle * RADIAN);
-  const y  = cy + r * Math.sin(-midAngle * RADIAN);
+  const r = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + r * Math.cos(-midAngle * RADIAN);
+  const y = cy + r * Math.sin(-midAngle * RADIAN);
   return (
     <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central"
       style={{ fontSize: ".65rem", fontWeight: 900, fontFamily: "Nunito" }}>
@@ -91,27 +84,27 @@ const PieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name })
   );
 };
 
-// ══════════════════════════════════════════════════════════
+
 export default function SellerDashboardHome() {
   const navigate = useNavigate();
-  const [products, setProducts]   = useState([]);
-  const [loading,  setLoading]    = useState(true);
-  const [period,   setPeriod]     = useState("monthly"); // monthly | weekly
-  const [refresh,  setRefresh]    = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState("monthly"); // monthly | weekly
+  const [refresh, setRefresh] = useState(false);
 
-  // ── Sidebar stats (shared with SellerProducts) ──────────
-  const totalRevenue  = products.reduce((s, p) => s + p.base_price * p.sold, 0);
-  const avgRating     = products.length
+
+  const totalRevenue = products.reduce((s, p) => s + p.base_price * p.sold, 0);
+  const avgRating = products.length
     ? (products.reduce((s, p) => s + Number(p.rating), 0) / products.length).toFixed(1)
     : "0.0";
 
   const sidebarStats = [
     { icon: "📦", label: "Total Products", val: products.length },
-    { icon: "💰", label: "Total Revenue",  val: `₹${(totalRevenue / 100000).toFixed(1)}L` },
-    { icon: "⭐", label: "Avg Rating",     val: avgRating },
+    { icon: "💰", label: "Total Revenue", val: `₹${(totalRevenue / 100000).toFixed(1)}L` },
+    { icon: "⭐", label: "Avg Rating", val: avgRating },
   ];
 
-  // ── Fetch products ──────────────────────────────────────
+
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -122,9 +115,9 @@ export default function SellerDashboardHome() {
             data.data.map((p) => ({
               ...p,
               base_price: Number(p.base_price),
-              old_price:  p.old_price ? Number(p.old_price) : null,
-              rating:     Number(p.rating),
-              tag:   typeof p.tag   === "string" ? p.tag.split(",").map(t => t.trim())   : [],
+              old_price: p.old_price ? Number(p.old_price) : null,
+              rating: Number(p.rating),
+              tag: typeof p.tag === "string" ? p.tag.split(",").map(t => t.trim()) : [],
               color: typeof p.color === "string" ? p.color.split(",").map(c => c.trim()) : [],
               image_url: Array.isArray(p.image_url) ? p.image_url : [],
             }))
@@ -139,7 +132,7 @@ export default function SellerDashboardHome() {
   }, [refresh]);
 
   // ── Derived chart data ──────────────────────────────────
-  const chartData   = useMemo(() =>
+  const chartData = useMemo(() =>
     period === "monthly" ? buildRevenueData(products) : buildWeeklyData(products),
     [products, period]
   );
@@ -147,11 +140,11 @@ export default function SellerDashboardHome() {
   const xKey = period === "monthly" ? "month" : "day";
 
   // ── KPI cards ───────────────────────────────────────────
-  const outOfStock  = products.filter(p => p.stock === 0).length;
-  const lowStock    = products.filter(p => p.stock > 0 && p.stock <= 10).length;
-  const totalSold   = products.reduce((s, p) => s + p.sold, 0);
+  const outOfStock = products.filter(p => p.stock === 0).length;
+  const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10).length;
+  const totalSold = products.reduce((s, p) => s + p.sold, 0);
   const totalOrders = MOCK_ORDERS.length;
-  const deliveredPct= Math.round((MOCK_ORDERS.filter(o => o.status === "delivered").length / totalOrders) * 100);
+  const deliveredPct = Math.round((MOCK_ORDERS.filter(o => o.status === "delivered").length / totalOrders) * 100);
 
   const KPIS = [
     {
@@ -181,7 +174,7 @@ export default function SellerDashboardHome() {
     {
       icon: "⭐", iconBg: "#fefce8", iconColor: "#f59e0b",
       label: "Avg Rating", value: avgRating,
-      delta: "+0.2", trend: "up", sub: `${products.reduce((s,p)=>s+p.reviews,0).toLocaleString()} reviews`,
+      delta: "+0.2", trend: "up", sub: `${products.reduce((s, p) => s + p.reviews, 0).toLocaleString()} reviews`,
       border: "#fef08a",
     },
     {
@@ -218,13 +211,13 @@ export default function SellerDashboardHome() {
       .slice(0, 5);
   }, [products]);
 
-  const PIE_COLORS = ["#ff6b35","#f7931e","#3b82f6","#22c55e","#8b5cf6"];
+  const PIE_COLORS = ["#ff6b35", "#f7931e", "#3b82f6", "#22c55e", "#8b5cf6"];
 
   // ── Stock health radial data ────────────────────────────
   const stockData = [
-    { name: "Healthy",    value: products.filter(p => p.stock > 10).length,       fill: "#22c55e" },
-    { name: "Low Stock",  value: products.filter(p => p.stock > 0 && p.stock <= 10).length, fill: "#f59e0b" },
-    { name: "Out",        value: outOfStock,                                        fill: "#ef4444" },
+    { name: "Healthy", value: products.filter(p => p.stock > 10).length, fill: "#22c55e" },
+    { name: "Low Stock", value: products.filter(p => p.stock > 0 && p.stock <= 10).length, fill: "#f59e0b" },
+    { name: "Out", value: outOfStock, fill: "#ef4444" },
   ];
 
   // ── Rating distribution ─────────────────────────────────
@@ -242,13 +235,13 @@ export default function SellerDashboardHome() {
 
   // ── Activity feed ───────────────────────────────────────
   const ACTIVITIES = [
-    { icon: "🛒", bg: "#f0fdf4", title: "New order received",        sub: "ORD-1018 · Morpankh Art · ₹980",    time: "2m ago" },
-    { icon: "⭐", bg: "#fefce8", title: "New 5-star review",          sub: "Silk Dupatta · 'Excellent quality!'", time: "18m ago" },
-    { icon: "⚠️", bg: "#fef2f2", title: "Low stock alert",           sub: "Handmade Lamp · only 3 left",         time: "1h ago" },
-    { icon: "↩️", bg: "#f5f3ff", title: "Return request",            sub: "ORD-1009 · Cotton Kurta",             time: "3h ago" },
-    { icon: "📦", bg: "#eff6ff", title: "Product published",         sub: "Bamboo Wall Clock · now live",        time: "5h ago" },
-    { icon: "💰", bg: "#fff3ee", title: "Payout processed",          sub: "₹24,300 credited to bank",            time: "1d ago" },
-    { icon: "🚀", bg: "#fdf4ff", title: "Product trending",          sub: "Morpankh Art · Top 10 in Feather",    time: "2d ago" },
+    { icon: "🛒", bg: "#f0fdf4", title: "New order received", sub: "ORD-1018 · Morpankh Art · ₹980", time: "2m ago" },
+    { icon: "⭐", bg: "#fefce8", title: "New 5-star review", sub: "Silk Dupatta · 'Excellent quality!'", time: "18m ago" },
+    { icon: "⚠️", bg: "#fef2f2", title: "Low stock alert", sub: "Handmade Lamp · only 3 left", time: "1h ago" },
+    { icon: "↩️", bg: "#f5f3ff", title: "Return request", sub: "ORD-1009 · Cotton Kurta", time: "3h ago" },
+    { icon: "📦", bg: "#eff6ff", title: "Product published", sub: "Bamboo Wall Clock · now live", time: "5h ago" },
+    { icon: "💰", bg: "#fff3ee", title: "Payout processed", sub: "₹24,300 credited to bank", time: "1d ago" },
+    { icon: "🚀", bg: "#fdf4ff", title: "Product trending", sub: "Morpankh Art · Top 10 in Feather", time: "2d ago" },
   ];
 
   // ── Insights ────────────────────────────────────────────
@@ -357,11 +350,11 @@ export default function SellerDashboardHome() {
                         <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                           <defs>
                             <linearGradient id="gradRev" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%"  stopColor="#ff6b35" stopOpacity={0.25} />
+                              <stop offset="5%" stopColor="#ff6b35" stopOpacity={0.25} />
                               <stop offset="95%" stopColor="#ff6b35" stopOpacity={0} />
                             </linearGradient>
                             <linearGradient id="gradOrd" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%"  stopColor="#3b82f6" stopOpacity={0.2} />
+                              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
                               <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                             </linearGradient>
                           </defs>
@@ -371,7 +364,7 @@ export default function SellerDashboardHome() {
                           <Tooltip content={<CustomTooltip />} />
                           <Legend wrapperStyle={{ fontSize: ".75rem", fontFamily: "Nunito", fontWeight: 800, paddingTop: 10 }} />
                           <Area type="monotone" dataKey="revenue" stroke="#ff6b35" strokeWidth={2.5} fill="url(#gradRev)" dot={false} activeDot={{ r: 5, fill: "#ff6b35" }} />
-                          <Area type="monotone" dataKey="orders"  stroke="#3b82f6" strokeWidth={2}   fill="url(#gradOrd)" dot={false} activeDot={{ r: 4, fill: "#3b82f6" }} />
+                          <Area type="monotone" dataKey="orders" stroke="#3b82f6" strokeWidth={2} fill="url(#gradOrd)" dot={false} activeDot={{ r: 4, fill: "#3b82f6" }} />
                         </AreaChart>
                       </ResponsiveContainer>
                     </div>
@@ -434,8 +427,8 @@ export default function SellerDashboardHome() {
                           <YAxis tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend wrapperStyle={{ fontSize: ".72rem", fontFamily: "Nunito", fontWeight: 800 }} />
-                          <Bar dataKey="orders"  fill="#ff6b35" radius={[5,5,0,0]} maxBarSize={28} />
-                          <Bar dataKey="returns" fill="#e8eaf6" radius={[5,5,0,0]} maxBarSize={28} />
+                          <Bar dataKey="orders" fill="#ff6b35" radius={[5, 5, 0, 0]} maxBarSize={28} />
+                          <Bar dataKey="returns" fill="#e8eaf6" radius={[5, 5, 0, 0]} maxBarSize={28} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>

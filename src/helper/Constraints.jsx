@@ -1,4 +1,4 @@
-import { FaHome, FaTasks, FaBan, FaCalendarAlt, FaUser, FaTachometerAlt } from "react-icons/fa";
+  import { FaHome, FaTasks, FaBan, FaCalendarAlt, FaUser, FaTachometerAlt } from "react-icons/fa";
 import { FaCrown } from "react-icons/fa";
 import { BiSolidBriefcase, BiSolidCategoryAlt, BiSolidDollarCircle, } from "react-icons/bi";
 import { FaProductHunt } from "react-icons/fa6";
@@ -74,8 +74,18 @@ const SETTINGS_TABS = [
   },
 ];
 
+
+const PAYMENT_METHOD_META = {
+    cod: { icon: "💵", label: "COD" },
+    card: { icon: "💳", label: "Card" },
+    upi: { icon: "📱", label: "UPI" },
+    netbanking: { icon: "🏦", label: "Net Banking" },
+    wallet: { icon: "👛", label: "Wallet" },
+};
+
 export {
   API_BASE_URL,
   SIDEBAR_MENUS,
   SETTINGS_TABS,
+  PAYMENT_METHOD_META
 };
