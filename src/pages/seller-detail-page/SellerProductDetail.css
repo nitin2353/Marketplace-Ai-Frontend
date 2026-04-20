@@ -562,3 +562,11 @@
   .spd-card { padding: 16px 14px; }
   .spd-kpi-val { font-size: 1.1rem; }
 }
+
+.qr-code{
+  height: 90px;
+  margin-bottom: 0px !important;
+  display: block;
+  margin-top: 0px !important;
+  margin-top: -22px !important;
+}

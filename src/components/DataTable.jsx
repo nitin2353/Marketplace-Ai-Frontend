@@ -10,17 +10,11 @@ import {
     Container,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { TABLE_HEADERS } from "./../helper/GlobalHelper"
 
 const ROWS_OPTIONS = [5, 10, 25];
 
-const COLUMNS = [
-    { label: "Order ID", key: "id" },
-    { label: "Buyer", key: "buyer" },
-    { label: "Qty", key: "qty" },
-    { label: "Amount", key: "amount" },
-    { label: "Status", key: "status" },
-    { label: "Date", key: "date" },
-];
+
 
 const SortIcon = ({ columnKey, sortConfig }) => {
     if (sortConfig.key !== columnKey) return <span className="text-muted ms-1">↕</span>;
@@ -62,11 +56,11 @@ const DataTable = ({
 
         let data = q
             ? tableData.filter(
-                  ({ id = "", buyer = "", status = "" }) =>
-                      String(id).toLowerCase().includes(q) ||
-                      String(buyer).toLowerCase().includes(q) ||
-                      String(status).toLowerCase().includes(q)
-              )
+                ({ id = "", buyer = "", status = "" }) =>
+                    String(id).toLowerCase().includes(q) ||
+                    String(buyer).toLowerCase().includes(q) ||
+                    String(status).toLowerCase().includes(q)
+            )
             : [...tableData];
 
         data.sort((a, b) => {
@@ -144,11 +138,11 @@ const DataTable = ({
                 <div className="text-muted d-flex justify-content-center"><p>No orders found.</p></div>
             ) : (
                 <>
-                    <div className="table-responsive pt-2 pb-2"  style={{borderTop: "1px solid #cfc8c8", borderBottom: "1px solid #cfc8c8"}}>
+                    <div className="table-responsive pt-2 pb-2" style={{ borderTop: "1px solid #cfc8c8", borderBottom: "1px solid #cfc8c8" }}>
                         <Table striped hover size="sm" className="mb-2 align-middle">
                             <thead>
                                 <tr>
-                                    {COLUMNS.map(({ label, key }) => (
+                                    {TABLE_HEADERS.map(({ label, key }) => (
                                         <th
                                             key={key}
                                             onClick={() => handleSort(key)}
@@ -166,12 +160,11 @@ const DataTable = ({
                             <tbody>
                                 {paginated.map((order, idx) => (
                                     <tr key={order.id ?? idx}>
-                                        <td
-                                            className="fw-bold text-primary text-nowrap"
-                                            style={{ fontSize: ".78rem", cursor: "pointer" }}
-                                            onClick={() => navigate(`/seller/orders/${order.id}`)}
-                                        >
-                                            {order.id}
+                                        <td>
+                                            <span className="fw-bold text-primary text-nowrap"
+                                                style={{ fontSize: ".78rem", cursor: "pointer" }} onClick={() => navigate(`/seller/orders/${order.id}`)}>
+                                                {order.id}
+                                            </span>
                                         </td>
 
                                         <td className="text-nowrap" style={{ fontSize: ".78rem" }}>

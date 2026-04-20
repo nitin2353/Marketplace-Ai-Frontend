@@ -4,10 +4,12 @@
 
 
 :root {
-  --primary-color: #e9f3fa; /* Light, airy blue for background or header */
-  --secondary-color: #3c8bb4; /* Muted ocean blue for sidebar or buttons */
+  --primary-color: #e9f3fa;
+  /* Light, airy blue for background or header */
+  --secondary-color: #3c8bb4;
+  /* Muted ocean blue for sidebar or buttons */
   --body-hightlighter: #2f6f8d;
-  --pinkish-main : #E86E91;
+  --pinkish-main: #E86E91;
   --highlight-color: white;
   /* Icon/Text color */
   --dark-color: #111827;
@@ -23,6 +25,7 @@
   --light: #f8f9fa;
   --dark: #212529;
 }
+
 .btn-custom-soft {
   background-color: var(--primary-color);
   color: var(--body-hightlighter);
@@ -35,11 +38,13 @@
   background-color: var(--secondary-color);
   color: var(--highlight-color);
 }
+
 * {
   font-family: "system-ui";
 }
 
 @media (min-width: 1400px) {
+
   .container,
   .container-lg,
   .container-md,
@@ -70,6 +75,7 @@
   border-radius: 30px;
   color: var(--highlight-color);
 }
+
 .column-text-truncate {
   white-space: nowrap;
   overflow: hidden;
@@ -126,6 +132,7 @@
   background-color: var(--secondary-color);
   color: var(--light);
 }
+
 .stepper-btn-inactive {
   background-color: lightgrey;
   color: white;
@@ -420,6 +427,7 @@
 }
 
 @media (max-width: 576px) {
+
   /* Dashboard-Card */
   .dashboard-card {
     margin-top: 0.5rem !important;
@@ -916,6 +924,7 @@ body {
 
 /*Mobile only */
 @media (max-width: 576px) {
+
   /* Make table horizontally scrollable */
   .table-responsive {
     overflow-x: auto;
@@ -1067,23 +1076,31 @@ body {
 }
 
 .pill-progress {
-  background-color: #fff7e0; /* soft amber */
-  color: #997404; /* dark amber */
+  background-color: #fff7e0;
+  /* soft amber */
+  color: #997404;
+  /* dark amber */
 }
 
 .pill-approval {
-  background-color: #e2d9f3; /* light violet */
-  color: #4a148c; /* deep purple */
+  background-color: #e2d9f3;
+  /* light violet */
+  color: #4a148c;
+  /* deep purple */
 }
 
 .pill-hold {
-  background-color: #eabb89; /* light violet */
-  color: #814403; /* deep purple */
+  background-color: #eabb89;
+  /* light violet */
+  color: #814403;
+  /* deep purple */
 }
 
 .pill-completed {
-  background-color: #d1e7dd; /* light green */
-  color: #0f5132; /* dark green */
+  background-color: #d1e7dd;
+  /* light green */
+  color: #0f5132;
+  /* dark green */
 }
 
 /* Edit Profile page CSS Start */
@@ -1585,18 +1602,22 @@ body {
   .my-text-class {
     font-size: 13px;
   }
+
   .my-text-class .nav-link {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
   }
+
   .tabStyle {
     background-color: var(--secondary-color);
     height: 38px;
   }
+
   .mobile-toggle {
     min-width: 0 !important;
     width: auto !important;
   }
+
   .mobile-toggle .dropdown-item {
     padding: 0.25rem 0.5rem;
     display: flex;
@@ -1607,6 +1628,7 @@ body {
   .mobile-toggle .dropdown-item svg {
     margin: 0;
   }
+
   .form-select-sm {
     padding-top: 0.6rem !important;
     padding-bottom: 0.6rem !important;
@@ -1619,20 +1641,25 @@ body {
   /*  */
   /* Mobile scrollable tabs & tables */
   .scrollable-mobile {
-    overflow-x: auto; /* horizontal scroll */
-    -webkit-overflow-scrolling: touch; /* smooth scroll for iOS */
+    overflow-x: auto;
+    /* horizontal scroll */
+    -webkit-overflow-scrolling: touch;
+    /* smooth scroll for iOS */
     white-space: nowrap;
   }
 
   /* Tab links inline & scrollable */
   .scrollable-mobile .nav {
-    flex-wrap: nowrap; /* tabs stay in one line */
+    flex-wrap: nowrap;
+    /* tabs stay in one line */
   }
 
   /* Table scrollable inside same container */
   .scrollable-mobile table {
-    min-width: 600px; /* minimum table width */
-    white-space: nowrap; /* prevent cell content wrap */
+    min-width: 600px;
+    /* minimum table width */
+    white-space: nowrap;
+    /* prevent cell content wrap */
   }
 
   /* Tab links inline & scrollable */
@@ -1640,27 +1667,35 @@ body {
     flex-wrap: nowrap;
     overflow-x: auto;
   }
+
   .scrollable-mobile .tab-content {
     width: 100%;
     white-space: break-spaces;
   }
+
   .scrollable-mobile table {
     width: 100%;
-    min-width: 600px; /* optional: prevent too narrow on desktop */
+    min-width: 600px;
+    /* optional: prevent too narrow on desktop */
     white-space: nowrap;
     border-collapse: collapse;
   }
-  .scrollable-mobile .tabStyle > button {
-    flex-shrink: 0; /* keep button visible */
+
+  .scrollable-mobile .tabStyle>button {
+    flex-shrink: 0;
+    /* keep button visible */
   }
+
   .mobile-button-wrapper {
     border-left: 2px solid #ccc;
   }
+
   .mobile-dropdown-wrapper {
     display: flex;
     align-items: center;
   }
 }
+
 /* Loader CSS Started */
 
 .loader-container {
@@ -1740,10 +1775,12 @@ body {
 .accordion-header {
   border-top: none !important;
 }
+
 .accordion-item:last-of-type {
   border-bottom-right-radius: none !important;
   border-bottom-left-radius: none !important;
 }
+
 .accordion-item:first-of-type {
   border-top-left-radius: none !important;
   border-top-right-radius: none !important;
@@ -1874,8 +1911,8 @@ body {
   color: var(--secondary-color);
 }
 
-.btn-pink:hover{
-   background: var(--primary-color);
+.btn-pink:hover {
+  background: var(--primary-color);
   color: var(--secondary-color);
 }
 
@@ -1885,7 +1922,7 @@ body {
   border: 1px solid var(--secondary-color);
 }
 
-.manufacturing-detail-modal .modal-header .btn-close{
+.manufacturing-detail-modal .modal-header .btn-close {
   background-color: white !important;
 }
 
@@ -1910,15 +1947,19 @@ body {
 
 /* Container behavior */
 .gapl-loader-block {
-  display: block;      /* Ensure it's a block-level element */
-  width: 100%;         /* Spans full width of parent */
-  text-align: center;  /* Centers inline-block children */
+  display: block;
+  /* Ensure it's a block-level element */
+  width: 100%;
+  /* Spans full width of parent */
+  text-align: center;
+  /* Centers inline-block children */
   margin: 20px 0;
   background: transparent;
 }
 
 .gapl-svg {
-  display: inline-block; /* Allows text-align to center it */
+  display: inline-block;
+  /* Allows text-align to center it */
   margin: 0 auto;
 }
 
@@ -1936,9 +1977,17 @@ body {
   transform: scaleX(1);
 }
 
-.blue-wave-top { transition-delay: 0.1s; }
-.pink-wave { transition-delay: 0.3s; }
-.blue-wave-bottom { transition-delay: 0.5s; }
+.blue-wave-top {
+  transition-delay: 0.1s;
+}
+
+.pink-wave {
+  transition-delay: 0.3s;
+}
+
+.blue-wave-bottom {
+  transition-delay: 0.5s;
+}
 
 /* Text Animation: Fade and Rise */
 .gapl-text {
@@ -1959,8 +2008,13 @@ body {
 }
 
 @keyframes gentleFloat {
-  0% { transform: translateY(0px) rotate(0deg); }
-  100% { transform: translateY(6px) rotate(0.5deg); }
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  100% {
+    transform: translateY(6px) rotate(0.5deg);
+  }
 }
 
 /* GAPLLoader specific centering within the card */
@@ -1973,12 +2027,14 @@ body {
 
 .gapl-svg {
   display: block;
-  margin: 0 auto; /* Horizontal centering */
+  margin: 0 auto;
+  /* Horizontal centering */
 }
 
 /* Ensure the text is visible and matches your theme */
 .gapl-text {
-  fill: #2f6f8d !important; /* Matches your Title color */
+  fill: #2f6f8d !important;
+  /* Matches your Title color */
   font-weight: 700;
 }
 
@@ -1997,8 +2053,13 @@ body {
 }
 
 @keyframes gentleFloat {
-  from { transform: translateY(0px); }
-  to { transform: translateY(8px); }
+  from {
+    transform: translateY(0px);
+  }
+
+  to {
+    transform: translateY(8px);
+  }
 }
 
 

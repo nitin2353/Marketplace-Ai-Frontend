@@ -11,6 +11,7 @@ import OrderTimeline from "../customer-order-list/OrderTimeline";
 import OrderDrawer from "../../components/OrderDrawer";
 import { PAYMENT_METHOD_META } from "../../helper/Constraints";
 import PayBadge from "../../components/PayBadge";
+import SellerSidebar from "../../components/SellerSidebar";
 
 const fmt = FMT
 
@@ -273,7 +274,7 @@ export default function SellerOrders() {
 
     const bulkUpdateStatus = useCallback(async (newStatus) => {
         if (!selected.size) return;
-        
+
         setBulkWorking(true);
         const selectedIds = Array.from(selected);
 

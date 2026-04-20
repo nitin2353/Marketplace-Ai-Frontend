@@ -9,6 +9,14 @@ const SORT_OPTIONS = [
     { v: "popular", l: "Most Popular" },
 ];
 
+export const TABLE_HEADERS = [
+    { label: "Order ID", key: "id" },
+    { label: "Buyer", key: "buyer" },
+    { label: "Qty", key: "qty" },
+    { label: "Amount", key: "amount" },
+    { label: "Status", key: "status" },
+    { label: "Date", key: "date" },
+];
 
 
 const API_FIELDS_MAP = {
@@ -246,4 +254,4 @@ export const PAYMENT_METHOD_LABELS = {
 
 
 
-export default { ALL_TAGS, SORT_OPTIONS, API_FIELDS_MAP, COUPONS, METHODS, METHOD_ICONS, FMT, FMT_DATE, FMT_DATE_TIME, TABS, STATUS_META, TIMELINE_STEPS, PAYMENT_METHOD_LABELS };
+export default { ALL_TAGS, TABLE_HEADERS, SORT_OPTIONS, API_FIELDS_MAP, COUPONS, METHODS, METHOD_ICONS, FMT, FMT_DATE, FMT_DATE_TIME, TABS, STATUS_META, TIMELINE_STEPS, PAYMENT_METHOD_LABELS };

@@ -15,6 +15,8 @@ import "./SellerProductDetail.css";
 import reportApi from "../../api/reportApi";
 import DataTable from "../../components/DataTable";
 import orderApi from "../../api/order.api";
+import { jwtDecode } from "jwt-decode";
+import JWTService from "../../config/jwt.config";
 
 const fmt = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
 const fmtL = (n) => n >= 100000 ? `₹${(n / 100000).toFixed(1)}L` : n >= 1000 ? `₹${(n / 1000).toFixed(1)}K` : `₹${n}`;
@@ -79,27 +81,25 @@ export default function SellerProductDetail() {
 
     const fetchMonthlySales = async () => {
         try {
-            const res = await orderApi.getSellerOrders(sellerId);
-            console.log(res)
-            return
-            const orders = res.data.data || [];
-            
+            let seller = JWTService.decodeTokenDetails();
+
+            const res = await orderApi.getSellerOrders(seller.id);
+
+            const orders = res.data || [];
+
             const monthMap = {};
-            console.log('orders', orders)
-            orders.forEach(order => {
-                order.items?.forEach(item => {
-                    if (item.product_id === id) {
-                        const date = new Date(order.created_time);
-                        const month = MONTHS[date.getMonth()];
-
-                        if (!monthMap[month]) {
-                            monthMap[month] = { month, units: 0, revenue: 0 };
-                        }
-
-                        monthMap[month].units += item.quantity;
-                        monthMap[month].revenue += item.line_total;
+            orders?.forEach(item => {
+                if (item.product_id == id) {
+                    console.log("Item", item)
+                    const date = new Date(item.created_time);
+                    const month = MONTHS[date.getMonth()];
+                    if (!monthMap[month]) {
+                        monthMap[month] = { month, units: 0, revenue: 0 };
                     }
-                });
+
+                    monthMap[month].units += item.total_items;
+                    monthMap[month].revenue += item.subtotal;
+                }
             });
 
             const finalData = MONTHS.map(m => monthMap[m] || {
@@ -200,7 +200,9 @@ export default function SellerProductDetail() {
 
     // const salesData = useMemo(() => product ? buildProductSales(product.sold, product.base_price) : [], [product]);
     const salesData = monthlyData;
+
     const totalRev = product ? product.base_price * product.sold : 0;
+    console.log("salesDatasalesData", totalRev)
     const stockPct = product ? Math.min(100, Math.round((product.stock / (product.stock + product.sold)) * 100)) : 0;
     const savingPct = product?.old_price ? Math.round(((product.old_price - product.base_price) / product.old_price) * 100) : 0;
 
@@ -268,7 +270,6 @@ export default function SellerProductDetail() {
                         {product && (
                             <div className="p-3 p-md-4">
 
-                                {/* ── ROW 1: Gallery + KPIs + Product Info ── */}
                                 <Row className="g-3 mb-4">
 
                                     {/* Gallery */}
@@ -291,15 +292,14 @@ export default function SellerProductDetail() {
                                                 )}
                                             </div>
 
-                                            {imgCount > 1 && (
-                                                <div className="spd-thumbs">
-                                                    {product.image_url.map((url, i) => (
-                                                        <img key={i} src={url} alt={`thumb-${i}`}
-                                                            className={`spd-thumb ${i === activeImg ? "active" : ""}`}
-                                                            onClick={() => setActiveImg(i)} />
-                                                    ))}
-                                                </div>
-                                            )}
+                                            <div className="spd-thumbs">
+                                                {product.image_url.map((url, i) => (
+                                                    <img key={i} src={url} alt={`thumb-${i}`}
+                                                        className={`spd-thumb ${i === activeImg ? "active" : ""}`}
+                                                        onClick={() => setActiveImg(i)} />
+                                                ))}
+                                            </div>
+
 
                                             {product.color.length > 0 && (
                                                 <div className="mt-3">
@@ -339,7 +339,17 @@ export default function SellerProductDetail() {
 
                                             <Col xs={12}>
                                                 <div className="spd-card">
-                                                    <div className="spd-card-title">📋 Product Details</div>
+                                                    <Row>
+                                                        <Col>
+                                                            <div className="spd-card-title">📋 Product Details</div>
+                                                        </Col>
+                                                        <Col className="border-1 h-3 mt-2 p-0 d-flex justify-content-end float-end">
+                                                            {/* <span style={{ fontSize: "7px" }} className=" mt-0 p-4">{product.id}</span> */}
+                                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/250px-QR_code_for_mobile_English_Wikipedia.svg.png" className="qr-code m-0 p-0" />
+                                                        </Col>
+                                                    </Row>
+
+
                                                     <div className="spd-card-sub" style={{ marginBottom: 10 }}>Core listing information</div>
                                                     {[
                                                         { key: "Brand", val: product.brand || "—" },
@@ -389,7 +399,7 @@ export default function SellerProductDetail() {
                                     <Col lg={8}>
                                         <div className="spd-card">
                                             <div className="spd-card-title">📈 Monthly Sales Performance</div>
-                                            <div className="spd-card-sub">Units sold &amp; revenue per month (estimated)</div>
+                                            <div className="spd-card-sub">Units sold & revenue per month (estimated)</div>
                                             <div style={{ height: 240 }}>
                                                 <ResponsiveContainer width="100%" height="100%">
                                                     <AreaChart data={salesData} margin={{ top: 10, right: 8, left: -14, bottom: 0 }}>
@@ -409,7 +419,6 @@ export default function SellerProductDetail() {
                                                             tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }}
                                                             axisLine={false} tickLine={false}
                                                         />
-                                                        {/* FIX: Left axis for revenue (₹), right axis for units */}
                                                         <YAxis
                                                             yAxisId="revenue"
                                                             orientation="left"
@@ -501,7 +510,7 @@ export default function SellerProductDetail() {
                                             <div className="spd-card-title">📊 Weekly Units Sold</div>
                                             <div className="spd-card-sub">Last 7 days estimate</div>
                                             <div style={{ height: 200 }}>
-                                                <ResponsiveContainer width="100%" height="100%">
+                                                <ResponsiveContainer width="100%" height="100%" className="text-light">
                                                     <BarChart data={weeklyData} margin={{ top: 5, right: 8, left: -18, bottom: 0 }}>
                                                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f8" vertical={false} />
                                                         <XAxis dataKey="day" tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }} axisLine={false} tickLine={false} />

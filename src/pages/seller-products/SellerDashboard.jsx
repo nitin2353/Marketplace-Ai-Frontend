@@ -154,7 +154,6 @@ export default function SellerProducts() {
             {loading && <GlobalLoader />}
             <Row className="g-0" style={{ minHeight: "100vh" }}>
 
-                {/* ── SIDEBAR (reusable component) ── */}
                 <Col lg={3} xl={2}>
                     <SellerSidebar stats={sidebarStats} />
                 </Col>
@@ -178,7 +177,6 @@ export default function SellerProducts() {
                             <span style={{ fontSize: "1rem" }}>➕</span> Add New Product
                         </Button>
                     </div>
-
                     {/* Stats chips */}
                     <Row className="g-3 mb-4">
                         {[
@@ -393,7 +391,7 @@ export default function SellerProducts() {
 
             {/* Delete Modal */}
             <Modal show={!!deleteModal} onHide={() => !deleteLoading && setDeleteModal(null)} centered dialogClassName="eco-modal">
-                <Modal.Body className="p-4 text-center">
+                <Modal.Body className="p-4 text-center rounded-5">
                     <div style={{ fontSize: "3rem", marginBottom: 12 }}>🗑️</div>
                     <h4 className="fw-bold mb-2" style={{ color: "#1a1a2e" }}>Delete Product?</h4>
                     <p className="text-muted mb-1" style={{ fontSize: "0.88rem" }}>You are about to permanently delete:</p>
