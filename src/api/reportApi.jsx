@@ -50,6 +50,15 @@ const getRecentOrdersByProduct = async (productId) => {
     }
 };
 
+const getRecentOrders = async () => {
+    try {
+        const response = await API.get(`/report/recent-orders`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: "Error fetching recent orders" };
+    }
+};
+
 // GET RATING BREAKDOWN BY PRODUCT
 const getRatingBreakdown = async (productId) => {
     try {
@@ -94,13 +103,25 @@ const getSellerReportDashboard = async (sellerId) => {
     }
 };
 
+
+const getRecentActivities = async () => {
+    try {
+        const response = await API.get("/report/recent-activities");
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: "Error fetching recent activities" };
+    }
+};
+
 export default {
     getSellerSummary,
     getWeeklyUnitsSold,
     getMonthlySales,
     getOrderStatusMix,
     getRecentOrdersByProduct,
+    getRecentOrders,
     getRatingBreakdown,
     getProductReportDashboard,
     getSellerReportDashboard,
+    getRecentActivities
 };

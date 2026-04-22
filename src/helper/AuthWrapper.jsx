@@ -11,11 +11,12 @@ export const AuthProvider = ({ children }) => {
   const [globalCartLength, setGlobalCartLength] = useState(0)
   const [refresh, setRefresh] = useState(false)
   const [coupon, setCoupon] = useState("");
+  const [isOpen, setIsOpen] = useState(true)
 
 
   return (
     <AuthWrapper.Provider
-      value={{ isLike, setIsLike, refresh, setRefresh, globalCartLength, setGlobalCartLength, coupon, setCoupon }}
+      value={{ isLike, setIsLike, refresh, setRefresh, globalCartLength, setGlobalCartLength, coupon, setCoupon, isOpen, setIsOpen }}
     >
       {children}
     </AuthWrapper.Provider>

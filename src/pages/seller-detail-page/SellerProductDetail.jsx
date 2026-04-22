@@ -17,6 +17,7 @@ import DataTable from "../../components/DataTable";
 import orderApi from "../../api/order.api";
 import { jwtDecode } from "jwt-decode";
 import JWTService from "../../config/jwt.config";
+import SellerNavbar from "../../components/Sellernavbar";
 
 const fmt = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
 const fmtL = (n) => n >= 100000 ? `₹${(n / 100000).toFixed(1)}L` : n >= 1000 ? `₹${(n / 1000).toFixed(1)}K` : `₹${n}`;
@@ -234,6 +235,7 @@ export default function SellerProductDetail() {
             {loading && <GlobalLoader />}
 
             <Container fluid className="p-0">
+                <SellerNavbar pageTitle={"ProductDetaial Page"} />
                 <Row className="g-0" style={{ minHeight: "100vh" }}>
 
                     {/* ── SIDEBAR ── */}
@@ -243,29 +245,6 @@ export default function SellerProductDetail() {
 
                     {/* ── MAIN ── */}
                     <Col lg={9} xl={10} style={{ overflowY: "auto", paddingBottom: 80 }}>
-
-                        {/* Header */}
-                        <div className="eco-hero p-3">
-                            <div className="spd-header-inner">
-                                <button className="spd-back-btn" onClick={() => navigate("/seller/products")}>
-                                    ← Back to Products
-                                </button>
-                                <div className="d-flex flex-wrap align-items-start justify-content-between gap-3">
-                                    <div>
-                                        <h1 className="spd-header-title">{product?.title || "Loading..."}</h1>
-                                        <p className="spd-header-sub">
-                                            {product?.brand && <span style={{ color: "var(--p2)", fontWeight: 800 }} className="text-dark">{product.brand}</span>}
-                                            {product?.category && <span style={{ color: "rgba(255,255,255,.4)" }} className="text-dark"> · {product.category}</span>}
-                                        </p>
-                                    </div>
-                                    <div className="spd-header-actions d-none d-lg-flex">
-                                        <button className="spd-action-btn ghost border-2 text-light" onClick={() => navigate(`/product/${id}`)}>👁️ View Live</button>
-                                        <button className="spd-action-btn primary border-2 text-light" onClick={() => setShowEdit(true)}>✏️ Edit Product</button>
-                                        <button className="spd-action-btn danger border-2 text-light" onClick={() => setDeleteModal(true)}>🗑️ Delete</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
                         {product && (
                             <div className="p-3 p-md-4">
@@ -343,12 +322,9 @@ export default function SellerProductDetail() {
                                                         <Col>
                                                             <div className="spd-card-title">📋 Product Details</div>
                                                         </Col>
-                                                        <Col className="border-1 h-3 mt-2 p-0 d-flex justify-content-end float-end">
-                                                            {/* <span style={{ fontSize: "7px" }} className=" mt-0 p-4">{product.id}</span> */}
-                                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/250px-QR_code_for_mobile_English_Wikipedia.svg.png" className="qr-code m-0 p-0" />
-                                                        </Col>
+                                                        
                                                     </Row>
-
+                                                    
 
                                                     <div className="spd-card-sub" style={{ marginBottom: 10 }}>Core listing information</div>
                                                     {[

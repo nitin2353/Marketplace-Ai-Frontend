@@ -171,6 +171,27 @@ const COUPONS = {
     FIRST50: 50,
 };
 
+// Full: "2026-04-21 10:30:00"
+export const FORMATED_DATE_TIME = (date) => {
+    const pad = (n) => String(n).padStart(2, '0');
+    const d = new Date(date);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
+
+// Only Date: "2026-04-21"
+export const FORMATED_DATE = (date) => {
+    const pad = (n) => String(n).padStart(2, '0');
+    const d = new Date(date);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
+// Only Time: "10:30:00"
+export const FORMATED_TIME = (date) => {
+    const pad = (n) => String(n).padStart(2, '0');
+    const d = new Date(date);
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
+
 export const METHODS = [
     {
         id: "card",
@@ -254,4 +275,4 @@ export const PAYMENT_METHOD_LABELS = {
 
 
 
-export default { ALL_TAGS, TABLE_HEADERS, SORT_OPTIONS, API_FIELDS_MAP, COUPONS, METHODS, METHOD_ICONS, FMT, FMT_DATE, FMT_DATE_TIME, TABS, STATUS_META, TIMELINE_STEPS, PAYMENT_METHOD_LABELS };
+export default { ALL_TAGS, TABLE_HEADERS, SORT_OPTIONS, API_FIELDS_MAP, COUPONS, FORMATED_DATE_TIME, FORMATED_DATE, FORMATED_TIME, METHODS, METHOD_ICONS, FMT, FMT_DATE, FMT_DATE_TIME, TABS, STATUS_META, TIMELINE_STEPS, PAYMENT_METHOD_LABELS };

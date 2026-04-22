@@ -2,11 +2,15 @@ import { useState, useEffect } from "react";
 import "../pages/seller-orders/SellerOrders.css";
 import OrderTimeline from "../pages/customer-order-list/OrderTimeline";
 import { PAYMENT_METHOD_META } from "../helper/Constraints";
-import { Stack } from "react-bootstrap";
+import { Col, Row, Stack } from "react-bootstrap";
 import { FMT, FMT_DATE } from "../helper/GlobalHelper";
 import PayBadge from "./PayBadge";
 import { useParams } from "react-router-dom";
-
+import { MdQrCodeScanner } from "react-icons/md";
+import ReactPDF from '@react-pdf/renderer';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import ShippingLabel from "../components/ShippingLabel.jsx";
+import DownloadLabelButton from "./DownloadLabelButton.jsx";
 
 
 const fmtDT = (d) =>
@@ -40,11 +44,7 @@ const PAYMENT_STATUSES = [
 
 
 
-const StatusBadge = ({ status }) => (
-    <span className={`so-status ${status || ""}`}>
-        {ORDER_STATUSES.find((s) => s.value === status)?.icon} {String(status || "unknown").replace("_", " ")}
-    </span>
-);
+
 
 
 
@@ -52,8 +52,7 @@ const StatusBadge = ({ status }) => (
 export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentUpdate, updating }) {
     const [newStatus, setNewStatus] = useState(order.order_status || "placed");
     const [newPayment, setNewPayment] = useState(order.payment_status || "pending");
-
-    console.log("order", order)
+    const [downloadLabel, setDownloadLabel] = useState(false)
 
     useEffect(() => {
         setNewStatus(order.order_status || "placed");
@@ -72,7 +71,8 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
 
 
     return (
-        <div className="so-drawer-overlay" onClick={onClose}>
+        <div className="so-drawer-overlay mt-5" onClick={onClose}>
+
             <div className="so-drawer" onClick={(e) => e.stopPropagation()}>
                 <div className="so-drawer-header">
                     <div>
@@ -84,6 +84,7 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
                                 textTransform: "uppercase",
                                 letterSpacing: "0.06em",
                                 marginBottom: 1,
+                                marginTop: '4px'
                             }}
                         >
                             Order Details
@@ -100,7 +101,6 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
                         </p>
                     </div>
                     <Stack direction="horizontal" gap={2} className="align-items-center">
-                        <StatusBadge status={order.order_status} />
                         <button className="so-drawer-close" onClick={onClose}>
                             ✕
                         </button>
@@ -154,6 +154,14 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
                             </div>
                         ))}
                     </div>
+                    <Row className="mt-3 mb-3">
+                        <Col md={6} xs={6} sm={6}className="fw-bold">Shipping Label </Col>
+                        <Col md={6} xs={6} sm={6} className="d-flex justify-content-end">
+                            <span className={`so-status ${status || ""} badge`} style={{ cursor: "pointer", fontSize: "14px" }}>
+                                <DownloadLabelButton order={order} />
+                            </span>
+                        </Col>
+                    </Row>
 
                     <div className="so-drawer-section">
                         <p className="so-drawer-section-title">👤 Customer</p>
@@ -253,11 +261,12 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
                             const imgSrc = Array.isArray(item.product_image_url)
                                 ? item.product_image_url[0]
                                 : item.product_image_url;
-                            console.log(imgSrc.replace('{"', '').replace('"}', '').trim())
+                            console.log("url", imgSrc.replace('{"', '').replace('"}', '').trim().split(',')[0].replace('"', ""))
                             return (
                                 <div key={item.id} className="so-item-row">
+                                    {console.log("item", item)}
                                     <img
-                                        src={imgSrc.replace('{"', '').replace('"}', '').trim()}
+                                        src={imgSrc.replace('{"', '').replace('"}', '').trim().split(',')[0].replace('"', "")}
                                         alt={item.product_title || "Product"}
                                         className="so-item-img"
                                         onError={(e) => {

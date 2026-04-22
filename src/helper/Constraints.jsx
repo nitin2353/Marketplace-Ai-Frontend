@@ -1,11 +1,12 @@
-  import { FaHome, FaTasks, FaBan, FaCalendarAlt, FaUser, FaTachometerAlt } from "react-icons/fa";
+import { FaHome, FaTasks, FaBan, FaCalendarAlt, FaUser, FaTachometerAlt } from "react-icons/fa";
 import { FaCrown } from "react-icons/fa";
 import { BiSolidBriefcase, BiSolidCategoryAlt, BiSolidDollarCircle, } from "react-icons/bi";
 import { FaProductHunt } from "react-icons/fa6";
 import { GrUpdate } from "react-icons/gr";
 
 const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3000/api/v1`;
-// const API_BASE_URL = `https://bql1tnzk-3000.inc1.devtunnels.ms/api/v1`;
+
+console.log("url", API_BASE_URL)
 
 
 
@@ -76,16 +77,43 @@ const SETTINGS_TABS = [
 
 
 const PAYMENT_METHOD_META = {
-    cod: { icon: "💵", label: "COD" },
-    card: { icon: "💳", label: "Card" },
-    upi: { icon: "📱", label: "UPI" },
-    netbanking: { icon: "🏦", label: "Net Banking" },
-    wallet: { icon: "👛", label: "Wallet" },
+  cod: { icon: "💵", label: "COD" },
+  card: { icon: "💳", label: "Card" },
+  upi: { icon: "📱", label: "UPI" },
+  netbanking: { icon: "🏦", label: "Net Banking" },
+  wallet: { icon: "👛", label: "Wallet" },
 };
+
+export const activityMeta = {
+  new_order: { icon: "🛒", bg: "#f0fdf4" },
+  review_received: { icon: "⭐", bg: "#fefce8" },
+  low_stock: { icon: "⚠️", bg: "#fef2f2" },
+  return_request: { icon: "↩️", bg: "#f5f3ff" },
+  product_published: { icon: "📦", bg: "#eff6ff" },
+  payout_processed: { icon: "💰", bg: "#fff3ee" },
+  product_trending: { icon: "🚀", bg: "#fdf4ff" },
+};
+
+export const timeAgo = (dateString) => {
+  const now = new Date();
+  const then = new Date(dateString);
+  const diffMs = now - then;
+
+  const mins = Math.floor(diffMs / (1000 * 60));
+  if (mins < 60) return `${mins}m ago`;
+
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+};
+
+
 
 export {
   API_BASE_URL,
   SIDEBAR_MENUS,
   SETTINGS_TABS,
-  PAYMENT_METHOD_META
+  PAYMENT_METHOD_META,
 };

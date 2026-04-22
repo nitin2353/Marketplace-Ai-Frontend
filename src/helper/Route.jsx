@@ -3,6 +3,7 @@ const ROUTE = {
   DASHBOARD: "/dashboard",
   CUSTOMER_REGISTER: "/customer/register",
   LOGIN: "auth/login",
+  INVOICE: "order/invoice/:id/:id",
   PRODUCT_DETAIL_PAGE: "product/:id",
   SELLER_PRODUCT_DETAIL_PAGE: "seller/product/:id",
   CREATE_PRODUCT: "/seller/product/create",

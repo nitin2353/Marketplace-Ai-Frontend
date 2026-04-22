@@ -11,6 +11,12 @@ import SellerSidebar from "../../components/SellerSidebar";
 import GlobalLoader from "../../components/GlobalLoader";
 import productApi from "../../api/product.api";
 import "./SellerDashboardHome.css";
+import SellerNavbar from "../../components/Sellernavbar";
+import DataTable from "../../components/DataTable";
+import reportApi from "../../api/reportApi";
+import toast from "react-hot-toast";
+import { timeAgo, activityMeta } from "../../helper/Constraints";
+
 
 
 const fmt = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
@@ -88,9 +94,12 @@ const PieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name })
 export default function SellerDashboardHome() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState("monthly"); // monthly | weekly
   const [refresh, setRefresh] = useState(false);
+
 
 
   const totalRevenue = products.reduce((s, p) => s + p.base_price * p.sold, 0);
@@ -108,6 +117,8 @@ export default function SellerDashboardHome() {
   useEffect(() => {
     (async () => {
       setLoading(true);
+      fetchRecentOrders()
+      fetchActivity()
       try {
         const { data } = await productApi.getAllProducts();
         if (data?.data) {
@@ -131,7 +142,34 @@ export default function SellerDashboardHome() {
     })();
   }, [refresh]);
 
-  // ── Derived chart data ──────────────────────────────────
+
+  const fetchRecentOrders = async () => {
+    try {
+      const res = await reportApi.getRecentOrders();
+      setRecentOrders(res.data.filter((ele, i) => {
+        if (i < 5) { return ele }
+      }) || []);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load recent orders");
+    }
+  };
+
+
+
+  const fetchActivity = async () => {
+    try {
+      const res = await reportApi.getRecentActivities();
+      setRecentActivity(res.data)
+
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load recent activity");
+    }
+  };
+
+
+
   const chartData = useMemo(() =>
     period === "monthly" ? buildRevenueData(products) : buildWeeklyData(products),
     [products, period]
@@ -139,7 +177,7 @@ export default function SellerDashboardHome() {
 
   const xKey = period === "monthly" ? "month" : "day";
 
-  // ── KPI cards ───────────────────────────────────────────
+  // ── KPI cards ───────────────────────────────────────────\
   const outOfStock = products.filter(p => p.stock === 0).length;
   const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10).length;
   const totalSold = products.reduce((s, p) => s + p.sold, 0);
@@ -186,6 +224,16 @@ export default function SellerDashboardHome() {
     },
   ];
 
+
+
+  const ACTIVITIES = recentActivity.map((item) => ({
+    icon: activityMeta[item.type]?.icon || "📌",
+    bg: activityMeta[item.type]?.bg || "#f3f4f6",
+    title: item.title,
+    sub: item.sub,
+    time: timeAgo(item.created_time),
+  }));
+
   // ── Top products by revenue ─────────────────────────────
   const topProducts = useMemo(() =>
     [...products]
@@ -215,8 +263,8 @@ export default function SellerDashboardHome() {
 
   // ── Stock health radial data ────────────────────────────
   const stockData = [
-    { name: "Healthy", value: products.filter(p => p.stock > 10).length, fill: "#22c55e" },
-    { name: "Low Stock", value: products.filter(p => p.stock > 0 && p.stock <= 10).length, fill: "#f59e0b" },
+    { name: "Healthy", value: products.filter(p => p.stock > 15).length, fill: "#22c55e" },
+    { name: "Low Stock", value: products.filter(p => p.stock > 0 && p.stock <= 15).length, fill: "#f59e0b" },
     { name: "Out", value: outOfStock, fill: "#ef4444" },
   ];
 
@@ -233,16 +281,6 @@ export default function SellerDashboardHome() {
     }));
   }, [products]);
 
-  // ── Activity feed ───────────────────────────────────────
-  const ACTIVITIES = [
-    { icon: "🛒", bg: "#f0fdf4", title: "New order received", sub: "ORD-1018 · Morpankh Art · ₹980", time: "2m ago" },
-    { icon: "⭐", bg: "#fefce8", title: "New 5-star review", sub: "Silk Dupatta · 'Excellent quality!'", time: "18m ago" },
-    { icon: "⚠️", bg: "#fef2f2", title: "Low stock alert", sub: "Handmade Lamp · only 3 left", time: "1h ago" },
-    { icon: "↩️", bg: "#f5f3ff", title: "Return request", sub: "ORD-1009 · Cotton Kurta", time: "3h ago" },
-    { icon: "📦", bg: "#eff6ff", title: "Product published", sub: "Bamboo Wall Clock · now live", time: "5h ago" },
-    { icon: "💰", bg: "#fff3ee", title: "Payout processed", sub: "₹24,300 credited to bank", time: "1d ago" },
-    { icon: "🚀", bg: "#fdf4ff", title: "Product trending", sub: "Morpankh Art · Top 10 in Feather", time: "2d ago" },
-  ];
 
   // ── Insights ────────────────────────────────────────────
   const INSIGHTS = useMemo(() => [
@@ -273,6 +311,7 @@ export default function SellerDashboardHome() {
       {loading && <GlobalLoader />}
 
       <Container fluid className="p-0">
+        <SellerNavbar pageTitle={"Dashboard"} />
         <Row className="g-0" style={{ minHeight: "100vh" }}>
 
           {/* ── SIDEBAR ── */}
@@ -282,29 +321,6 @@ export default function SellerDashboardHome() {
 
           {/* ── MAIN ── */}
           <Col lg={9} xl={10} style={{ overflowY: "auto" }}>
-
-            {/* Header */}
-            <div className="sdh-header">
-              <div className="sdh-header-inner d-flex flex-wrap align-items-center justify-content-between gap-3">
-                <div>
-                  <h1 className="sdh-header-title">📊 Seller Dashboard</h1>
-                  <p className="sdh-header-sub">Track your sales, inventory, and growth in real-time</p>
-                </div>
-                <div className="d-flex flex-column align-items-end gap-2">
-                  <span className="sdh-header-date">
-                    📅 {today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-                  </span>
-                  <div className="sdh-period-tabs">
-                    {["weekly", "monthly"].map(p => (
-                      <button key={p} className={`sdh-period-tab ${period === p ? "active" : ""}`}
-                        onClick={() => setPeriod(p)}>
-                        {p === "weekly" ? "7 Days" : "12 Months"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
 
             <div className="p-3 p-md-4">
 
@@ -553,31 +569,8 @@ export default function SellerDashboardHome() {
                         View All →
                       </button>
                     </div>
-
-                    <div style={{ overflowX: "auto" }}>
-                      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                        <thead>
-                          <tr>
-                            {["Order ID", "Product", "Qty", "Amount", "Status", "Date"].map(h => (
-                              <th key={h} style={{ fontSize: ".68rem", fontWeight: 800, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".04em", padding: "6px 8px", textAlign: "left", borderBottom: "1.5px solid var(--border)", whiteSpace: "nowrap" }}>{h}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {MOCK_ORDERS.slice(0, 8).map(o => (
-                            <tr key={o.id} style={{ transition: "background .12s" }}
-                              onMouseEnter={e => e.currentTarget.style.background = "#fafbff"}
-                              onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                              <td style={{ padding: "9px 8px", fontSize: ".78rem", fontWeight: 900, color: "var(--text)" }}>{o.id}</td>
-                              <td style={{ padding: "9px 8px", fontSize: ".75rem", fontWeight: 700, color: "var(--muted)", maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.product}</td>
-                              <td style={{ padding: "9px 8px", fontSize: ".78rem", fontWeight: 800, textAlign: "center" }}>{o.qty}</td>
-                              <td style={{ padding: "9px 8px", fontSize: ".8rem", fontWeight: 900, color: "var(--p)" }}>{fmt(o.amount)}</td>
-                              <td style={{ padding: "9px 8px" }}><span className={`sdh-status ${o.status}`}>{o.status}</span></td>
-                              <td style={{ padding: "9px 8px", fontSize: ".72rem", color: "var(--muted)", fontWeight: 700, whiteSpace: "nowrap" }}>{o.date}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div className="mt-5">
+                      <DataTable isSearch={false} tableData={recentOrders} isHeader={false} />
                     </div>
                   </div>
                 </Col>
@@ -588,6 +581,7 @@ export default function SellerDashboardHome() {
                     <div className="sdh-card-title">🔔 Recent Activity</div>
                     <div className="sdh-card-sub">Latest events on your store</div>
                     {ACTIVITIES.map((a, i) => (
+                      i < 5 && 
                       <div key={i} className="sdh-activity-item" style={{ animationDelay: `${i * 0.05}s` }}>
                         <div className="sdh-activity-dot" style={{ background: a.bg }}>{a.icon}</div>
                         <div style={{ flex: 1, minWidth: 0 }}>

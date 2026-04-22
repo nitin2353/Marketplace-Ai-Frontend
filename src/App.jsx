@@ -30,6 +30,9 @@ import ChatPage from "./pages/requirements/ChatPage";
 import SellerProductDetail from "./pages/seller-detail-page/SellerProductDetail";
 import SellerDashboardHome from "./pages/seller-dashboard/Sellerdashboardhome";
 import SellerOrders from "./pages/seller-orders/SellerOrders";
+import Invoice from "./components/Invoice.jsx";
+import InvoiceDownloadPage from "./components/InvoiceDownloadPage.jsx";
+import InvoicePage from "./components/InvoicePage.jsx";
 
 
 const App = () => {
@@ -43,6 +46,7 @@ const App = () => {
           <Route path={ROUTE.CUSTOMER_REGISTER} element={<CustomerRegister />} />
           <Route path={ROUTE.SELLER_REGISTER} element={<SellerRegister />} />
           <Route path={ROUTE.ADMIN_LOGIN} element={<AdminLogin />} />
+          <Route path={ROUTE.INVOICE} element={<InvoicePage />} />
           <Route path={ROUTE.CART} element={<ProtectedRoute moduleName="cart"><Cart /></ProtectedRoute>} />
           <Route path={ROUTE.ORDERS} element={<ProtectedRoute moduleName="orders"><OrdersPage /></ProtectedRoute>} />
           <Route path={ROUTE.WISHLIST} element={<ProtectedRoute moduleName="wishlist"><WishlistPage /></ProtectedRoute>} />

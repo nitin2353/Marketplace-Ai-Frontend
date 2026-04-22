@@ -25,6 +25,8 @@ const DataTable = ({
     tableData = [],
     getStatusColor,
     title = "Recent Orders",
+    isSearch=true,
+    isHeader=true
 }) => {
     const navigate = useNavigate();
 
@@ -32,6 +34,8 @@ const DataTable = ({
     const [sortConfig, setSortConfig] = useState({ key: "date", direction: "desc" });
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(ROWS_OPTIONS[0]);
+
+    console.log(tableData)
 
     const handleSort = useCallback((key) => {
         setSortConfig((prev) => ({
@@ -103,7 +107,12 @@ const DataTable = ({
     return (
         <Container fluid className="mt-3 mb-4 p-3 rounded-4" style={{ background: "var(--card)" }}>
             {/* Toolbar: Search + Rows per page */}
-            <Row className="mb-3 align-items-center g-2">
+            {
+                isHeader && 
+                <Row className="mb-3 align-items-center g-2">
+
+                {
+                isSearch &&     
                 <Col xs={12} sm={7} md={6} lg={5}>
                     <InputGroup size="sm">
                         <InputGroup.Text>🔍</InputGroup.Text>
@@ -115,7 +124,7 @@ const DataTable = ({
                             onChange={handleSearch}
                         />
                     </InputGroup>
-                </Col>
+                </Col>}
 
                 <Col xs="auto" className="ms-sm-auto">
                     <InputGroup size="sm">
@@ -132,7 +141,7 @@ const DataTable = ({
                         </Form.Select>
                     </InputGroup>
                 </Col>
-            </Row>
+            </Row>}
 
             {filteredAndSorted.length === 0 ? (
                 <div className="text-muted d-flex justify-content-center"><p>No orders found.</p></div>

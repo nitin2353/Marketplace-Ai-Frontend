@@ -16,6 +16,7 @@ import productApi from "../../api/product.api";
 import { requestFormReset } from "react-dom";
 import toast from "react-hot-toast";
 import './SellerDashboard.css'
+import SellerNavbar from "../../components/Sellernavbar";
 
 
 const FILTERS = ["All", "In Stock", "Low Stock", "Out of Stock", "Customizable", "Returnable"];
@@ -151,6 +152,7 @@ export default function SellerProducts() {
     return (
 
         <Container fluid className="p-0" style={{ minHeight: "100vh", background: "#f1f4ff" }}>
+            <SellerNavbar />
             {loading && <GlobalLoader />}
             <Row className="g-0" style={{ minHeight: "100vh" }}>
 
@@ -318,71 +320,6 @@ export default function SellerProducts() {
                             ))}
                         </Row>
                     )}
-
-                    {/* Table view */}
-                    {viewMode === "table" && filtered.length > 0 && (
-                        <Card className="eco-section-card" style={{ overflow: "hidden" }}>
-                            <div style={{ overflowX: "auto" }}>
-                                <table className="eco-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Product</th><th>Brand</th><th>Price</th><th>Stock</th>
-                                            <th>Sold</th><th>Rating</th><th>Tags</th><th>Return</th>
-                                            <th style={{ textAlign: "right" }}>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filtered.map(product => (
-                                            <tr key={product.id}>
-                                                <td style={{ minWidth: 240 }}>
-                                                    <div className="d-flex align-items-center gap-3">
-                                                        {product.image_url
-                                                            ? <img src={product.image_url.split(",")[0]} alt={product.title} style={{ width: 46, height: 46, borderRadius: 10, objectFit: "cover", flexShrink: 0 }} />
-                                                            : <div style={{ width: 46, height: 46, borderRadius: 10, background: "#f1f4ff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.4rem", flexShrink: 0 }}>📦</div>
-                                                        }
-                                                        <span className="fw-bold" style={{ fontSize: "0.85rem", color: "#1a1a2e" }}>
-                                                            {product.title.length > 40 ? product.title.slice(0, 40) + "…" : product.title}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td><span style={{ fontWeight: 700, color: "#6b7280" }}>{product.brand}</span></td>
-                                                <td>
-                                                    <div className="fw-black" style={{ color: "#ff6b35" }}>₹{product.base_price.toLocaleString()}</div>
-                                                    {product.discount > 0 && <div style={{ fontSize: "0.72rem", color: "#22c55e", fontWeight: 700 }}>{product.discount}% off</div>}
-                                                </td>
-                                                <td>{stockBadge(product.stock)}</td>
-                                                <td><span className="fw-bold">{product.sold}</span></td>
-                                                <td>
-                                                    <span style={{ fontWeight: 800, color: "#f7931e" }}>⭐ {product.rating}</span>
-                                                    <div style={{ fontSize: "0.72rem", color: "#9ca3af" }}>{product.reviews} reviews</div>
-                                                </td>
-                                                <td style={{ minWidth: 120 }}>
-                                                    <div className="d-flex flex-wrap gap-1">
-                                                        {product.tag.split(",").slice(0, 2).map(t => <Badge key={t} className="eco-badge-tag">{t.trim()}</Badge>)}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div style={{ fontSize: "0.78rem", fontWeight: 700 }}>
-                                                        {product.is_return && <span style={{ color: "#22c55e" }}>↩️ Return</span>}
-                                                        {product.is_return && product.is_replace && <br />}
-                                                        {product.is_replace && <span style={{ color: "#3b82f6" }}>🔄 Replace</span>}
-                                                        {!product.is_return && !product.is_replace && <span style={{ color: "#9ca3af" }}>None</span>}
-                                                    </div>
-                                                </td>
-                                                <td style={{ textAlign: "right" }}>
-                                                    <div className="d-flex gap-2 justify-content-end">
-                                                        <Button size="sm" className="eco-btn-main text-white" style={{ fontSize: "0.78rem", padding: "6px 12px" }} onClick={() => navigate(`/seller/product/edit/${product.id}`)}>✏️ Edit</Button>
-                                                        <Button size="sm" className="eco-btn-outline" style={{ fontSize: "0.78rem", padding: "6px 10px", color: "#dc2626", borderColor: "#fca5a5" }} onClick={() => setDeleteModal(product)}>🗑️</Button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </Card>
-                    )}
-
                     <div style={{ height: 40 }} />
                 </Col>
             </Row>

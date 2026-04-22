@@ -15,6 +15,7 @@ import productApi from "../../api/product.api";
 import toast from "react-hot-toast";
 import './CreateProduct.css'
 import SellerSidebar from "../../components/SellerSidebar";
+import SellerNavbar from "../../components/Sellernavbar";
 
 
 const PRESET_TAGS = ["New Arrival", "Trending", "Best Seller", "Limited Edition", "Eco Friendly", "Premium", "Sale"];
@@ -193,6 +194,7 @@ export default function CreateProduct() {
 
     return (
         <Container fluid className="p-0" style={{ minHeight: "100vh", background: "#f1f4ff" }}>
+            <SellerNavbar pageTitle={"Add Product"} />
             <Form onSubmit={handleSubmit(onSubmit)}>
                 <Row className="g-0" style={{ minHeight: "100vh" }}>
 
@@ -223,11 +225,6 @@ export default function CreateProduct() {
                         </div>
 
                         <Stack gap={4}>
-
-                            {/* ════════════════════════════════════════════
-                                STEP 0 — VARIANT MODE SELECTOR
-                                Must be chosen before rest of the form
-                            ════════════════════════════════════════════ */}
                             <Card className="eco-section-card p-4" style={{ border: hasVariants === null ? "2px solid #f7931e" : "2px solid #e8eaf6" }}>
                                 <div className="eco-section-title">⚙️ Step 1 — Product Type</div>
                                 <p style={{ fontSize: "0.88rem", color: "#6b7280", marginBottom: 16 }}>
