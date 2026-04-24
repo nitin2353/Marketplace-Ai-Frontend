@@ -1,12 +1,17 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthWrapper } from "../helper/AuthWrapper";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useId } from "react";
 import JWTService from "../config/jwt.config";
+import { Overlay, Popover } from "react-bootstrap";
+import NotificationPanel from "./NotificationPanel";
+import notificationApi from "../api/notification.api";
+import toast from "react-hot-toast";
 
 export default function SellerNavbar({
     sellerName = "",
     notifCount = 1,
-    pageTitle = ""
+    pageTitle = "",
+    notifications = [],
 }) {
     const navigate = useNavigate();
     const { pathname } = useLocation();
@@ -14,17 +19,25 @@ export default function SellerNavbar({
 
     const [userInfo, setUserInfo] = useState(null);
     const [displayName, setDisplayName] = useState("My Store");
+    const [showNotif, setShowNotif] = useState(false);
+    const [refreshNotify, setRefreshNotify] = useState(false);
+    const [notifyCount, setNotifyCount] = useState(0)
+    const bellRef = useRef(null);
 
     useEffect(() => {
         setName();
     }, []);
 
+    useEffect(() => {
+        if (userInfo?.id) {
+            fetchNotificationCount();
+        }
+    }, [userInfo?.id, refreshNotify]);
+
     const setName = () => {
         const data = JWTService.decodeTokenDetails();
-
         if (data) {
             setUserInfo(data);
-
             const fullName = `${data?.firstName || ""} ${data?.lastName || ""}`.trim();
             setDisplayName(fullName || sellerName || "My Store");
         } else {
@@ -52,13 +65,29 @@ export default function SellerNavbar({
 
     const initials =
         displayName && displayName !== "My Store"
-            ? displayName
-                  .split(" ")
-                  .map((word) => word[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()
+            ? displayName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
             : "SE";
+
+    const btnStyle = (active = false) => ({
+        width: 40, height: 40, borderRadius: 10,
+        border: `1.5px solid ${active ? "#ff6b35" : "#e8eaf6"}`,
+        background: active ? "#fff3ee" : "#f8f9ff",
+        cursor: "pointer", display: "flex",
+        alignItems: "center", justifyContent: "center",
+        fontSize: "1.05rem", transition: "all 0.2s",
+    });
+
+
+
+    const fetchNotificationCount = async () => {
+        try {
+            const result = await notificationApi.getUnreadCount(userInfo.id);
+            setNotifyCount(result.data.unread_count)
+        } catch (error) {
+            toast.error("Fetch Notification Error");
+        }
+    }
+
 
     return (
         <nav
@@ -148,140 +177,89 @@ export default function SellerNavbar({
                 {currentTitle}
             </div>
 
+            {/* ── Right actions ── */}
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+
+                {/* ── Bell button ── */}
                 <button
+                    ref={bellRef}
                     type="button"
-                    onClick={() => navigate("/seller/notifications")}
-                    style={{
-                        position: "relative",
-                        width: 40,
-                        height: 40,
-                        borderRadius: 10,
-                        border: "1.5px solid #e8eaf6",
-                        background: "#f8f9ff",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "1.1rem",
-                        transition: "all 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#fff3ee";
-                        e.currentTarget.style.borderColor = "#ff6b35";
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#f8f9ff";
-                        e.currentTarget.style.borderColor = "#e8eaf6";
-                    }}
+                    onClick={() => setShowNotif((v) => !v)}
+                    style={{ ...btnStyle(showNotif), position: "relative"}}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "#fff3ee"; e.currentTarget.style.borderColor = "#ff6b35"; }}
+                    onMouseLeave={(e) => { if (!showNotif) { e.currentTarget.style.background = "#f8f9ff"; e.currentTarget.style.borderColor = "#e8eaf6"; } }}
                 >
                     🔔
-                    {notifCount > 0 && (
-                        <span
-                            style={{
-                                position: "absolute",
-                                top: -5,
-                                right: -5,
-                                background: "#ff6b35",
-                                color: "#fff",
-                                fontSize: "0.58rem",
-                                fontWeight: 900,
-                                borderRadius: "50%",
-                                width: 17,
-                                height: 17,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                border: "2px solid #fff",
-                            }}
-                        >
-                            {notifCount > 9 ? "9+" : notifCount}
+                    {notifyCount > 0 && (
+                        <span style={{
+                            position: "absolute", top: -5, right: -5,
+                            background: "#ff6b35", color: "#fff",
+                            fontSize: "0.69rem", fontWeight: 900,
+                            borderRadius: "50%", width: 20, height: 20,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            border: "2px solid #fff",
+                        }}>
+                            {notifyCount > 9 ? "9+" : notifyCount}
                         </span>
                     )}
                 </button>
 
+                <Overlay
+                    target={bellRef.current}
+                    show={showNotif}
+                    placement="bottom-end"
+                    rootClose
+                    onHide={() => setShowNotif(false)}
+                >
+                    <Popover style={{
+                        maxWidth: 340, padding: 0,
+                        border: "0.5px solid #e5e7eb",
+                        borderRadius: 12,
+                        boxShadow: "0 8px 32px rgba(0,0,0,.12)",
+                        overflow: "hidden",
+                    }}>
+                        <NotificationPanel mode={"seller"} refreshNotify={refreshNotify} setRefreshNotify={setRefreshNotify}  />
+                    </Popover>
+                </Overlay>
+
+                {/* ── Store button ── */}
                 <button
                     type="button"
                     onClick={() => navigate("/")}
                     title="View store"
-                    style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 10,
-                        border: "1.5px solid #e8eaf6",
-                        background: "#f8f9ff",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "1.05rem",
-                        transition: "all 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#fff3ee";
-                        e.currentTarget.style.borderColor = "#ff6b35";
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#f8f9ff";
-                        e.currentTarget.style.borderColor = "#e8eaf6";
-                    }}
+                    style={btnStyle()}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "#fff3ee"; e.currentTarget.style.borderColor = "#ff6b35"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "#f8f9ff"; e.currentTarget.style.borderColor = "#e8eaf6"; }}
                 >
                     🏪
                 </button>
 
+                {/* ── User pill ── */}
                 <div
                     onClick={() => navigate("/seller/settings")}
                     style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        background: "#f8f9ff",
-                        border: "1.5px solid #e8eaf6",
-                        borderRadius: 24,
-                        padding: "5px 12px 5px 5px",
-                        cursor: "pointer",
-                        transition: "all 0.2s",
+                        display: "flex", alignItems: "center", gap: 8,
+                        background: "#f8f9ff", border: "1.5px solid #e8eaf6",
+                        borderRadius: 24, padding: "5px 12px 5px 5px",
+                        cursor: "pointer", transition: "all 0.2s",
                     }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#fff3ee";
-                        e.currentTarget.style.borderColor = "#ff6b35";
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#f8f9ff";
-                        e.currentTarget.style.borderColor = "#e8eaf6";
-                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "#fff3ee"; e.currentTarget.style.borderColor = "#ff6b35"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "#f8f9ff"; e.currentTarget.style.borderColor = "#e8eaf6"; }}
                 >
-                    <div
-                        style={{
-                            width: 30,
-                            height: 30,
-                            borderRadius: "50%",
-                            background: "linear-gradient(135deg, #ff6b35, #f7931e)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "0.72rem",
-                            fontWeight: 900,
-                            color: "#fff",
-                            flexShrink: 0,
-                            letterSpacing: 0.5,
-                        }}
-                    >
+                    <div style={{
+                        width: 30, height: 30, borderRadius: "50%",
+                        background: "linear-gradient(135deg, #ff6b35, #f7931e)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: "0.72rem", fontWeight: 900, color: "#fff",
+                        flexShrink: 0, letterSpacing: 0.5,
+                    }}>
                         {initials}
                     </div>
-
-                    <span
-                        className="d-none d-sm-block"
-                        style={{
-                            color: "#1a1a2e",
-                            fontSize: "0.82rem",
-                            fontWeight: 700,
-                            maxWidth: 110,
-                            overflow: "hidden",
-                            whiteSpace: "nowrap",
-                            textOverflow: "ellipsis",
-                        }}
-                    >
+                    <span className="d-none d-sm-block" style={{
+                        color: "#1a1a2e", fontSize: "0.82rem", fontWeight: 700,
+                        maxWidth: 110, overflow: "hidden",
+                        whiteSpace: "nowrap", textOverflow: "ellipsis",
+                    }}>
                         {displayName}
                     </span>
                 </div>

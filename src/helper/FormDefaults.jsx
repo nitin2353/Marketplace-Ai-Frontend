@@ -33,4 +33,28 @@ export const formResetData = {
         notify: rowData?.notify || false
     }),
 
+    product: (product = {}) => ({
+        title: product.title || "",
+        description: product.description || "",
+        brand: product.brand || "",
+        category: product.category || "",
+        base_price: product.base_price || "",
+        old_price: product.old_price || "",
+        stock: product.stock || "",
+        weight: product.weight || "",
+        length: product.length || "",
+        width: product.width || "",
+        height: product.height || "",
+        delivery_days: product.delivery_days || "",
+        tax_percentage: product.tax_percentage || "",
+        min_stock_alert: product.min_stock_alert || "",
+        return_replace_duration: product.return_replace_duration || "",
+        return_replace_instructions: product.return_replace_instructions || "",
+        slug: product.slug || "",
+        meta_title: product.meta_title || "",
+        meta_description: product.meta_description || "",
+        customization_type: product.customization_type || "",
+        customization_fields: JSON.stringify(product.customization_fields) || "",
+    })
+
 };

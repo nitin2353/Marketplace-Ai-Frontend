@@ -569,7 +569,7 @@ export default function SellerDashboardHome() {
                         View All →
                       </button>
                     </div>
-                    <div className="mt-5">
+                    <div className="mt-2">
                       <DataTable isSearch={false} tableData={recentOrders} isHeader={false} />
                     </div>
                   </div>

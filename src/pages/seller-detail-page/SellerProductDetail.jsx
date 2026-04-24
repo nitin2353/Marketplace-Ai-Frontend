@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Badge, Col, Container, Modal, Row, Table } from "react-bootstrap";
+import { Col, Container, Modal, Row } from "react-bootstrap";
 import {
     Area, AreaChart, Bar, BarChart, CartesianGrid,
     Cell, Legend, Pie, PieChart, ResponsiveContainer,
@@ -15,27 +15,16 @@ import "./SellerProductDetail.css";
 import reportApi from "../../api/reportApi";
 import DataTable from "../../components/DataTable";
 import orderApi from "../../api/order.api";
-import { jwtDecode } from "jwt-decode";
 import JWTService from "../../config/jwt.config";
 import SellerNavbar from "../../components/Sellernavbar";
 
+// ── Formatters ────────────────────────────────────────────────────────────────
 const fmt = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
 const fmtL = (n) => n >= 100000 ? `₹${(n / 100000).toFixed(1)}L` : n >= 1000 ? `₹${(n / 1000).toFixed(1)}K` : `₹${n}`;
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const PIE_COLORS = ["#22c55e", "#f59e0b", "#3b82f6", "#ef4444", "#8b5cf6"];
 
-const ORDER_STATUSES = ["delivered", "pending", "processing", "cancelled", "returned"];
-const STATUS_CLASS = { delivered: "success", pending: "warning", processing: "info", cancelled: "danger", returned: "purple" };
-
-const buildProductSales = (sold, basePrice) => {
-    const avgMonthly = sold / 12;
-    return MONTHS.map((month) => ({
-        month,
-        units: Math.max(0, Math.round(avgMonthly * (0.5 + Math.random()))),
-        revenue: 0,
-    })).map((m) => ({ ...m, revenue: m.units * basePrice }));
-};
-
-// ── Dual-axis tooltip ──────────────────────────────────────
+// ── Chart Tooltip ─────────────────────────────────────────────────────────────
 const ChartTip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
     return (
@@ -59,10 +48,12 @@ const getStatusColor = (status) => {
     }
 };
 
+// ── Main Component ────────────────────────────────────────────────────────────
 export default function SellerProductDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
 
+    // ── State ──
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeImg, setActiveImg] = useState(0);
@@ -72,105 +63,30 @@ export default function SellerProductDetail() {
     const [deleteModal, setDeleteModal] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [weeklyData, setWeeklyData] = useState([]);
+    const [monthlyData, setMonthlyData] = useState([]);
     const [recentOrders, setRecentOrders] = useState([]);
 
-    const [monthlyData, setMonthlyData] = useState([]);
-
-    useEffect(() => {
-        fetchMonthlySales();
-    }, []);
-
-    const fetchMonthlySales = async () => {
-        try {
-            let seller = JWTService.decodeTokenDetails();
-
-            const res = await orderApi.getSellerOrders(seller.id);
-
-            const orders = res.data || [];
-
-            const monthMap = {};
-            orders?.forEach(item => {
-                if (item.product_id == id) {
-                    console.log("Item", item)
-                    const date = new Date(item.created_time);
-                    const month = MONTHS[date.getMonth()];
-                    if (!monthMap[month]) {
-                        monthMap[month] = { month, units: 0, revenue: 0 };
-                    }
-
-                    monthMap[month].units += item.total_items;
-                    monthMap[month].revenue += item.subtotal;
-                }
-            });
-
-            const finalData = MONTHS.map(m => monthMap[m] || {
-                month: m,
-                units: 0,
-                revenue: 0
-            });
-
-            setMonthlyData(finalData);
-
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to load monthly sales");
-        }
-    };
-
-    useEffect(() => {
-        const fetchWeeklyData = async () => {
-            try {
-                const res = await reportApi.getWeeklyUnitsSold(id);
-                setWeeklyData(res.data || []);
-            } catch (error) {
-                console.error(error);
-                toast.error("Failed to load weekly sales");
-            }
-        };
-        if (id) fetchWeeklyData();
-    }, [id]);
-
-    useEffect(() => {
-        const fetchRecentOrders = async () => {
-            try {
-                const res = await reportApi.getRecentOrdersByProduct(product.id);
-                setRecentOrders(res.data || []);
-            } catch (error) {
-                console.error(error);
-                toast.error("Failed to load recent orders");
-            }
-        };
-        if (product?.id) fetchRecentOrders();
-    }, [product?.id]);
-
-    // ── Sidebar stats ──────────────────────────────────────
-    const sidebarStats = product ? [
-        { icon: "💰", label: "Product Revenue", val: fmtL(product.base_price * product.sold) },
-        { icon: "🛒", label: "Units Sold", val: product.sold },
-        { icon: "⭐", label: "Rating", val: product.rating },
-    ] : [];
-
-    // ── Fetch product ──────────────────────────────────────
+    // ── Fetch Product ──
     useEffect(() => {
         (async () => {
             setLoading(true);
             try {
                 const { data } = await productApi.getProductById(id);
-                if (data?.data || data) {
-                    const raw = data?.data || data;
-                    setProduct({
-                        ...raw,
-                        base_price: Number(raw.base_price),
-                        old_price: raw.old_price ? Number(raw.old_price) : null,
-                        rating: Number(raw.rating),
-                        tag: typeof raw.tag === "string" ? raw.tag.split(",").map(t => t.trim()) : raw.tag || [],
-                        color: typeof raw.color === "string" ? raw.color.split(",").map(c => c.trim()) : raw.color || [],
-                        image_url: Array.isArray(raw.image_url) ? raw.image_url : [],
-                    });
-                } else {
-                    toast.error("Product not found");
-                    navigate("/seller/products");
-                }
+                const raw = data?.data || data;
+                if (!raw) { toast.error("Product not found"); navigate("/seller/products"); return; }
+                setProduct({
+                    ...raw,
+                    base_price: Number(raw.base_price),
+                    old_price: raw.old_price ? Number(raw.old_price) : null,
+                    stock: Number(raw.stock || 0),
+                    sold: Number(raw.sold || 0),
+                    rating: Number(raw.rating || 0),
+                    reviews: Number(raw.reviews || 0),
+                    discount: Number(raw.discount || 0),
+                    tag: typeof raw.tag === "string" ? raw.tag.split(",").map(t => t.trim()).filter(Boolean) : (raw.tag || []),
+                    color: typeof raw.color === "string" ? raw.color.split(",").map(c => c.trim()).filter(Boolean) : (raw.color || []),
+                    image_url: Array.isArray(raw.image_url) ? raw.image_url : (raw.image_url ? [raw.image_url] : []),
+                });
             } catch (e) {
                 console.error(e);
                 toast.error("Failed to load product");
@@ -180,7 +96,53 @@ export default function SellerProductDetail() {
         })();
     }, [id, refresh]);
 
-    // ── Delete handler ─────────────────────────────────────
+    // ── Fetch Monthly Sales ──
+    useEffect(() => {
+        if (!id) return;
+        (async () => {
+            try {
+                const seller = JWTService.decodeTokenDetails();
+                const res = await orderApi.getSellerOrders(seller.id);
+                const orders = res.data || [];
+                const monthMap = {};
+                orders.forEach(item => {
+                    if (String(item.product_id) === String(id)) {
+                        const m = MONTHS[new Date(item.created_time).getMonth()];
+                        if (!monthMap[m]) monthMap[m] = { month: m, units: 0, revenue: 0 };
+                        monthMap[m].units += Number(item.total_items || 0);
+                        monthMap[m].revenue += Number(item.subtotal || 0);
+                    }
+                });
+                setMonthlyData(MONTHS.map(m => monthMap[m] || { month: m, units: 0, revenue: 0 }));
+            } catch (err) {
+                console.error(err);
+            }
+        })();
+    }, [id]);
+
+    // ── Fetch Weekly Data ──
+    useEffect(() => {
+        if (!id) return;
+        (async () => {
+            try {
+                const res = await reportApi.getWeeklyUnitsSold(id);
+                setWeeklyData(res.data || []);
+            } catch (err) { console.error(err); }
+        })();
+    }, [id]);
+
+    // ── Fetch Recent Orders ──
+    useEffect(() => {
+        if (!product?.id) return;
+        (async () => {
+            try {
+                const res = await reportApi.getRecentOrdersByProduct(product.id);
+                setRecentOrders(res.data || []);
+            } catch (err) { console.error(err); }
+        })();
+    }, [product?.id]);
+
+    // ── Delete handler ──
     const handleDelete = async () => {
         setDeleteLoading(true);
         try {
@@ -195,47 +157,49 @@ export default function SellerProductDetail() {
         }
     };
 
+    // ── Gallery nav ──
     const imgCount = product?.image_url?.length || 0;
     const prevImg = () => setActiveImg((i) => (i - 1 + imgCount) % imgCount);
     const nextImg = () => setActiveImg((i) => (i + 1) % imgCount);
 
-    // const salesData = useMemo(() => product ? buildProductSales(product.sold, product.base_price) : [], [product]);
-    const salesData = monthlyData;
-
+    // ── Derived values ──
     const totalRev = product ? product.base_price * product.sold : 0;
-    console.log("salesDatasalesData", totalRev)
-    const stockPct = product ? Math.min(100, Math.round((product.stock / (product.stock + product.sold)) * 100)) : 0;
-    const savingPct = product?.old_price ? Math.round(((product.old_price - product.base_price) / product.old_price) * 100) : 0;
+    const stockPct = product ? Math.min(100, Math.round((product.stock / Math.max(1, product.stock + product.sold)) * 100)) : 0;
+    const stockColor = !product ? "#22c55e" : product.stock === 0 ? "var(--danger)" : product.stock <= 10 ? "var(--warning)" : "var(--success)";
 
-    const ratingDist = useMemo(() => {
-        if (!product) return [];
-        const r = Math.round(product.rating);
-        const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-        const total = product.reviews || 10;
-        dist[r] = Math.round(total * 0.5);
-        dist[Math.max(1, r - 1)] = Math.round(total * 0.25);
-        dist[Math.min(5, r + 1)] = Math.round(total * 0.15);
-        dist[Math.max(1, r - 2)] = Math.round(total * 0.07);
-        dist[1] = Math.max(0, total - dist[5] - dist[4] - dist[3] - dist[2]);
-        return [5, 4, 3, 2, 1].map((s) => ({ star: s, count: dist[s] || 0, pct: Math.round(((dist[s] || 0) / total) * 100) }));
-    }, [product]);
-
-    // ── FIX: Use recentOrders (real API data) for pie, not fake buildOrders ──
     const statusPie = useMemo(() => {
         const map = {};
         recentOrders.forEach((o) => { map[o.status] = (map[o.status] || 0) + 1; });
         return Object.entries(map).map(([name, value]) => ({ name, value }));
     }, [recentOrders]);
 
-    const PIE_COLORS = ["#22c55e", "#f59e0b", "#3b82f6", "#ef4444", "#8b5cf6"];
-    const stockColor = product?.stock === 0 ? "var(--danger)" : product?.stock <= 10 ? "var(--warning)" : "var(--success)";
+    const ratingDist = useMemo(() => {
+        if (!product) return [];
+        const r = Math.round(product.rating);
+        const total = product.reviews || 10;
+        const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        dist[Math.min(5, Math.max(1, r))] = Math.round(total * 0.50);
+        dist[Math.min(5, Math.max(1, r - 1))] = Math.round(total * 0.25);
+        dist[Math.min(5, Math.max(1, r + 1))] = Math.round(total * 0.15);
+        dist[Math.min(5, Math.max(1, r - 2))] = Math.round(total * 0.07);
+        dist[1] = Math.max(0, total - dist[5] - dist[4] - dist[3] - dist[2]);
+        return [5, 4, 3, 2, 1].map(s => ({ star: s, count: dist[s] || 0, pct: Math.round(((dist[s] || 0) / total) * 100) }));
+    }, [product]);
+
+    // ── Sidebar stats ──
+    const sidebarStats = product ? [
+        { icon: "💰", label: "Product Revenue", val: fmtL(totalRev) },
+        { icon: "🛒", label: "Units Sold", val: product.sold },
+        { icon: "⭐", label: "Rating", val: product.rating },
+    ] : [];
+
+    if (loading) return <GlobalLoader />;
 
     return (
         <div className="spd-page">
-            {loading && <GlobalLoader />}
-
             <Container fluid className="p-0">
-                <SellerNavbar pageTitle={"ProductDetaial Page"} />
+                <SellerNavbar pageTitle="Product Detail" />
+
                 <Row className="g-0" style={{ minHeight: "100vh" }}>
 
                     {/* ── SIDEBAR ── */}
@@ -243,19 +207,44 @@ export default function SellerProductDetail() {
                         <SellerSidebar stats={sidebarStats} />
                     </Col>
 
-                    {/* ── MAIN ── */}
+                    {/* ── MAIN CONTENT ── */}
                     <Col lg={9} xl={10} style={{ overflowY: "auto", paddingBottom: 80 }}>
-
                         {product && (
                             <div className="p-3 p-md-4">
 
+                                {/* ── TOP ACTION BAR (Desktop) ── */}
+                                <div className="spd-top-actions mb-4">
+                                    <div>
+                                        <h2 className="spd-page-title">{product.title}</h2>
+                                        <p className="spd-page-sub">
+                                            {product.brand && <><span className="spd-chip">{product.brand}</span></>}
+                                            {product.category && <span className="spd-chip">{product.category}</span>}
+                                            <span className={`spd-chip ${product.stock === 0 ? "danger" : product.stock <= 10 ? "warning" : "success"}`}>
+                                                {product.stock === 0 ? "Out of Stock" : product.stock <= 10 ? `Low Stock: ${product.stock}` : `In Stock: ${product.stock}`}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div className="spd-desktop-actions d-none d-lg-flex gap-2">
+                                        <button className="spd-action-btn ghost" onClick={() => navigate(`/product/${id}`)}>
+                                            👁️ View Live
+                                        </button>
+                                        <button className="spd-action-btn primary" onClick={() => setShowEdit(true)}>
+                                            ✏️ Edit Product
+                                        </button>
+                                        <button className="spd-action-btn danger" onClick={() => setDeleteModal(true)}>
+                                            🗑️ Delete
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* ── ROW 1: Gallery + KPIs + Details ── */}
                                 <Row className="g-3 mb-4">
 
                                     {/* Gallery */}
                                     <Col md={5} lg={4}>
                                         <div className="spd-card" style={{ padding: 16 }}>
                                             <div className="spd-gallery">
-                                                {product.image_url.length > 0 ? (
+                                                {imgCount > 0 ? (
                                                     <img src={product.image_url[activeImg]} alt={product.title} className="spd-gallery-main" />
                                                 ) : (
                                                     <div className="spd-gallery-placeholder">📦</div>
@@ -271,24 +260,27 @@ export default function SellerProductDetail() {
                                                 )}
                                             </div>
 
-                                            <div className="spd-thumbs">
-                                                {product.image_url.map((url, i) => (
-                                                    <img key={i} src={url} alt={`thumb-${i}`}
-                                                        className={`spd-thumb ${i === activeImg ? "active" : ""}`}
-                                                        onClick={() => setActiveImg(i)} />
-                                                ))}
-                                            </div>
+                                            {/* Thumbnails */}
+                                            {imgCount > 1 && (
+                                                <div className="spd-thumbs">
+                                                    {product.image_url.map((url, i) => (
+                                                        <img key={i} src={url} alt={`thumb-${i}`}
+                                                            className={`spd-thumb ${i === activeImg ? "active" : ""}`}
+                                                            onClick={() => setActiveImg(i)} />
+                                                    ))}
+                                                </div>
+                                            )}
 
-
+                                            {/* Color swatches */}
                                             {product.color.length > 0 && (
                                                 <div className="mt-3">
-                                                    <div style={{ fontSize: ".72rem", fontWeight: 800, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".04em", marginBottom: 8 }}>
-                                                        Available Colours ({product.color.length})
-                                                    </div>
+                                                    <div className="spd-swatch-label">Available Colours ({product.color.length})</div>
                                                     <div className="d-flex gap-2 flex-wrap">
                                                         {product.color.map((c, i) => (
-                                                            <div key={i} className={`spd-color-dot ${i === activeColor ? "active" : ""}`}
-                                                                style={{ background: c }} title={c} onClick={() => setActiveColor(i)} />
+                                                            <div key={i}
+                                                                className={`spd-color-dot ${i === activeColor ? "active" : ""}`}
+                                                                style={{ background: c }} title={c}
+                                                                onClick={() => setActiveColor(i)} />
                                                         ))}
                                                     </div>
                                                 </div>
@@ -296,16 +288,20 @@ export default function SellerProductDetail() {
                                         </div>
                                     </Col>
 
-                                    {/* Info + KPIs */}
+                                    {/* KPIs + Details */}
                                     <Col md={7} lg={8}>
-                                        <Row className="g-3 h-100">
+                                        <Row className="g-3">
                                             {[
                                                 { icon: "💰", val: fmt(product.base_price), lbl: "Selling Price", bg: "#fff3ee", border: "#ffd3b8" },
                                                 { icon: "🏷️", val: product.old_price ? fmt(product.old_price) : "—", lbl: "MRP", bg: "#f0fdf4", border: "#bbf7d0" },
                                                 { icon: "🚀", val: product.sold, lbl: "Units Sold", bg: "#eff6ff", border: "#bfdbfe" },
-                                                { icon: "📦", val: product.stock, lbl: "In Stock", bg: product.stock === 0 ? "var(--danger-soft)" : product.stock <= 10 ? "var(--warning-soft)" : "#f0fdf4", border: product.stock === 0 ? "#fecaca" : product.stock <= 10 ? "#fef08a" : "#bbf7d0" },
+                                                {
+                                                    icon: "📦", val: product.stock, lbl: "In Stock",
+                                                    bg: product.stock === 0 ? "var(--danger-soft)" : product.stock <= 10 ? "var(--warning-soft)" : "#f0fdf4",
+                                                    border: product.stock === 0 ? "#fecaca" : product.stock <= 10 ? "#fef08a" : "#bbf7d0"
+                                                },
                                                 { icon: "⭐", val: product.rating, lbl: "Rating", bg: "#fefce8", border: "#fef08a" },
-                                                { icon: "💬", val: product.reviews || 0, lbl: "Reviews", bg: "#fdf4ff", border: "#e9d5ff" },
+                                                { icon: "💬", val: product.reviews, lbl: "Reviews", bg: "#fdf4ff", border: "#e9d5ff" },
                                             ].map((k, i) => (
                                                 <Col xs={6} sm={4} key={k.lbl}>
                                                     <div className="spd-kpi" style={{ background: k.bg, borderColor: k.border, animationDelay: `${i * 0.06}s` }}>
@@ -316,23 +312,19 @@ export default function SellerProductDetail() {
                                                 </Col>
                                             ))}
 
+                                            {/* Product Details card */}
                                             <Col xs={12}>
                                                 <div className="spd-card">
-                                                    <Row>
-                                                        <Col>
-                                                            <div className="spd-card-title">📋 Product Details</div>
-                                                        </Col>
-                                                        
-                                                    </Row>
-                                                    
-
-                                                    <div className="spd-card-sub" style={{ marginBottom: 10 }}>Core listing information</div>
+                                                    <div className="spd-card-title">📋 Product Details</div>
+                                                    <div className="spd-card-sub">Core listing information</div>
                                                     {[
                                                         { key: "Brand", val: product.brand || "—" },
                                                         { key: "Category", val: product.category || "—" },
                                                         { key: "Base Price", val: fmt(product.base_price) },
                                                         { key: "MRP", val: product.old_price ? fmt(product.old_price) : "—" },
                                                         { key: "Discount", val: product.discount > 0 ? `${product.discount}%` : "No discount" },
+                                                        { key: "COD", val: product.is_cod_available ? <span className="spd-badge success">Available</span> : <span className="spd-badge danger">Not Available</span> },
+                                                        { key: "Free Delivery", val: product.is_free_delivery ? <span className="spd-badge success">Yes</span> : <span className="spd-badge" style={{ background: "var(--border)", color: "var(--muted)" }}>No</span> },
                                                         {
                                                             key: "Stock", val: (
                                                                 <span className={`spd-badge ${product.stock === 0 ? "danger" : product.stock <= 10 ? "warning" : "success"}`}>
@@ -370,15 +362,71 @@ export default function SellerProductDetail() {
                                     </Row>
                                 )}
 
-                                {/* ── SALES CHART ── */}
+                                {/* ── Variants Table (if any) ── */}
+                                {product.variants && product.variants.length > 0 && (
+                                    <Row className="g-3 mb-4">
+                                        <Col xs={12}>
+                                            <div className="spd-card">
+                                                <div className="spd-card-title">🎨 Product Variants</div>
+                                                <div className="spd-card-sub">{product.variants.length} variant{product.variants.length > 1 ? "s" : ""} available</div>
+                                                <div className="spd-variants-wrap">
+                                                    <table className="spd-variants-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>#</th>
+                                                                <th>Color</th>
+                                                                <th>Size</th>
+                                                                <th>Price</th>
+                                                                <th>Old Price</th>
+                                                                <th>Stock</th>
+                                                                <th>Discount</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {console.log("product.variants", product.variants)}
+                                                            {product.variants.map((v, i) => {
+                                                                const disc = v.old_price && Number(v.old_price) > Number(v.price)
+                                                                    ? Math.round(((Number(v.old_price) - Number(v.price)) / Number(v.old_price)) * 100)
+                                                                    : null;
+                                                                return (
+                                                                    <tr key={i}>
+                                                                        <td><span className="spd-v-num">{i + 1}</span></td>
+                                                                        <td>
+                                                                            <div className="d-flex align-items-center gap-2">
+                                                                                <span className="spd-v-color" style={{ background: v.color || "#ccc" }} />
+                                                                                <span style={{ fontSize: ".75rem", fontWeight: 700, color: "var(--muted)" }}>{v.color || "—"}</span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td><span className="spd-badge info" style={{ textTransform: "none" }}>{v.size || "—"}</span></td>
+                                                                        <td style={{ fontWeight: 900, color: "var(--p)" }}>{v.price ? fmt(v.price) : "—"}</td>
+                                                                        <td style={{ color: "var(--muted)", textDecoration: "line-through", fontSize: ".8rem" }}>{v.old_price ? fmt(v.old_price) : "—"}</td>
+                                                                        <td>
+                                                                            <span className={`spd-badge ${Number(v.stock) === 0 ? "danger" : Number(v.stock) <= 5 ? "warning" : "success"}`}>
+                                                                                {Number(v.stock) === 0 ? "Out" : v.stock}
+                                                                            </span>
+                                                                        </td>
+                                                                        <td>{disc ? <span className="spd-badge orange">{disc}% off</span> : "—"}</td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                )}
+
+                                {/* ── Charts Row ── */}
                                 <Row className="g-3 mb-4">
+                                    {/* Monthly Sales Area Chart */}
                                     <Col lg={8}>
                                         <div className="spd-card">
                                             <div className="spd-card-title">📈 Monthly Sales Performance</div>
-                                            <div className="spd-card-sub">Units sold & revenue per month (estimated)</div>
+                                            <div className="spd-card-sub">Units sold &amp; revenue per month</div>
                                             <div style={{ height: 240 }}>
                                                 <ResponsiveContainer width="100%" height="100%">
-                                                    <AreaChart data={salesData} margin={{ top: 10, right: 8, left: -14, bottom: 0 }}>
+                                                    <AreaChart data={monthlyData} margin={{ top: 10, right: 8, left: -14, bottom: 0 }}>
                                                         <defs>
                                                             <linearGradient id="gRev" x1="0" y1="0" x2="0" y2="1">
                                                                 <stop offset="5%" stopColor="#ff6b35" stopOpacity={0.25} />
@@ -390,75 +438,35 @@ export default function SellerProductDetail() {
                                                             </linearGradient>
                                                         </defs>
                                                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f8" vertical={false} />
-                                                        <XAxis
-                                                            dataKey="month"
-                                                            tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }}
-                                                            axisLine={false} tickLine={false}
-                                                        />
-                                                        <YAxis
-                                                            yAxisId="revenue"
-                                                            orientation="left"
-                                                            tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }}
-                                                            axisLine={false} tickLine={false}
-                                                            tickFormatter={fmtL}
-                                                        />
-                                                        <YAxis
-                                                            yAxisId="units"
-                                                            orientation="right"
-                                                            tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }}
-                                                            axisLine={false} tickLine={false}
-                                                            width={30}
-                                                        />
+                                                        <XAxis dataKey="month" tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
+                                                        <YAxis yAxisId="revenue" orientation="left" tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }} axisLine={false} tickLine={false} tickFormatter={fmtL} />
+                                                        <YAxis yAxisId="units" orientation="right" tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }} axisLine={false} tickLine={false} width={30} />
                                                         <Tooltip content={<ChartTip />} />
                                                         <Legend wrapperStyle={{ fontSize: ".72rem", fontFamily: "Nunito", fontWeight: 800, paddingTop: 8 }} />
-                                                        <Area
-                                                            yAxisId="revenue"
-                                                            type="monotone" dataKey="revenue"
-                                                            stroke="#ff6b35" strokeWidth={2.5}
-                                                            fill="url(#gRev)" dot={false}
-                                                            activeDot={{ r: 5, fill: "#ff6b35" }}
-                                                        />
-                                                        <Area
-                                                            yAxisId="units"
-                                                            type="monotone" dataKey="units"
-                                                            stroke="#3b82f6" strokeWidth={2}
-                                                            fill="url(#gUnits)" dot={false}
-                                                            activeDot={{ r: 4, fill: "#3b82f6" }}
-                                                        />
+                                                        <Area yAxisId="revenue" type="monotone" dataKey="revenue" stroke="#ff6b35" strokeWidth={2.5} fill="url(#gRev)" dot={false} activeDot={{ r: 5, fill: "#ff6b35" }} />
+                                                        <Area yAxisId="units" type="monotone" dataKey="units" stroke="#3b82f6" strokeWidth={2} fill="url(#gUnits)" dot={false} activeDot={{ r: 4, fill: "#3b82f6" }} />
                                                     </AreaChart>
                                                 </ResponsiveContainer>
                                             </div>
                                         </div>
                                     </Col>
 
-                                    {/* FIX: Order status pie now uses recentOrders (real API data) */}
+                                    {/* Order Status Pie */}
                                     <Col lg={4}>
                                         <div className="spd-card">
                                             <div className="spd-card-title">🥧 Order Status Mix</div>
                                             <div className="spd-card-sub">
-                                                {recentOrders.length > 0
-                                                    ? `${recentOrders.length} orders breakdown`
-                                                    : "No orders yet"}
+                                                {recentOrders.length > 0 ? `${recentOrders.length} orders breakdown` : "No orders yet"}
                                             </div>
                                             {recentOrders.length === 0 ? (
-                                                <div style={{ height: 180, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                                    <span style={{ color: "var(--muted)", fontSize: ".82rem", fontWeight: 600 }}>No order data available</span>
-                                                </div>
+                                                <div className="spd-empty-chart">No order data available</div>
                                             ) : (
                                                 <>
                                                     <div style={{ height: 180 }}>
                                                         <ResponsiveContainer width="100%" height="100%">
                                                             <PieChart>
-                                                                <Pie
-                                                                    data={statusPie}
-                                                                    cx="50%" cy="50%"
-                                                                    innerRadius={46} outerRadius={74}
-                                                                    paddingAngle={3} dataKey="value"
-                                                                    labelLine={false}
-                                                                >
-                                                                    {statusPie.map((_, i) => (
-                                                                        <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                                                                    ))}
+                                                                <Pie data={statusPie} cx="50%" cy="50%" innerRadius={46} outerRadius={74} paddingAngle={3} dataKey="value" labelLine={false}>
+                                                                    {statusPie.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                                                                 </Pie>
                                                                 <Tooltip contentStyle={{ borderRadius: 10, border: "none", boxShadow: "0 4px 20px rgba(0,0,0,.1)", fontFamily: "Nunito", fontSize: ".78rem" }} />
                                                             </PieChart>
@@ -468,9 +476,7 @@ export default function SellerProductDetail() {
                                                         {statusPie.map((s, i) => (
                                                             <div key={s.name} style={{ display: "flex", alignItems: "center", gap: 5 }}>
                                                                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: PIE_COLORS[i] }} />
-                                                                <span style={{ fontSize: ".68rem", fontWeight: 800, color: "var(--muted)", textTransform: "capitalize" }}>
-                                                                    {s.name} ({s.value})
-                                                                </span>
+                                                                <span style={{ fontSize: ".68rem", fontWeight: 800, color: "var(--muted)", textTransform: "capitalize" }}>{s.name} ({s.value})</span>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -480,22 +486,22 @@ export default function SellerProductDetail() {
                                     </Col>
                                 </Row>
 
+                                {/* ── Stats Row ── */}
                                 <Row className="g-3 mb-4">
+                                    {/* Weekly Bar */}
                                     <Col md={5}>
                                         <div className="spd-card">
                                             <div className="spd-card-title">📊 Weekly Units Sold</div>
-                                            <div className="spd-card-sub">Last 7 days estimate</div>
+                                            <div className="spd-card-sub">Last 7 days</div>
                                             <div style={{ height: 200 }}>
-                                                <ResponsiveContainer width="100%" height="100%" className="text-light">
+                                                <ResponsiveContainer width="100%" height="100%">
                                                     <BarChart data={weeklyData} margin={{ top: 5, right: 8, left: -18, bottom: 0 }}>
                                                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f8" vertical={false} />
                                                         <XAxis dataKey="day" tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                                                         <YAxis tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                                                         <Tooltip content={<ChartTip />} />
                                                         <Bar dataKey="units" radius={[6, 6, 0, 0]} maxBarSize={30}>
-                                                            {weeklyData.map((_, i) => (
-                                                                <Cell key={i} fill={i === 5 || i === 6 ? "#f7931e" : "#ff6b35"} />
-                                                            ))}
+                                                            {weeklyData.map((_, i) => <Cell key={i} fill={i === 5 || i === 6 ? "#f7931e" : "#ff6b35"} />)}
                                                         </Bar>
                                                     </BarChart>
                                                 </ResponsiveContainer>
@@ -503,15 +509,13 @@ export default function SellerProductDetail() {
                                         </div>
                                     </Col>
 
-                                    {/* Stock health */}
+                                    {/* Stock Health */}
                                     <Col md={3}>
                                         <div className="spd-card">
                                             <div className="spd-card-title">📦 Stock Health</div>
                                             <div className="spd-card-sub">Current inventory status</div>
                                             <div style={{ textAlign: "center", margin: "8px 0 12px" }}>
-                                                <div style={{ fontFamily: "var(--font-display)", fontSize: "2.5rem", fontWeight: 800, color: stockColor, lineHeight: 1 }}>
-                                                    {product.stock}
-                                                </div>
+                                                <div style={{ fontFamily: "var(--font-display)", fontSize: "2.5rem", fontWeight: 800, color: stockColor, lineHeight: 1 }}>{product.stock}</div>
                                                 <div style={{ fontSize: ".72rem", fontWeight: 700, color: "var(--muted)" }}>units remaining</div>
                                             </div>
                                             <div className="spd-stock-track">
@@ -520,14 +524,12 @@ export default function SellerProductDetail() {
                                                     background: product.stock === 0 ? "var(--danger)" : product.stock <= 10 ? "linear-gradient(90deg,#fbbf24,#f59e0b)" : "linear-gradient(90deg,#22c55e,#16a34a)"
                                                 }} />
                                             </div>
-                                            <div style={{ fontSize: ".7rem", fontWeight: 700, color: "var(--muted)", marginBottom: 14 }}>
-                                                {stockPct}% of total inventory
-                                            </div>
+                                            <div style={{ fontSize: ".7rem", fontWeight: 700, color: "var(--muted)", marginBottom: 14 }}>{stockPct}% of total inventory</div>
                                             <div className="spd-divider" style={{ margin: "10px 0" }} />
                                             {[
                                                 { lbl: "Total Sold", val: product.sold, color: "var(--p)" },
                                                 { lbl: "In Stock", val: product.stock, color: stockColor },
-                                                { lbl: "Return Rate", val: `${Math.round(product.reviews > 0 ? (Math.random() * 5) : 0)}%`, color: "var(--warning)" },
+                                                { lbl: "Min Alert", val: product.min_stock_alert || "—", color: "var(--warning)" },
                                             ].map(({ lbl, val, color }) => (
                                                 <div key={lbl} style={{ display: "flex", justifyContent: "space-between", marginBottom: 7 }}>
                                                     <span style={{ fontSize: ".76rem", fontWeight: 700, color: "var(--muted)" }}>{lbl}</span>
@@ -537,17 +539,15 @@ export default function SellerProductDetail() {
                                         </div>
                                     </Col>
 
-                                    {/* Rating distribution */}
+                                    {/* Rating Distribution */}
                                     <Col md={4}>
                                         <div className="spd-card">
                                             <div className="spd-card-title">⭐ Rating Breakdown</div>
                                             <div className="spd-card-sub">
-                                                Avg: <span style={{ color: "var(--warning)", fontWeight: 900 }}>{product.rating}</span> / 5 · {product.reviews || 0} reviews
+                                                Avg: <span style={{ color: "var(--warning)", fontWeight: 900 }}>{product.rating}</span> / 5 · {product.reviews} reviews
                                             </div>
                                             <div style={{ textAlign: "center", margin: "4px 0 14px" }}>
-                                                <div style={{ fontFamily: "var(--font-display)", fontSize: "2.8rem", fontWeight: 800, color: "var(--warning)", lineHeight: 1 }}>
-                                                    {product.rating}
-                                                </div>
+                                                <div style={{ fontFamily: "var(--font-display)", fontSize: "2.8rem", fontWeight: 800, color: "var(--warning)", lineHeight: 1 }}>{product.rating}</div>
                                                 <div style={{ fontSize: "1rem", letterSpacing: 3, marginTop: 2 }}>
                                                     {"★".repeat(Math.round(product.rating))}
                                                     <span style={{ color: "#d1d5db" }}>{"★".repeat(5 - Math.round(product.rating))}</span>
@@ -566,9 +566,10 @@ export default function SellerProductDetail() {
                                     </Col>
                                 </Row>
 
-                                {/* ── RECENT ORDERS ── */}
+                                {/* ── Recent Orders Table ── */}
                                 <DataTable tableData={recentOrders} getStatusColor={getStatusColor} />
 
+                                {/* ── Tags & Policy ── */}
                                 <Row className="g-3 mb-4">
                                     <Col md={5}>
                                         <div className="spd-card">
@@ -576,16 +577,13 @@ export default function SellerProductDetail() {
                                             <div className="spd-card-sub">Discoverability keywords</div>
                                             <div className="d-flex flex-wrap gap-2">
                                                 {product.tag.length > 0
-                                                    ? product.tag.map((t) => <span key={t} className="spd-tag">{t}</span>)
-                                                    : <span style={{ color: "var(--muted)", fontSize: ".82rem", fontWeight: 600 }}>No tags added</span>
-                                                }
+                                                    ? product.tag.map(t => <span key={t} className="spd-tag">{t}</span>)
+                                                    : <span style={{ color: "var(--muted)", fontSize: ".82rem", fontWeight: 600 }}>No tags added</span>}
                                             </div>
                                             {product.color.length > 0 && (
                                                 <>
                                                     <div className="spd-divider" />
-                                                    <div style={{ fontSize: ".72rem", fontWeight: 800, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".04em", marginBottom: 10 }}>
-                                                        Colour Variants
-                                                    </div>
+                                                    <div className="spd-swatch-label">Colour Variants</div>
                                                     <div className="d-flex gap-2 flex-wrap align-items-center">
                                                         {product.color.map((c, i) => (
                                                             <div key={i} style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -594,6 +592,15 @@ export default function SellerProductDetail() {
                                                             </div>
                                                         ))}
                                                     </div>
+                                                </>
+                                            )}
+                                            {/* SEO Section */}
+                                            {(product.slug || product.meta_title) && (
+                                                <>
+                                                    <div className="spd-divider" />
+                                                    <div className="spd-swatch-label">SEO Info</div>
+                                                    {product.slug && <div className="spd-info-row"><span className="spd-info-key">URL Slug</span><span className="spd-info-val">/p/{product.slug}</span></div>}
+                                                    {product.meta_title && <div className="spd-info-row"><span className="spd-info-key">Meta Title</span><span className="spd-info-val">{product.meta_title}</span></div>}
                                                 </>
                                             )}
                                         </div>
@@ -606,26 +613,28 @@ export default function SellerProductDetail() {
                                             <Row className="g-2">
                                                 {[
                                                     {
-                                                        icon: "↩️", bg: product.is_return ? "var(--success-soft)" : "var(--border)",
+                                                        icon: "↩️",
+                                                        bg: product.is_return ? "var(--success-soft)" : "var(--border)",
                                                         title: product.is_return ? `${product.return_replace_duration || 7}-Day Return Policy` : "No Return Policy",
                                                         desc: product.is_return
                                                             ? product.return_replace_instructions || "Customer can return the product within the specified duration."
                                                             : "This product is not eligible for return.",
-                                                        enabled: product.is_return,
+                                                        enabled: !!product.is_return,
                                                     },
                                                     {
-                                                        icon: "🔄", bg: product.is_replace ? "var(--info-soft)" : "var(--border)",
+                                                        icon: "🔄",
+                                                        bg: product.is_replace ? "var(--info-soft)" : "var(--border)",
                                                         title: product.is_replace ? "Replacement Available" : "No Replacement",
                                                         desc: product.is_replace
                                                             ? `Replacement within ${product.return_replace_duration || 7} days if product is defective or damaged.`
                                                             : "This product does not have a replacement option.",
-                                                        enabled: product.is_replace,
+                                                        enabled: !!product.is_replace,
                                                     },
                                                 ].map(({ icon, bg, title, desc, enabled }) => (
                                                     <Col xs={12} key={title}>
                                                         <div className="spd-policy-item" style={{ opacity: enabled ? 1 : 0.6 }}>
                                                             <div className="spd-policy-icon" style={{ background: bg }}>{icon}</div>
-                                                            <div>
+                                                            <div style={{ flex: 1, minWidth: 0 }}>
                                                                 <div className="spd-policy-title">{title}</div>
                                                                 <div className="spd-policy-desc">{desc}</div>
                                                             </div>
@@ -636,6 +645,29 @@ export default function SellerProductDetail() {
                                                     </Col>
                                                 ))}
                                             </Row>
+
+                                            {/* Shipping Info */}
+                                            {(product.weight || product.delivery_days) && (
+                                                <>
+                                                    <div className="spd-divider" />
+                                                    <div className="spd-card-title" style={{ fontSize: ".85rem", marginBottom: 10 }}>🚚 Shipping Info</div>
+                                                    <Row className="g-2">
+                                                        {[
+                                                            { lbl: "Weight", val: product.weight ? `${product.weight} kg` : "—" },
+                                                            { lbl: "Delivery", val: product.delivery_days ? `${product.delivery_days} days` : "—" },
+                                                            { lbl: "Dimensions", val: (product.length && product.width && product.height) ? `${product.length}×${product.width}×${product.height} cm` : "—" },
+                                                            { lbl: "Tax", val: product.tax_percentage ? `${product.tax_percentage}%${product.tax_inclusive ? " (incl.)" : ""}` : "—" },
+                                                        ].map(({ lbl, val }) => (
+                                                            <Col xs={6} key={lbl}>
+                                                                <div className="spd-ship-chip">
+                                                                    <span className="spd-ship-lbl">{lbl}</span>
+                                                                    <span className="spd-ship-val">{val}</span>
+                                                                </div>
+                                                            </Col>
+                                                        ))}
+                                                    </Row>
+                                                </>
+                                            )}
                                         </div>
                                     </Col>
                                 </Row>
@@ -646,14 +678,14 @@ export default function SellerProductDetail() {
                 </Row>
             </Container>
 
-            {/* ── Mobile sticky action bar ── */}
+            {/* ── Mobile Sticky Action Bar ── */}
             <div className="spd-sticky-bar d-lg-none">
                 <button className="spd-action-btn ghost flex-fill" style={{ justifyContent: "center" }} onClick={() => navigate(`/product/${id}`)}>👁️ View</button>
                 <button className="spd-action-btn primary flex-fill" style={{ justifyContent: "center" }} onClick={() => setShowEdit(true)}>✏️ Edit</button>
                 <button className="spd-action-btn danger" style={{ justifyContent: "center" }} onClick={() => setDeleteModal(true)}>🗑️</button>
             </div>
 
-            {/* ── Edit Modal ── */}
+            {/* ── Edit Product Modal ── */}
             <EditProductModal
                 show={showEdit}
                 product={product}
@@ -671,12 +703,12 @@ export default function SellerProductDetail() {
                     <p style={{ color: "var(--p)", fontWeight: 900, fontSize: ".95rem", marginBottom: 24 }}>"{product?.title}"</p>
                     <div className="d-flex gap-3">
                         <button
-                            style={{ flex: 1, background: "transparent", border: "1.5px solid var(--border)", borderRadius: 12, padding: "11px", fontFamily: "Nunito", fontWeight: 800, fontSize: ".88rem", cursor: "pointer", color: "var(--muted)" }}
+                            className="spd-del-cancel"
                             onClick={() => setDeleteModal(false)}
                             disabled={deleteLoading}
                         >Cancel</button>
                         <button
-                            style={{ flex: 1, background: "linear-gradient(135deg,#ef4444,#dc2626)", border: "none", borderRadius: 12, padding: "11px", fontFamily: "Nunito", fontWeight: 900, fontSize: ".88rem", cursor: "pointer", color: "#fff", boxShadow: "0 4px 14px rgba(239,68,68,.35)" }}
+                            className="spd-del-confirm"
                             onClick={handleDelete}
                             disabled={deleteLoading}
                         >

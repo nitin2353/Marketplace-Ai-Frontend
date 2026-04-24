@@ -4,6 +4,7 @@ import s from '.././style/Shippinglabel.styles';
 import GlobalHelper, { FORMATED_DATE_TIME } from '../helper/GlobalHelper';
 
 const ShippingLabel = ({ order = {} }) => {
+    console.log("order", order)
     const addressSnapshot = order?.address_snapshot || {};
     const sellerInfo = order?.seller_info || {};
     const sellerAddress = sellerInfo?.address || {};
@@ -13,12 +14,46 @@ const ShippingLabel = ({ order = {} }) => {
         ? String(order.payment_method).toUpperCase()
         : '';
 
+    const getPackageDimension = (items = []) => {
+        if (!Array.isArray(items) || items.length === 0) {
+            return "—";
+        }
+
+        let totalWeight = 0;
+        let maxLength = 0;
+        let maxWidth = 0;
+        let totalHeight = 0;
+
+        items.forEach((item) => {
+            const qty = Number(item.quantity || 1);
+
+            const d = item.dimension?.final_pack || item.dimension || {};
+
+            const length = Number(d.length || 0);
+            const width = Number(d.width || 0);
+            const height = Number(d.height || 0);
+            const weight = Number(d.weight || 0);
+
+            maxLength = Math.max(maxLength, length);
+            maxWidth = Math.max(maxWidth, width);
+            totalHeight += height;
+            totalWeight += weight;
+        });
+
+        return {
+            dimensions: `${maxLength}×${maxWidth}×${totalHeight} cm`,
+            weight: `${totalWeight.toFixed(2)} kg`
+        };
+    };
+
     const shipToAddress = [
         addressSnapshot?.address_line_1,
         addressSnapshot?.address_line_2,
     ]
         .filter(Boolean)
         .join(', ');
+
+    const packageInfo = getPackageDimension(order?.items || []);
 
     const o = {
         orderNo: order?.order_number || '',
@@ -42,10 +77,10 @@ const ShippingLabel = ({ order = {} }) => {
             phone: sellerMeta?.phone || '',
         },
         product: {
-            name: order?.product_title || '',
+            name: order?.product_title || order?.items?.[0]?.product_title || '',
             qty: order?.total_quantity || 1,
-            weight: order?.weight || '320 g',
-            dimensions: order?.dimensions || '28×18×5 cm',
+            weight: packageInfo.weight,
+            dimensions: packageInfo.dimensions,
             orderDate: order?.created_time ? FORMATED_DATE_TIME(order.created_time) : '',
             courier: 'ShopEase Express',
         },
