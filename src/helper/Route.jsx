@@ -7,6 +7,7 @@ const ROUTE = {
   PRODUCT_DETAIL_PAGE: "product/:id",
   SELLER_PRODUCT_DETAIL_PAGE: "seller/product/:id",
   CREATE_PRODUCT: "/seller/product/create",
+  SELLER_REVIEWS: "/seller/reviews",
   SELLER_PRODUCTS: "seller/products",
   SELLER_DASHBOARD: "seller/dashboard",
   SELLER_ORDER: "/seller/orders/:id",
@@ -20,7 +21,8 @@ const ROUTE = {
   CHECKOUT: "dashboard/checkout",
   WISHLIST: "dashboard/wishlist",
   SETTINGS: "dashboard/settings",
-  CHAT: "product/:id/customization"
+  CHAT: "product/:id/customization",
+  SELLER_SETTING: "/seller/settings"
 
 };
 

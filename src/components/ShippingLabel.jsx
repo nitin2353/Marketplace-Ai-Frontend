@@ -16,13 +16,14 @@ const ShippingLabel = ({ order = {} }) => {
 
     const getPackageDimension = (items = []) => {
         if (!Array.isArray(items) || items.length === 0) {
-            return "—";
+            return { dimensions: "—", weight: "—" };
         }
 
         let totalWeight = 0;
         let maxLength = 0;
         let maxWidth = 0;
         let totalHeight = 0;
+        let hasDimensions = false;
 
         items.forEach((item) => {
             const qty = Number(item.quantity || 1);
@@ -34,11 +35,19 @@ const ShippingLabel = ({ order = {} }) => {
             const height = Number(d.height || 0);
             const weight = Number(d.weight || 0);
 
+            if (length > 0 || width > 0 || height > 0 || weight > 0) {
+                hasDimensions = true;
+            }
+
             maxLength = Math.max(maxLength, length);
             maxWidth = Math.max(maxWidth, width);
             totalHeight += height;
             totalWeight += weight;
         });
+
+        if (!hasDimensions) {
+            return { dimensions: "—", weight: "—" };
+        }
 
         return {
             dimensions: `${maxLength}×${maxWidth}×${totalHeight} cm`,

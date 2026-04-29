@@ -33,6 +33,8 @@ import SellerOrders from "./pages/seller-orders/SellerOrders";
 import Invoice from "./components/Invoice.jsx";
 import InvoiceDownloadPage from "./components/InvoiceDownloadPage.jsx";
 import InvoicePage from "./components/InvoicePage.jsx";
+import SellerReviews from "./pages/SellerReviews/SellerReviews";
+import SellerSettings from "./pages/seller-settings/Seller.jsx";
 
 
 const App = () => {
@@ -61,9 +63,11 @@ const App = () => {
           <Route path={ROUTE.SELLER_DASHBOARD} element={<ProtectedRoute moduleName="seller-dashboard"><SellerDashboardHome /></ProtectedRoute>} />
           <Route path={ROUTE.SELLER_ORDER} element={<ProtectedRoute moduleName="seller-orders"><SellerOrders /></ProtectedRoute>} />
           <Route path={ROUTE.SELLER_ORDER_BY_ID} element={<ProtectedRoute moduleName="seller-orders"><SellerOrders /></ProtectedRoute>} />
+          <Route path={ROUTE.SELLER_REVIEWS} element={<ProtectedRoute moduleName="seller-reviews"><SellerReviews /></ProtectedRoute>} />
           <Route path={ROUTE.SELLER_PRODUCT_DETAIL_PAGE} element={<ProtectedRoute moduleName="seller-product-detail-page"><SellerProductDetail /></ProtectedRoute>} />
           <Route path={ROUTE.CHAT} element={<ProtectedRoute moduleName="requirement"><ChatPage /></ProtectedRoute>} />
           <Route path={ROUTE.CUSTOMER_REQUIREMENTS_LISTING} element={<ProtectedRoute moduleName="curstomer_requirements_list"><RequirementListing /></ProtectedRoute>} />
+          <Route path={ROUTE.SELLER_SETTING} element={<ProtectedRoute moduleName="seller_setting"><SellerSettings /></ProtectedRoute>} />
           <Route element={<ProtectedRoute />}>
           </Route>
           <Route path="*" element={<NotFound />} />

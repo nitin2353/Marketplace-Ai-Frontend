@@ -118,16 +118,9 @@ export default function ProductDashboard() {
     }, []);
 
 
-    const addToCart = useCallback((product, qty = 1) => {
-
-        try {
-            console.log("product, qty", product, qty)
-
-        } catch (error) {
-            toast.error(error.message)
-        }
-
-    }, [addToast]);
+    const addToCart = useCallback((product) => {
+        setCartModal(product);
+    }, []);
 
 
 

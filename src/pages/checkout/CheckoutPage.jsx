@@ -33,21 +33,7 @@ const calcTotals = (cart, discount) => {
 };
 
 
-const buildDefaultAddress = (user) => ({
-    id: "a1",
-    label: "home",
-    name: user?.name || "User",
-    mobile: user?.phone || "9876543210",
-    address_line_1: "123 Main Street",
-    address_line_2: "Near Central Park",
-    city: "Mumbai",
-    state: "Maharashtra",
-    pincode: "400001",
-    country: "India",
-    country_code: "IN",
-    instructions: "",
-    isDefault: true,
-});
+
 
 
 function Stepper({ step }) {
@@ -121,27 +107,18 @@ export default function CheckoutPage() {
     const loadAddresses = useCallback(async () => {
         try {
             const res = await addressApi.getAddressesByUserId();
-            if (res?.success && Array.isArray(res.data) && res.data.length) {
+            if (res?.success && Array.isArray(res.data)) {
                 applyAddressList(res.data);
-                return;
+            } else {
+                setAddresses([]);
+                setSelectedAddr(null);
             }
-            throw new Error("Empty response");
-        } catch {
-            try {
-                const raw = localStorage.getItem("user_addresses");
-                if (raw) {
-                    applyAddressList(JSON.parse(raw));
-                    return;
-                }
-            } catch { /* ignore JSON parse error */ }
-
-            // Fallback 2: demo address
-            const demo = [buildDefaultAddress(user)];
-            setAddresses(demo);
-            setSelectedAddr(demo[0]);
-            localStorage.setItem("user_addresses", JSON.stringify(demo));
+        } catch (err) {
+            console.error("Address fetch error:", err);
+            setAddresses([]);
+            setSelectedAddr(null);
         }
-    }, [user, applyAddressList]);
+    }, [applyAddressList]);
 
 
     useEffect(() => {
@@ -154,15 +131,12 @@ export default function CheckoutPage() {
         try {
             const res = await addressApi.createAddress(newAddress);
             if (!res?.success) throw new Error(res?.message || "Failed to save address.");
-            const saved = res.data || newAddress;
-            const updated = [...addresses, saved];
-            setAddresses(updated);
-            localStorage.setItem("user_addresses", JSON.stringify(updated));
             toast.success("Address saved!");
+            loadAddresses(); // Reload from server
         } catch (err) {
             toast.error(err.message || "Failed to save address.");
         }
-    }, [addresses]);
+    }, [loadAddresses]);
 
 
     const applyCoupon = useCallback(() => {

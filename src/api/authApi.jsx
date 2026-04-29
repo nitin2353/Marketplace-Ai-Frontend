@@ -114,6 +114,32 @@ const deleteUser = async (id) => {
   }
 };
 
+const changePassword = async (data) => {
+  try {
+    const response = await apiConfig.patch("/auth/change-password", data);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Error updating password" };
+  }
+};
+
+const deactivateAccount = async () => {
+  try {
+    const response = await apiConfig.post("/auth/deactivate-account");
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Error deactivating account" };
+  }
+};
+
+const deleteAccount = async () => {
+  try {
+    const response = await apiConfig.delete("/auth/delete-account");
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Error deleting account" };
+  }
+};
 
 export default {
   signupCustomer,
@@ -125,5 +151,8 @@ export default {
   getUserById,
   updateUser,
   deleteUser,
-  updatePassword
+  updatePassword,
+  changePassword,
+  deactivateAccount,
+  deleteAccount
 };

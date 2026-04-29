@@ -5,6 +5,7 @@ import { FMT } from "../../helper/GlobalHelper";
 import { STATUS_META, PAYMENT_METHOD_LABELS, FMT_DATE } from "../../helper/GlobalHelper";
 import orderApi from "../../api/order.api";
 import OrderTimeline from "./OrderTimeline";
+import ReviewModal from "../../components/ReviewModal";
 import "./orderpage.css";
 
 
@@ -13,20 +14,18 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
     const [expanded, setExpanded] = useState(false);
     const [orderDetails, setOrderDetails] = useState(null);
     const [loadingDetails, setLoadingDetails] = useState(false);
+    const [showReview, setShowReview] = useState(false);
+    const [reviewed, setReviewed] = useState(order.is_reviewed || false);
 
     const status = order.order_status || "placed";
     const payment = order.payment_status || "pending";
     const meta = STATUS_META[status] || STATUS_META.placed;
     const payMeta = PAYMENT_METHOD_LABELS[order.payment_method] || { icon: "💳", label: order.payment_method };
 
-    useEffect(() => {
-        fetchOrderDetails();
-    })
-
 
     // Fetch order details when expanded (if not already loaded)
     const fetchOrderDetails = useCallback(async () => {
-        if (orderDetails || loadingDetails) return;
+        if (order.items?.length > 0 || loadingDetails) return;
 
         setLoadingDetails(true);
         try {
@@ -48,7 +47,7 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
         } finally {
             setLoadingDetails(false);
         }
-    }, [order.id, orderDetails, loadingDetails]);
+    }, [order.id, order.items, loadingDetails]);
 
     // Handle expand/collapse
     const handleToggle = () => {
@@ -89,20 +88,27 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
 
             {/* ── Body ── */}
             <div className="ord-card-body">
-                {/* Product image strip */}
                 <div className="ord-img-strip">
-                    {console.log(items[0]?.product_image_url.split(',')[0].replaceAll('"{\\"', "").replaceAll('\\"', ""))}
-                    <img
-                        key={items.id}
-                        src={items[0]?.product_image_url.split(',')[0].replaceAll('{"', "").replaceAll('"', "")}
-                        alt={items.product_title || "Product"}
-                        className="ord-product-img"
-                        onError={(e) => {
-                            e.target.onerror = null; // 🔥 prevent infinite loop
-                            e.target.src = `https://placehold.co/52x52/f1f4ff/ff6b35?text=${encodeURIComponent((items.product_title || "P").slice(0, 2))}`;
-                        }}
-                    />
+                    {visItems.map((item) => {
+                        const src = Array.isArray(item.product_image_url)
+                            ? item.product_image_url[0]
+                            : (typeof item.product_image_url === 'string'
+                                ? item.product_image_url.split(',')[0].replace(/[{}"\\]/g, "")
+                                : item.product_image_url);
 
+                        return (
+                            <img
+                                key={item.id || Math.random()}
+                                src={src}
+                                alt={item.product_title || "Product"}
+                                className="ord-product-img"
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = `https://placehold.co/52x52/f1f4ff/ff6b35?text=${encodeURIComponent((item.product_title || "P").slice(0, 2))}`;
+                                }}
+                            />
+                        );
+                    })}
 
                     {moreQty > 0 && (
                         <div className="ord-product-img more">+{moreQty}</div>
@@ -201,7 +207,13 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
                                                 }}
                                             >
                                                 <img
-                                                    src={items[0]?.product_image_url.split(',')[0].replaceAll('{"', "").replaceAll('"', "")}
+                                                    src={
+                                                        Array.isArray(item.product_image_url)
+                                                            ? item.product_image_url[0]
+                                                            : (typeof item.product_image_url === 'string'
+                                                                ? item.product_image_url.split(',')[0].replace(/[{}"\\]/g, "")
+                                                                : item.product_image_url)
+                                                    }
                                                     alt={item.product_title || "Product"}
                                                     style={{
                                                         width: 44,
@@ -211,12 +223,12 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
                                                         border: "1.5px solid #e8eaf6",
                                                         flexShrink: 0
                                                     }}
-                                                onError={(e) => {
-                                                    e.target.onerror = null; // 🔥 prevent loop
-                                                    e.target.src = `https://placehold.co/44x44/f1f4ff/ff6b35?text=${encodeURIComponent(
-                                                        (item.product_title || "P").slice(0, 2)
-                                                    )}`;
-                                                }}
+                                                    onError={(e) => {
+                                                        e.target.onerror = null; // 🔥 prevent loop
+                                                        e.target.src = `https://placehold.co/44x44/f1f4ff/ff6b35?text=${encodeURIComponent(
+                                                            (item.product_title || "P").slice(0, 2)
+                                                        )}`;
+                                                    }}
                                                 />
 
                                                 {/* Content */}
@@ -328,6 +340,16 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
                         </button>
                     )}
                     {status === "delivered" && (
+                        <button 
+                            className="ord-btn-reorder" 
+                            style={{ background: reviewed ? "#f3f4f6" : "linear-gradient(135deg, #10b981, #059669)", color: reviewed ? "#9ca3af" : "#fff" }}
+                            disabled={reviewed}
+                            onClick={(e) => { e.stopPropagation(); if(!reviewed) setShowReview(true); }}
+                        >
+                            {reviewed ? "★ Reviewed" : "★ Write Review"}
+                        </button>
+                    )}
+                    {status === "delivered" && (
                         <button className="ord-btn-reorder" onClick={(e) => e.stopPropagation()}>
                             🔁 Reorder
                         </button>
@@ -340,6 +362,14 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
                     </button>
                 </Stack>
             </div>
+
+            <ReviewModal
+                show={showReview}
+                onHide={() => setShowReview(false)}
+                orderId={order.id}
+                sellerId={order.seller_id || items[0]?.seller_id}
+                onSuccess={() => setReviewed(true)}
+            />
         </div>
     );
 }

@@ -7,7 +7,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Form, InputGroup, ListGroup } from 'react-bootstrap';
 import cartApi from '../api/cartApi';
 import wishlistApi from '../api/wishlist.api';
+import notificationApi from '../api/notification.api';
 import { useAuthWrapper } from '../helper/AuthWrapper';
+import { Overlay, Popover } from 'react-bootstrap';
+import NotificationPanel from './NotificationPanel';
+import JWTService from '../config/jwt.config';
+import toast from "react-hot-toast";
 
 
 function debounce(fn, delay = 500) {
@@ -37,8 +42,15 @@ const Toolbar = ({
     const itemRefs = useRef([]);
     const dropdownRef = useRef(null);
     const searchValueRef = useRef("");
+    const bellRef = useRef(null);
+
+    const [showNotif, setShowNotif] = useState(false);
+    const [notifyCount, setNotifyCount] = useState(0);
+    const [refreshNotify, setRefreshNotify] = useState(false);
 
     const { isLike, refresh, setGlobalCartLength } = useAuthWrapper()
+    const userData = JWTService.decodeTokenDetails();
+    const entityId = userData?.id || userData?.user_id;
 
     useEffect(() => {
         searchValueRef.current = search;
@@ -51,7 +63,8 @@ const Toolbar = ({
 
     useEffect(() => {
         fetchCart()
-        // fetchWishlist()
+        if (entityId) fetchNotificationCount();
+        
         const handler = (e) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setSuggestions([]);
@@ -59,7 +72,20 @@ const Toolbar = ({
         };
         document.addEventListener("mousedown", handler);
         return () => document.removeEventListener("mousedown", handler);
-    }, []);
+    }, [entityId]);
+
+    useEffect(() => {
+        if (entityId) fetchNotificationCount();
+    }, [entityId, refreshNotify]);
+
+    const fetchNotificationCount = async () => {
+        try {
+            const result = await notificationApi.getUnreadCount(entityId);
+            setNotifyCount(result.data.unread_count);
+        } catch (error) {
+            console.error("Fetch Notification Error", error);
+        }
+    };
 
     useEffect(() => {
         fetchCart()
@@ -339,8 +365,50 @@ const Toolbar = ({
                     <div className="toolbar-btn d-flex rounded-3 border">❤️</div>
                 </div>
 
+                {/* Notifications */}
+                <div style={{ position: "relative", cursor: "pointer" }} ref={bellRef} onClick={() => setShowNotif(!showNotif)} title="Notifications">
+                    <div className="toolbar-btn rounded-3 border">
+                        🔔
+                        {notifyCount > 0 && (
+                            <span className="badge-number" style={{ top: -5, right: -5 }}>
+                                {notifyCount > 9 ? "9+" : notifyCount}
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                <Overlay
+                    target={bellRef.current}
+                    show={showNotif}
+                    placement="bottom-end"
+                    rootClose
+                    onHide={() => setShowNotif(false)}
+                >
+                    <Popover style={{
+                        maxWidth: 340, padding: 0,
+                        border: "0.5px solid #e5e7eb",
+                        borderRadius: 12,
+                        boxShadow: "0 8px 32px rgba(0,0,0,.12)",
+                        overflow: "hidden",
+                    }}>
+                        <NotificationPanel 
+                            mode="user" 
+                            refreshNotify={refreshNotify} 
+                            setRefreshNotify={setRefreshNotify}
+                            onMarkAllRead={() => setRefreshNotify(r => !r)}
+                        />
+                    </Popover>
+                </Overlay>
+
                 {/* Profile */}
-                {/* <div className="icon-box rounded-3" title="Profile">SE</div> */}
+                <div 
+                    className="toolbar-btn rounded-3 border" 
+                    title="Profile" 
+                    onClick={() => navigate('/dashboard/settings/profile')}
+                    style={{ background: "linear-gradient(135deg,#ff6b35,#f7931e)", color: "#fff", fontWeight: 900, fontSize: "0.8rem" }}
+                >
+                    {userData?.firstName?.[0] || userData?.name?.[0] || "U"}
+                </div>
             </div>
 
             {/* Spinner keyframe (injected once) */}

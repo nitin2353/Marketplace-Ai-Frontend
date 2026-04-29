@@ -181,8 +181,7 @@ function NoVariantModal({ item, onClose }) {
         submitToCart({
             product_id: item.id,
             total_quantity: qty,
-            price: price * qty,
-            prouduct_price: price,
+            product_price: price,
         });
     }, [isOOS, submitToCart, item.id, qty, price]);
 
@@ -293,7 +292,7 @@ function VariantModal({ item, onClose }) {
             product_id: item.id,
             variant_id: av.id,
             total_quantity: qty,
-            price: av.price * qty,
+            product_price: av.price,
         });
     }, [av, isOOS, submitToCart, item.id, qty]);
 

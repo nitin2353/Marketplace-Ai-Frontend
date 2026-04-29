@@ -183,7 +183,6 @@ export default function NotificationPanel({
             } else {
                 response = await notificationApi.getUserNotifications(entityId, 1, 10);
             }
-            setRefreshNotify(!refreshNotify)
             const rows = response?.data || [];
 
             const mapped = rows.map((n) => {
@@ -212,8 +211,7 @@ export default function NotificationPanel({
 
     useEffect(() => {
         fetchNotifications();
-        setRefreshNotify(!refreshNotify)
-    }, [])
+    }, []);
 
     useEffect(() => {
         if (entityId) fetchNotifications();

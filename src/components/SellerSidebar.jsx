@@ -7,7 +7,6 @@ const NAV_ITEMS = [
     { icon: "📦", label: "My Products", path: "/seller/products" },
     { icon: "➕", label: "Add Product", path: "/seller/product/create" },
     { icon: "🛒", label: "Orders", path: "/seller/orders" },
-    { icon: "💰", label: "Earnings", path: "/seller/earnings" },
     { icon: "⭐", label: "Reviews", path: "/seller/reviews" },
     { icon: "⚙️", label: "Settings", path: "/seller/settings" },
 ];
@@ -43,9 +42,8 @@ export default function SellerSidebar({ stats = [] }) {
             )}
 
             <div
-                className={`eco-hero seller-sidebar ${
-                    isOpen ? "d-flex" : "d-none"
-                } d-lg-flex flex-column justify-content-between p-4`}
+                className={`eco-hero seller-sidebar ${isOpen ? "d-flex" : "d-none"
+                    } d-lg-flex flex-column justify-content-between p-4`}
                 style={{
                     minHeight: "100vh",
                     height: "100vh",

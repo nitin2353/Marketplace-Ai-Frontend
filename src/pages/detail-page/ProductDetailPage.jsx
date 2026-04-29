@@ -12,6 +12,7 @@ import StarRating from "../../components/StarRating";
 import cartApi from "../../api/cartApi";
 import { useAuthWrapper } from "../../helper/AuthWrapper";
 import FullScreenImageModal from "../../components/FullScreenImageModal";
+import reviewApi from "../../api/review.api";
 import { FMT } from "../../helper/GlobalHelper";
 import JWTService from "../../config/jwt.config";
 
@@ -66,6 +67,8 @@ export default function ProductDetail() {
   const [activeVariant, setActiveVariant] = useState(null);
   const [modalShow, setModalShow] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
 
   const { refresh, setRefresh } = useAuthWrapper()
@@ -143,6 +146,26 @@ export default function ProductDetail() {
       setLoading(false);
     }
   };
+
+  const fetchReviews = async () => {
+    try {
+      setReviewsLoading(true);
+      const res = await reviewApi.getProductReviews(id);
+      if (res?.success) {
+        setReviews(res.data || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch reviews:", err);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "reviews" && reviews.length === 0) {
+      fetchReviews();
+    }
+  }, [activeTab]);
 
   const displayPrice = activeVariant?.price ?? product?.price ?? 0;
   const displayStock = activeVariant?.stock ?? product?.stock ?? 0;
@@ -534,6 +557,7 @@ export default function ProductDetail() {
                       ["desc", "📋 Description"],
                       ["policy", "↩️ Return Policy"],
                       ["info", "ℹ️ Product Info"],
+                      ["reviews", "★ Reviews"],
                     ].map(([t, l]) => (
                       <button key={t} className={`pd-tab-btn ${activeTab === t ? "active" : ""}`} onClick={() => setActiveTab(t)}>
                         {l}
@@ -588,6 +612,46 @@ export default function ProductDetail() {
                             <div style={{ fontWeight: 700, color: "#374151", marginTop: 1 }}>{v}</div>
                           </div>
                         ))}
+                      </div>
+                    )}
+                    {activeTab === "reviews" && (
+                      <div style={{ minHeight: 120 }}>
+                        {reviewsLoading ? (
+                          <div className="text-center p-4">
+                            <div className="pd-skeleton" style={{ height: 20, width: "100%", marginBottom: 10 }} />
+                            <div className="pd-skeleton" style={{ height: 20, width: "80%", marginBottom: 10 }} />
+                            <div className="pd-skeleton" style={{ height: 20, width: "60%" }} />
+                          </div>
+                        ) : reviews.length === 0 ? (
+                          <div className="text-center p-4 text-muted">
+                            <div style={{ fontSize: "2rem", marginBottom: 8 }}>💬</div>
+                            <p className="mb-0 fw-bold">No reviews yet</p>
+                            <p className="small">Be the first to share your experience after purchasing!</p>
+                          </div>
+                        ) : (
+                          <div className="d-flex flex-column gap-3">
+                            {reviews.map((r) => (
+                              <div key={r.id} style={{ borderBottom: "1.5px solid #f0f0f0", paddingBottom: 12 }}>
+                                <div className="d-flex justify-content-between align-items-start mb-1">
+                                  <div className="fw-bold" style={{ fontSize: "0.88rem", color: "#1a1a2e" }}>
+                                    {r.user_name || "Verified Customer"}
+                                  </div>
+                                  <div className="small text-muted" style={{ fontWeight: 600 }}>
+                                    {new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                                  </div>
+                                </div>
+                                <div className="mb-2" style={{ display: "flex", gap: 2 }}>
+                                  {[1, 2, 3, 4, 5].map((s) => (
+                                    <span key={s} style={{ color: s <= r.rating ? "#ffc107" : "#e4e5e9", fontSize: "0.75rem" }}>★</span>
+                                  ))}
+                                </div>
+                                <p className="mb-0" style={{ fontSize: "0.82rem", color: "#4b5563", lineHeight: 1.5 }}>
+                                  {r.comment || "No comment provided."}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

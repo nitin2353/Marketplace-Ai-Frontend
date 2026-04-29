@@ -46,17 +46,23 @@ export default function Login() {
     try {
       const res = await authApi?.userLogin(payload);
       if (res.success) {
-        localStorage.setItem("token", res?.data?.token);
+        // Handle nested data structure if present
+        const token = res.data?.token || res.token;
+        localStorage.setItem("token", token);
+        
         toast.success(res.message || "Logged In Successfully");
-        let { role } = JWTService.decodeTokenDetails(res?.token)
-        if (role == 'seller') {
-          navigate('/seller/products')
+        
+        const decoded = JWTService.decodeTokenDetails(token);
+        const role = decoded?.role;
+
+        if (role === 'seller') {
+          navigate('/seller/dashboard');
         } else {
-          navigate('/dashboard')
+          navigate('/');
         }
       }
     } catch (err) {
-      toast.error((err?.message == "User not found") ? "Invalid Credentials" : "Login failed");
+      toast.error((err?.message === "User not found") ? "Invalid Credentials" : (err?.message || "Login failed"));
     } finally {
       setLoading(false);
     }

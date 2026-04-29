@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import "./ChatPage.css";
 
 // ── Config ─────────────────────────────────────────────────
-const SOCKET_URL = "http://localhost:3000";
+const SOCKET_URL = import.meta.env.VITE_API_BASE_URL?.replace("/api/v1", "") || "http://localhost:3000";
 const QUICK_EMOJI = ["👍", "❤️", "😂", "😮", "😢", "🙏", "🔥", "✅"];
 const EMOJI_LIST = ["😊", "😂", "❤️", "👍", "🙌", "🔥", "✅", "📦", "🎨", "🤝", "💡", "📅", "🚀", "😮", "🙏", "👏"];
 
