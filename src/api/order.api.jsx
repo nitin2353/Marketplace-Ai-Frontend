@@ -10,6 +10,15 @@ const createOrder = async (data) => {
     }
 };
 
+const buyNow = async (data) => {
+    try {
+        const response = await API.post("/order/buy-now", data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: "Error processing buy now" };
+    }
+};
+
 const getCustomerOrders = async (userId) => {
     try {
         const response = await API.get(`/order/customer/${userId}`);
@@ -147,6 +156,7 @@ const getUserOrders = async () => {
 
 export default {
     createOrder,
+    buyNow,
     getCustomerOrders,
     getCustomerOrderById,
     getSellerOrders,

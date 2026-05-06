@@ -6,7 +6,7 @@ import productApi from "../../api/product.api";
 import toast from "react-hot-toast";
 import "./CreateProduct.css";
 import SellerSidebar from "../../components/SellerSidebar";
-import SellerNavbar from "../../components/Sellernavbar";
+import SellerNavbar from "../../components/SellerNavbar";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const PRESET_TAGS = ["New Arrival", "Trending", "Best Seller", "Limited Edition", "Eco Friendly", "Premium", "Sale"];
@@ -534,12 +534,12 @@ export default function CreateProduct() {
                                     <label className="cp-label mb-2">Product Tags</label>
                                     <div className="d-flex flex-wrap gap-2 mb-3">
                                         {PRESET_TAGS.map(t => (
-                                            <Badge key={t} bg={tags.includes(t) ? "warning" : "light"} text={tags.includes(t) ? "dark" : "secondary"}
-                                                className="rounded-3 px-3 py-2 fw-semibold"
-                                                style={{ cursor: "pointer", fontSize: "0.78rem", border: tags.includes(t) ? "2px solid #f7931e" : "2px solid #e8eaf6" }}
+                                            <div key={t}  text={tags.includes(t) ? "" : ""}
+                                                className="rounded-3 px-3 py-2"
+                                                style={{backgroundColor:"#5068f0ff",cursor: "pointer", fontSize: "0.78rem", border: tags.includes(t) ? "2px solid #355aff" : "2px solid #e8eaf6" }}
                                                 onClick={() => tags.includes(t) ? removeTag(t) : addTag(t)}>
                                                 {t}
-                                            </Badge>
+                                            </div>
                                         ))}
                                     </div>
 

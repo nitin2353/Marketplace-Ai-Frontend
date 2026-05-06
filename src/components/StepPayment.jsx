@@ -8,7 +8,7 @@ import { METHODS } from "../helper/GlobalHelper";
 export default function StepPayment({ selected, onSelect, onNext, onBack }) {
 
 
-    const validateAndNext = () => { 
+    const validateAndNext = () => {
         if (!selected) {
             return;
         }
@@ -19,16 +19,17 @@ export default function StepPayment({ selected, onSelect, onNext, onBack }) {
         <div>
             <p className="co-section-title">💳 Choose Payment Method</p>
 
-            <Stack gap={2} className="mb-2">
+            <Stack gap={2} className="mb-2" >
                 {METHODS.map(({ id, icon, label, sub }) => (
                     <div
                         key={id}
                         className={`co-pay-opt ${selected === id ? "active" : ""}`}
                         onClick={() => onSelect(id)}
+                        style={{border: "1px solid #5a62f2ff"}}
                     >
                         {/* Custom radio */}
-                        <div className={`co-pay-radio ${selected === id ? "active" : ""}`}>
-                            {selected === id && <div className="co-pay-radio-dot" />}
+                        <div className={` ${selected === id ? "active" : ""}`}>
+                            {selected === id && <div className="co-pay-radio" style={{background: "#5a62f2ff"}} /> }
                         </div>
                         <span style={{ fontSize: 20 }}>{icon}</span>
                         <div>
@@ -54,9 +55,10 @@ export default function StepPayment({ selected, onSelect, onNext, onBack }) {
             <Stack direction="horizontal" gap={2} className="mt-4">
                 <button className="co-btn-back" onClick={onBack}>← Back</button>
                 <button
-                    className="co-btn-main flex-fill"
+                    className="flex-fill"
                     onClick={validateAndNext}
                     disabled={!selected}
+                    style={{ background: "#5a62f2ff", color: "white", border: "none", padding: "10px 0", fontWeight: 600, fontSize: "1.1rem", borderRadius: "10px" }}
                 >
                     Review Order →
                 </button>

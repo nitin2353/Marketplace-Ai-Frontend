@@ -26,24 +26,18 @@ export default function StepReview({
             {console.log("address", address)}
             {/* ── Address ── */}
             <div className="co-review-block">
-                <Row>
-                    <Col>
-                        <div className="co-review-block-header">
-                            <span>📦 Delivering to</span>
-                        </div>
-                    </Col>
-                    <Col>
-                        <div style={{
-                            background: "linear-gradient(135deg, var(--p), var(--p2)) !important",
-                            border: "1px solid #e8eaf6",
-                            borderRadius: 8, padding: "3px 10px",
-                            width: "fit-content", float: "right",
-                            fontSize: ".72rem", fontWeight: 800, color: "#ffffff"
-                        }}>
-                            {address.label}
-                        </div>
-                    </Col>
-                </Row>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <div className="co-review-block-header mb-0">
+                        <span>📦 Delivering to</span>
+                    </div>
+                    <div style={{
+                        background: "var(--primary-gradient)",
+                        borderRadius: 8, padding: "3px 10px",
+                        fontSize: ".72rem", fontWeight: 800, color: "#ffffff"
+                    }}>
+                        {address?.label}
+                    </div>
+                </div>
                 <p style={{ fontWeight: 800, fontSize: "0.9rem", color: "#1a1a2e", marginBottom: 3 }}>
                     {address?.name}
                 </p>
@@ -115,7 +109,8 @@ export default function StepReview({
                         onChange={(e) => onCouponChange(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && onCouponApply()}
                     />
-                    <button className="co-coupon-btn" onClick={onCouponApply}>Apply</button>
+                    <button style={{ background: "#5a62f2ff", color: "white", width: "20%", border: "none", padding: "10px 0", fontWeight: 600, fontSize: "1.1rem", borderRadius: "10px" }} onClick={onCouponApply}>Apply</button>
+
                 </div>
                 {couponMsg && (
                     <p style={{ fontSize: "0.75rem", fontWeight: 700, marginTop: 6, color: couponMsg.type === "success" ? "#16a34a" : "#dc2626" }}>
@@ -148,18 +143,14 @@ export default function StepReview({
                 </div>
             </div>
 
-            <Stack direction="horizontal" gap={2} className="mt-2">
-                <button className="co-btn-back" onClick={onBack}>← Back</button>
-                <button
-                    className="co-btn-main flex-fill"
-                    onClick={() => onPlace(total)}
-                    disabled={placing}
-                >
-                    {placing
-                        ? "Placing Order…"
-                        : `✅ Place Order · ${FMT(total)}`}
+            <div className="d-flex flex-sm-row gap-2 mt-4">
+                <button className="co-btn-back h-100 order-2 order-sm-1" onClick={onBack}>← Back</button>
+
+                <button className="w-100 h-100 mt-2" disabled={placing} style={{ background: "#4261ecff", color: "white", border: "none", padding: "10px 0", fontWeight: 600, fontSize: "1.1rem", borderRadius: "10px" }} onClick={() => onPlace(total)}>{placing
+                    ? "Placing Order…"
+                    : `✅ Place Order · ${FMT(total)}`}
                 </button>
-            </Stack>
+            </div>
         </div >
     );
 }

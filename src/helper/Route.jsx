@@ -22,6 +22,8 @@ const ROUTE = {
   WISHLIST: "dashboard/wishlist",
   SETTINGS: "dashboard/settings",
   CHAT: "product/:id/customization",
+  CHAT_CONVERSATION: "/chat/:conversationId",
+  CHAT_LIST: "/chat",
   SELLER_SETTING: "/seller/settings"
 
 };

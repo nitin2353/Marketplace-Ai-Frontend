@@ -6,11 +6,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Syne:wght@700;800&display=swap');
 
 :root {
-  --p: #ff6b35;
-  --p2: #f7931e;
-  --p-grad: linear-gradient(135deg, #ff6b35, #f7931e);
-  --p-soft: #fff3ee;
-  --p-border: #ffd3b8;
+  --p: #5242e6;
+  --p2: #3238d3;
+  --p-grad: linear-gradient(135deg, #523ffc, #3d43f1);
+  --p-soft: #eef5ff;
+  --p-border: #b8cfff;
   --bg: #f1f4ff;
   --card: #ffffff;
   --text: #1a1a2e;
@@ -19,17 +19,17 @@
   --success: #22c55e;
   --success-soft: #f0fdf4;
   --danger: #ef4444;
-  --danger-soft: #fef2f2;
+  --danger-soft: #f2f6fe;
   --info: #3b82f6;
   --info-soft: #eff6ff;
-  --warning: #f59e0b;
-  --warning-soft: #fffbeb;
+  --warning: #0b0ff5;
+  --warning-soft: #ebecff;
   --purple: #8b5cf6;
   --purple-soft: #f5f3ff;
   --radius: 16px;
   --radius-sm: 10px;
-  --shadow: 0 4px 24px rgba(255, 107, 53, 0.08);
-  --shadow-md: 0 8px 32px rgba(255, 107, 53, 0.13);
+  --shadow: 0 4px 24px rgba(53, 83, 255, 0.08);
+  --shadow-md: 0 8px 32px rgba(53, 73, 255, 0.13);
   --font-display: 'Syne', sans-serif;
   --font-body: 'Nunito', sans-serif;
 }
@@ -118,35 +118,35 @@
 .spd-action-btn.primary {
   background: var(--p-grad);
   color: #fff;
-  box-shadow: 0 4px 14px rgba(255, 107, 53, .35);
+  box-shadow: 0 4px 14px rgba(53, 56, 255, 0.35);
 }
 
 .spd-action-btn.primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(255, 107, 53, .45);
+  box-shadow: 0 6px 20px rgba(53, 56, 255, 0.45);
 }
 
 .spd-action-btn.ghost {
-  background: #fff;
-  border: 1.5px solid var(--border);
-  color: var(--muted);
+  background: #ffffff;
+  border: 1.5px solid #0b0ff5;
+  color: #0b0ff5;
 }
 
 .spd-action-btn.ghost:hover {
-  border-color: var(--p);
-  color: var(--p);
-  background: var(--p-soft);
+  border-color: #0b0ff5;
+  color: #0b0ff5;
+  background: #eef5ff;
 }
 
 .spd-action-btn.danger {
   background: var(--danger-soft);
-  border: 1.5px solid #fecaca;
+  border: 1.5px solid #cad8fe;
   color: var(--danger);
 }
 
 .spd-action-btn.danger:hover {
-  background: #fee2e2;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, .2);
+  background: #e2e9fe;
+  box-shadow: 0 4px 12px rgba(53, 56, 255, 0.45);
 }
 
 /* ── Card ──────────────────────────────────────────────── */
@@ -293,7 +293,7 @@
 
 .spd-thumb.active {
   border-color: var(--p);
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, .18);
+  box-shadow: 0 0 0 3px rgba(56, 53, 255, 0.18);
 }
 
 /* Color swatch label */
@@ -546,7 +546,7 @@
 .spd-rating-fill {
   height: 100%;
   border-radius: 4px;
-  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  background: linear-gradient(90deg, #246ffb, #0b22f5);
   transition: width .7s ease;
 }
 
@@ -714,13 +714,13 @@
   font-size: .88rem;
   cursor: pointer;
   color: #fff;
-  box-shadow: 0 4px 14px rgba(239, 68, 68, .35);
+  box-shadow: 0 4px 14px rgba(68, 94, 239, 0.35);
   transition: all .15s;
 }
 
 .spd-del-confirm:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(239, 68, 68, .45);
+  box-shadow: 0 6px 20px rgba(84, 68, 239, 0.45);
 }
 
 .spd-del-confirm:disabled,

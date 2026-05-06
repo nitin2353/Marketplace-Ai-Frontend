@@ -7,6 +7,7 @@ const NAV_ITEMS = [
     { icon: "📦", label: "My Products", path: "/seller/products" },
     { icon: "➕", label: "Add Product", path: "/seller/product/create" },
     { icon: "🛒", label: "Orders", path: "/seller/orders" },
+    { icon: "💬", label: "Customization Chat", path: "/chat" },
     { icon: "⭐", label: "Reviews", path: "/seller/reviews" },
     { icon: "⚙️", label: "Settings", path: "/seller/settings" },
 ];
@@ -27,68 +28,61 @@ export default function SellerSidebar({ stats = [] }) {
 
     return (
         <>
-            {/* Mobile overlay */}
-            {isOpen && (
-                <div
-                    className="d-lg-none"
-                    onClick={() => setIsOpen(false)}
-                    style={{
-                        position: "fixed",
-                        inset: 0,
-                        backgroundColor: "rgba(0,0,0,0.45)",
-                        zIndex: 1040,
-                    }}
-                />
-            )}
+            <div
+                className={`pd-overlay ${isOpen ? 'show' : ''}`}
+                onClick={() => setIsOpen(false)}
+            />
 
             <div
-                className={`eco-hero seller-sidebar ${isOpen ? "d-flex" : "d-none"
-                    } d-lg-flex flex-column justify-content-between p-4`}
+                className={`pd-sidebar ${!isOpen ? "collapsed" : ""}`}
                 style={{
-                    minHeight: "100vh",
                     height: "100vh",
                     width: "280px",
                     position: "fixed",
                     top: 0,
                     left: 0,
-                    zIndex: 1050,
+                    // zIndex: 1050,
+                    background: "var(--bg-surface)",
+                    borderRight: "1px solid var(--border-light)",
+                    boxShadow: "var(--shadow-lg)",
                     overflowY: "auto",
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                 }}
             >
-                {/* Close button - mobile only */}
-                <div className="d-flex justify-content-end d-lg-none mb-3">
-                    <button
-                        type="button"
-                        className="btn btn-light btn-sm rounded-circle fw-bold"
-                        onClick={() => setIsOpen(false)}
-                        style={{ width: "32px", height: "32px", padding: 0 }}
-                    >
-                        ×
-                    </button>
+                {/* Logo Section */}
+                <div style={{ padding: "24px 20px", borderBottom: "1px solid var(--border-light)" }}>
+                    <div className="d-flex justify-content-between align-items-center">
+                        <div
+                            style={{
+                                fontFamily: "var(--font-heading)",
+                                fontSize: "1.6rem",
+                                fontWeight: 800,
+                                color: "var(--primary)",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "10px"
+                            }}
+                            onClick={() => handleNavigate("/")}
+                        >
+                            <span style={{ fontSize: "1.8rem" }}>🛍️</span> ShopEase
+                        </div>
+                        <button
+                            className="d-lg-none btn btn-light btn-sm rounded-circle"
+                            onClick={() => setIsOpen(false)}
+                            style={{ width: "32px", height: "32px" }}
+                        >
+                            ×
+                        </button>
+                    </div>
+                    <div style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontWeight: 600, marginTop: "4px", textTransform: "uppercase", letterSpacing: "1px" }}>
+                        Seller Central
+                    </div>
                 </div>
 
-                {/* Top */}
-                <div>
-                    <div
-                        className="text-white fw-black mb-1"
-                        style={{
-                            fontFamily: "Nunito",
-                            fontSize: "1.9rem",
-                            fontWeight: 900,
-                            cursor: "pointer",
-                        }}
-                        onClick={() => handleNavigate("/")}
-                    >
-                        🛍️ ShopEase
-                    </div>
-
-                    <div
-                        className="text-white fw-semibold mb-5"
-                        style={{ opacity: 0.85, fontSize: "0.88rem" }}
-                    >
-                        Seller Dashboard
-                    </div>
-
+                {/* Navigation */}
+                <div style={{ padding: "20px 0", flex: 1 }}>
+                    <div style={{ color: "var(--text-light)", fontSize: "0.75rem", fontWeight: 600, padding: "0 20px 10px", textTransform: "uppercase" }}>MAIN MENU</div>
                     <Stack gap={1}>
                         {NAV_ITEMS.map(({ icon, label, path }) => {
                             const isActive =
@@ -98,11 +92,22 @@ export default function SellerSidebar({ stats = [] }) {
                             return (
                                 <div
                                     key={label}
-                                    className={`eco-nav-item ${isActive ? "active" : ""}`}
                                     onClick={() => handleNavigate(path)}
-                                    style={{ cursor: "pointer" }}
+                                    style={{
+                                        cursor: "pointer",
+                                        padding: "12px 20px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "12px",
+                                        background: isActive ? "var(--bg-hover)" : "transparent",
+                                        color: isActive ? "var(--primary)" : "var(--text-main)",
+                                        fontWeight: isActive ? 700 : 500,
+                                        fontSize: "0.95rem",
+                                        borderLeft: isActive ? "4px solid var(--primary)" : "4px solid transparent",
+                                        transition: "all 0.2s"
+                                    }}
                                 >
-                                    <span style={{ fontSize: "1rem" }}>{icon}</span>
+                                    <span style={{ fontSize: "1.2rem", opacity: isActive ? 1 : 0.7 }}>{icon}</span>
                                     {label}
                                 </div>
                             );
@@ -110,21 +115,33 @@ export default function SellerSidebar({ stats = [] }) {
                     </Stack>
                 </div>
 
-                {/* Bottom */}
-                <div className="mt-4">
+                {/* Bottom Stats */}
+                <div style={{ padding: "20px", background: "var(--bg-hover)", borderTop: "1px solid var(--border-light)" }}>
                     {stats.length > 0 && (
-                        <Stack gap={2} className="mb-3">
+                        <Stack gap={3} className="mb-3">
                             {stats.map(({ icon, label, val }) => (
                                 <div
                                     key={label}
-                                    className="eco-sidebar-stat d-flex align-items-center gap-2"
+                                    className="d-flex align-items-center gap-3"
                                 >
-                                    <span style={{ fontSize: "1.3rem" }}>{icon}</span>
-                                    <div className="text-white">
-                                        <div className="fw-bold" style={{ fontSize: "0.92rem" }}>
+                                    <div style={{
+                                        width: "40px",
+                                        height: "40px",
+                                        borderRadius: "10px",
+                                        background: "white",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "1.2rem",
+                                        boxShadow: "var(--shadow-sm)"
+                                    }}>
+                                        {icon}
+                                    </div>
+                                    <div>
+                                        <div style={{ fontSize: "1rem", fontWeight: 800, color: "var(--text-main)", lineHeight: 1.2 }}>
                                             {val}
                                         </div>
-                                        <div style={{ fontSize: "0.7rem", opacity: 0.75 }}>
+                                        <div style={{ fontSize: "0.7rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>
                                             {label}
                                         </div>
                                     </div>
@@ -133,8 +150,16 @@ export default function SellerSidebar({ stats = [] }) {
                         </Stack>
                     )}
 
-                    <div className="text-white" style={{ opacity: 0.65, fontSize: "0.75rem" }}>
-                        ⭐ Trusted by 2 Crore+ happy customers
+                    <div style={{
+                        background: "rgba(37, 99, 235, 0.1)",
+                        padding: "10px",
+                        borderRadius: "8px",
+                        fontSize: "0.75rem",
+                        color: "var(--primary)",
+                        fontWeight: 600,
+                        textAlign: "center"
+                    }}>
+                        ⭐ Top Rated Seller Hub
                     </div>
                 </div>
             </div>

@@ -5,7 +5,7 @@ const GlobalLoader = () => {
     return (
         <div className="overlay-loader position-fixed">
             <div className="d-flex justify-content-center align-items-center" style={{ height: "80vh" }}>
-                <HashLoader color="#ee5922" size={60} />
+                <HashLoader color="#188cdaff" size={60} />
             </div>
         </div>
     )

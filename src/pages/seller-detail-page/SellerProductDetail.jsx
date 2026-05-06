@@ -16,13 +16,13 @@ import reportApi from "../../api/reportApi";
 import DataTable from "../../components/DataTable";
 import orderApi from "../../api/order.api";
 import JWTService from "../../config/jwt.config";
-import SellerNavbar from "../../components/Sellernavbar";
+import SellerNavbar from "../../components/SellerNavbar";
 
 // ── Formatters ────────────────────────────────────────────────────────────────
 const fmt = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
 const fmtL = (n) => n >= 100000 ? `₹${(n / 100000).toFixed(1)}L` : n >= 1000 ? `₹${(n / 1000).toFixed(1)}K` : `₹${n}`;
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const PIE_COLORS = ["#22c55e", "#f59e0b", "#3b82f6", "#ef4444", "#8b5cf6"];
+const PIE_COLORS = ["#22c55e", "#1b0bf5ff", "#1bbcf5ff", "#ef4444", "#8b5cf6"];
 
 // ── Chart Tooltip ─────────────────────────────────────────────────────────────
 const ChartTip = ({ active, payload, label }) => {
@@ -74,6 +74,7 @@ export default function SellerProductDetail() {
                 const { data } = await productApi.getProductById(id);
                 const raw = data?.data || data;
                 if (!raw) { toast.error("Product not found"); navigate("/seller/products"); return; }
+                {console.log('raw', raw)}
                 setProduct({
                     ...raw,
                     base_price: Number(raw.base_price),
@@ -81,7 +82,7 @@ export default function SellerProductDetail() {
                     stock: Number(raw.stock || 0),
                     sold: Number(raw.sold || 0),
                     rating: Number(raw.rating || 0),
-                    reviews: Number(raw.reviews || 0),
+                    reviews: Number(raw.review_count || 0),
                     discount: Number(raw.discount || 0),
                     tag: typeof raw.tag === "string" ? raw.tag.split(",").map(t => t.trim()).filter(Boolean) : (raw.tag || []),
                     color: typeof raw.color === "string" ? raw.color.split(",").map(c => c.trim()).filter(Boolean) : (raw.color || []),
@@ -176,7 +177,7 @@ export default function SellerProductDetail() {
     const ratingDist = useMemo(() => {
         if (!product) return [];
         const r = Math.round(product.rating);
-        const total = product.reviews || 10;
+        const total = product.review_count || 10;
         const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
         dist[Math.min(5, Math.max(1, r))] = Math.round(total * 0.50);
         dist[Math.min(5, Math.max(1, r - 1))] = Math.round(total * 0.25);
@@ -231,7 +232,7 @@ export default function SellerProductDetail() {
                                         <button className="spd-action-btn primary" onClick={() => setShowEdit(true)}>
                                             ✏️ Edit Product
                                         </button>
-                                        <button className="spd-action-btn danger" onClick={() => setDeleteModal(true)}>
+                                        <button className="spd-action-btn ghost" onClick={() => setDeleteModal(true)}>
                                             🗑️ Delete
                                         </button>
                                     </div>
@@ -301,7 +302,7 @@ export default function SellerProductDetail() {
                                                     border: product.stock === 0 ? "#fecaca" : product.stock <= 10 ? "#fef08a" : "#bbf7d0"
                                                 },
                                                 { icon: "⭐", val: product.rating, lbl: "Rating", bg: "#fefce8", border: "#fef08a" },
-                                                { icon: "💬", val: product.reviews, lbl: "Reviews", bg: "#fdf4ff", border: "#e9d5ff" },
+                                                { icon: "💬", val: product.review_count, lbl: "Reviews", bg: "#fdf4ff", border: "#e9d5ff" },
                                             ].map((k, i) => (
                                                 <Col xs={6} sm={4} key={k.lbl}>
                                                     <div className="spd-kpi" style={{ background: k.bg, borderColor: k.border, animationDelay: `${i * 0.06}s` }}>
@@ -429,8 +430,8 @@ export default function SellerProductDetail() {
                                                     <AreaChart data={monthlyData} margin={{ top: 10, right: 8, left: -14, bottom: 0 }}>
                                                         <defs>
                                                             <linearGradient id="gRev" x1="0" y1="0" x2="0" y2="1">
-                                                                <stop offset="5%" stopColor="#ff6b35" stopOpacity={0.25} />
-                                                                <stop offset="95%" stopColor="#ff6b35" stopOpacity={0} />
+                                                                <stop offset="5%" stopColor="#356bffff" stopOpacity={0.25} />
+                                                                <stop offset="95%" stopColor="#356bffff" stopOpacity={0} />
                                                             </linearGradient>
                                                             <linearGradient id="gUnits" x1="0" y1="0" x2="0" y2="1">
                                                                 <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
@@ -443,7 +444,7 @@ export default function SellerProductDetail() {
                                                         <YAxis yAxisId="units" orientation="right" tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }} axisLine={false} tickLine={false} width={30} />
                                                         <Tooltip content={<ChartTip />} />
                                                         <Legend wrapperStyle={{ fontSize: ".72rem", fontFamily: "Nunito", fontWeight: 800, paddingTop: 8 }} />
-                                                        <Area yAxisId="revenue" type="monotone" dataKey="revenue" stroke="#ff6b35" strokeWidth={2.5} fill="url(#gRev)" dot={false} activeDot={{ r: 5, fill: "#ff6b35" }} />
+                                                        <Area yAxisId="revenue" type="monotone" dataKey="revenue" stroke="#4335ffff" strokeWidth={2.5} fill="url(#gRev)" dot={false} activeDot={{ r: 5, fill: "#4335ffff" }} />
                                                         <Area yAxisId="units" type="monotone" dataKey="units" stroke="#3b82f6" strokeWidth={2} fill="url(#gUnits)" dot={false} activeDot={{ r: 4, fill: "#3b82f6" }} />
                                                     </AreaChart>
                                                 </ResponsiveContainer>
@@ -501,7 +502,7 @@ export default function SellerProductDetail() {
                                                         <YAxis tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                                                         <Tooltip content={<ChartTip />} />
                                                         <Bar dataKey="units" radius={[6, 6, 0, 0]} maxBarSize={30}>
-                                                            {weeklyData.map((_, i) => <Cell key={i} fill={i === 5 || i === 6 ? "#f7931e" : "#ff6b35"} />)}
+                                                            {weeklyData.map((_, i) => <Cell key={i} fill={i === 5 || i === 6 ? "#7067ebff" : "#2f21e6ff"} />)}
                                                         </Bar>
                                                     </BarChart>
                                                 </ResponsiveContainer>
@@ -544,7 +545,7 @@ export default function SellerProductDetail() {
                                         <div className="spd-card">
                                             <div className="spd-card-title">⭐ Rating Breakdown</div>
                                             <div className="spd-card-sub">
-                                                Avg: <span style={{ color: "var(--warning)", fontWeight: 900 }}>{product.rating}</span> / 5 · {product.reviews} reviews
+                                                Avg: <span style={{ color: "var(--warning)", fontWeight: 900 }}>{product.rating}</span> / 5 · {product.review_count} reviews
                                             </div>
                                             <div style={{ textAlign: "center", margin: "4px 0 14px" }}>
                                                 <div style={{ fontFamily: "var(--font-display)", fontSize: "2.8rem", fontWeight: 800, color: "var(--warning)", lineHeight: 1 }}>{product.rating}</div>
@@ -573,11 +574,11 @@ export default function SellerProductDetail() {
                                 <Row className="g-3 mb-4">
                                     <Col md={5}>
                                         <div className="spd-card">
-                                            <div className="spd-card-title">🏷️ Tags &amp; Attributes</div>
+                                            <div className="spd-card-title">🏷️ Tags & Attributes</div>
                                             <div className="spd-card-sub">Discoverability keywords</div>
                                             <div className="d-flex flex-wrap gap-2">
                                                 {product.tag.length > 0
-                                                    ? product.tag.map(t => <span key={t} className="spd-tag">{t}</span>)
+                                                    ? product.tag.map(t => <span key={t} className="spd-tag text-primary">{t}</span>)
                                                     : <span style={{ color: "var(--muted)", fontSize: ".82rem", fontWeight: 600 }}>No tags added</span>}
                                             </div>
                                             {product.color.length > 0 && (

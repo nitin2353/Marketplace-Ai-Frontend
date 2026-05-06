@@ -42,10 +42,20 @@ const updatePayment = async (userId, data) => {
     }
 };
 
-// UPDATE NOTIFICATION PREFERENCES
-const updateNotificationPrefs = async (userId, prefs) => {
+// GET NOTIFICATION PREFERENCES
+const getNotificationPrefs = async () => {
     try {
-        const response = await API.put(`/user/notification-preferences/${userId}`, prefs);
+        const response = await API.get(`/user/notification-preferences`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: "Error fetching notification preferences" };
+    }
+};
+
+// UPDATE NOTIFICATION PREFERENCES
+const updateNotificationPrefs = async (prefs) => {
+    try {
+        const response = await API.put(`/user/notification-preferences`, prefs);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error updating notification preferences" };
@@ -58,5 +68,6 @@ export default {
     updateProfile,
     updateStore,
     updatePayment,
+    getNotificationPrefs,
     updateNotificationPrefs
 };

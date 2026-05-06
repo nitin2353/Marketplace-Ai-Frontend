@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import Toolbar from "../../components/Toolbar";
 import wishlistApi from "../../api/wishlist.api";
 import cartApi from "../../api/cartApi";
-import './Wishlist.css'
 import SkeletonCard from "../../components/SkeletonCard";
 import StarRating from "../../components/StarRating";
 import { useAuthWrapper } from "../../helper/AuthWrapper";
@@ -187,9 +186,9 @@ export default function WishlistPage() {
                         <p className="text-muted mb-4" style={{ fontSize: ".9rem" }}>
                             Save items you love and come back to them anytime!
                         </p>
-                        <button
-                            onClick={() => navigate("/dashboard")}
-                            style={{ border: "none", borderRadius: 12, background: "linear-gradient(135deg,#ff6b35,#f7931e)", color: "#fff", fontWeight: 800, padding: "12px 32px", fontFamily: "Nunito", cursor: "pointer", fontSize: ".95rem" }}
+                        <button 
+                            onClick={() => navigate("/")}
+                            style={{ border: "none", borderRadius: 12, background: "#414af2ff", color: "#ffffffff", fontWeight: 800, padding: "12px 32px", fontFamily: "Nunito", cursor: "pointer", fontSize: ".95rem" }}
                         >
                             🛍️ Discover Products
                         </button>
@@ -242,7 +241,7 @@ export default function WishlistPage() {
                                 <div className="fw-bold" style={{ color: "#555", marginBottom: 8 }}>No items on sale right now</div>
                                 <button
                                     onClick={() => setTab("All")}
-                                    style={{ border: "none", background: "none", color: "var(--p)", fontWeight: 800, cursor: "pointer", fontFamily: "Nunito", fontSize: ".84rem" }}
+                                    style={{ border: "none", background: "none", color: "#262fdcff", fontWeight: 800, cursor: "pointer", fontFamily: "Nunito", fontSize: ".84rem" }}
                                 >
                                     Show all →
                                 </button>
@@ -395,20 +394,9 @@ export default function WishlistPage() {
                         {/* ── Bulk actions ── */}
                         <div className="d-flex justify-content-center gap-3 mt-5 fu flex-wrap">
                             <button
-                                onClick={() => {
-                                    setCart(items.map(i => i.id));
-                                    toast.success(`${items.length} item${items.length !== 1 ? "s" : ""} added to cart! 🛒`);
-                                }}
-                                style={{ border: "none", borderRadius: 12, background: "linear-gradient(135deg,#ff6b35,#f7931e)", color: "#fff", fontWeight: 800, fontSize: ".9rem", padding: "12px 28px", fontFamily: "Nunito", cursor: "pointer", boxShadow: "0 4px 16px rgba(255,107,53,.3)", transition: "transform .15s" }}
-                                onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"}
-                                onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
-                            >
-                                🛒 Add All to Cart
-                            </button>
-                            <button
                                 onClick={removeAllItems}
-                                style={{ border: "2px solid #fca5a5", borderRadius: 12, background: "#fff", color: "#dc2626", fontWeight: 700, fontSize: ".9rem", padding: "12px 24px", fontFamily: "Nunito", cursor: "pointer", transition: "background .15s" }}
-                                onMouseEnter={e => e.currentTarget.style.background = "#fff0f0"}
+                                style={{ border: "2px solid #444cddff", borderRadius: 12, background: "#fff", color: "#262fdcff", fontWeight: 700, fontSize: ".9rem", padding: "12px 24px", fontFamily: "Nunito", cursor: "pointer", transition: "background .15s" }}
+                                onMouseEnter={e => e.currentTarget.style.background = "#f0f1ffff"}
                                 onMouseLeave={e => e.currentTarget.style.background = "#fff"}
                             >
                                 🗑️ Clear Wishlist

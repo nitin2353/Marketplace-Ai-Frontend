@@ -1,29 +1,43 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+/* AI Marketplace — Legacy App Styles */
 
 :root {
-  --primary-color: #e9f3fa;
-  /* Light, airy blue for background or header */
-  --secondary-color: #3c8bb4;
-  /* Muted ocean blue for sidebar or buttons */
-  --body-hightlighter: #2f6f8d;
-  --pinkish-main: #E86E91;
-  --highlight-color: white;
-  /* Icon/Text color */
-  --dark-color: #111827;
-  /* Modals/Buttons */
-  --lightshade-color: #cbd5e1;
-  /* Form inputs, hover, subtle bg */
-  /* --primary: #0d6efd; */
-  --secondary: #6c757d;
-  --success: #198754;
-  --info: #0dcaf0;
-  --warning: #ffc107;
-  --danger: #dc3545;
-  --light: #f8f9fa;
-  --dark: #212529;
+  --primary: #2563eb; /* Professional Blue (Blue 600) */
+  --primary-dark: #1e40af; /* Dark Blue (Blue 800) */
+  --secondary: #64748b; /* Slate Gray */
+  --accent: #3b82f6; /* Lighter Blue */
+  
+  --bg-main: #f1f5f9; /* Soft Slate Background */
+  --bg-surface: #ffffff;
+  --bg-hover: #eff6ff; /* Light Blue Hover */
+  
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-light: #94a3b8;
+  
+  --border-light: #e2e8f0;
+  --border-medium: #cbd5e1;
+  
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+  
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  /* Legacy mapping for compatibility */
+  --primary-color: #f1f5f9;
+  --secondary-color: var(--primary);
+  --body-hightlighter: var(--primary);
+  --highlight-color: #ffffff;
+  --dark-color: var(--text-main);
+  --lightshade-color: var(--bg-hover);
 }
 
 .btn-custom-soft {

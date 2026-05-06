@@ -10,22 +10,20 @@ import "./orderpage.css";
 
 
 const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCancel }) => {
-    const navigate = useNavigate();
     const [expanded, setExpanded] = useState(false);
-    const [orderDetails, setOrderDetails] = useState(null);
-    const [loadingDetails, setLoadingDetails] = useState(false);
     const [showReview, setShowReview] = useState(false);
-    const [reviewed, setReviewed] = useState(order.is_reviewed || false);
+    const [loadingDetails, setLoadingDetails] = useState(false);
+    const [currentReviewItem, setCurrentReviewItem] = useState(null);
+    const [orderDetails, setOrderDetails] = useState(null);
 
-    const status = order.order_status || "placed";
-    const payment = order.payment_status || "pending";
+    const status = order?.order_status || order?.status || 'placed';
+    const payment = order?.payment_method || order?.payment || 'cod';
     const meta = STATUS_META[status] || STATUS_META.placed;
-    const payMeta = PAYMENT_METHOD_LABELS[order.payment_method] || { icon: "💳", label: order.payment_method };
-
+    const payMeta = PAYMENT_METHOD_LABELS[payment] || PAYMENT_METHOD_LABELS.cod;
 
     // Fetch order details when expanded (if not already loaded)
     const fetchOrderDetails = useCallback(async () => {
-        if (order.items?.length > 0 || loadingDetails) return;
+        if (loadingDetails) return;
 
         setLoadingDetails(true);
         try {
@@ -35,32 +33,35 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
             ]);
 
             setOrderDetails({
-                items: itemsResponse?.data || [],
-                address_snapshot: addressResponse?.data || null
+                items: Array.isArray(itemsResponse?.data) ? itemsResponse.data : (Array.isArray(itemsResponse) ? itemsResponse : []),
+                address_snapshot: addressResponse?.data || addressResponse || null
             });
         } catch (error) {
             console.error("Error fetching order details:", error);
-            setOrderDetails({
-                items: [],
-                address_snapshot: null
-            });
         } finally {
             setLoadingDetails(false);
         }
-    }, [order.id, order.items, loadingDetails]);
+    }, [order.id, loadingDetails]);
 
     // Handle expand/collapse
     const handleToggle = () => {
         const newExpanded = !expanded;
         setExpanded(newExpanded);
-        if (newExpanded && !orderDetails) {
+        if (newExpanded) {
             fetchOrderDetails();
         }
     };
 
+    const handleReviewSuccess = (productId) => {
+        setOrderDetails(prev => ({
+            ...prev,
+            items: prev.items.map(item => item.product_id === productId ? { ...item, is_reviewed: true } : item)
+        }));
+    };
+
     // Use order details if available, otherwise fallback to order data
-    const items = orderDetails?.items || order.items || [];
-    const addressSnapshot = orderDetails?.address_snapshot || order.address_snapshot;
+    const items = Array.isArray(orderDetails?.items) ? orderDetails.items : (Array.isArray(order?.items) ? order.items : []);
+    const addressSnapshot = orderDetails?.address_snapshot || order?.address_snapshot;
 
     const visItems = items.slice(0, 3);
     const moreQty = items.length - 3;
@@ -71,35 +72,46 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
         <div className="ord-card ord-fu" onClick={handleToggle}>
 
             {/* ── Header ── */}
-            <div className="ord-card-header">
+            <div className="ord-card-header d-flex flex-column flex-sm-row justify-content-between align-items-start gap-3">
                 <div>
                     <p className="ord-number mb-0"># {order.order_number}</p>
-                    <p className="ord-date  mb-0">{FMT_DATE(order.created_time)}</p>
+                    <p className="ord-date mb-0">{FMT_DATE(order.created_time)}</p>
                 </div>
-                <Stack direction="horizontal" gap={2} className="align-items-center flex-wrap">
-                    <span className={`ord-status ${status}`}>
-                        {meta.icon} {meta.label}
+                <div className="d-flex align-items-center gap-2 flex-wrap">
+                    <span className={`ord-status ${status}`} style={{ fontSize: "0.75rem", padding: "4px 10px" }}>
+                        {meta?.icon} {meta?.label}
                     </span>
-                    <span className={`ord-pay-badge ${payment}`}>
-                        {payment === "paid" ? "✔ Paid" : payment === "failed" ? "✕ Failed" : payment === "refunded" ? "↩ Refunded" : "⏳ Pending"}
+                    <span className={`ord-pay-badge ${payment}`} style={{ fontSize: "0.75rem", padding: "4px 10px" }}>
+                        {payMeta?.icon} {payMeta?.label}
                     </span>
-                </Stack>
+                </div>
             </div>
 
             {/* ── Body ── */}
             <div className="ord-card-body">
                 <div className="ord-img-strip">
-                    {visItems.map((item) => {
-                        const src = Array.isArray(item.product_image_url)
-                            ? item.product_image_url[0]
-                            : (typeof item.product_image_url === 'string'
-                                ? item.product_image_url.split(',')[0].replace(/[{}"\\]/g, "")
-                                : item.product_image_url);
+                    {visItems.map((item, idx) => {
+                        let src = "";
+                        try {
+                            const imgData = item.product_image_url || item.image_url || "";
+                            if (Array.isArray(imgData)) {
+                                src = imgData[0];
+                            } else if (typeof imgData === 'string') {
+                                if (imgData.startsWith('[') || imgData.startsWith('{')) {
+                                    const parsed = JSON.parse(imgData);
+                                    src = Array.isArray(parsed) ? parsed[0] : parsed;
+                                } else {
+                                    src = imgData.split(',')[0].replace(/[{}"\\]/g, "");
+                                }
+                            }
+                        } catch (e) {
+                            console.error("Image parse error", e);
+                        }
 
                         return (
                             <img
-                                key={item.id || Math.random()}
-                                src={src}
+                                key={item.id || `img-${idx}`}
+                                src={src || `https://placehold.co/52x52/f1f4ff/ff6b35?text=${encodeURIComponent((item.product_title || "P").slice(0, 2))}`}
                                 alt={item.product_title || "Product"}
                                 className="ord-product-img"
                                 onError={(e) => {
@@ -117,23 +129,23 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
 
                 {/* First item title + meta */}
                 {items[0] && (
-                    <div>
-                        <p className="ord-item-title mb-0">
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                        <p className="ord-item-title mb-1" style={{ fontSize: "clamp(0.85rem, 3vw, 0.95rem)", fontWeight: 800 }}>
                             {items[0].product_title}
                             {items.length > 1 && (
-                                <span style={{ color: "#9ca3af", fontWeight: 700 }}>
+                                <span style={{ color: "#9ca3af", fontWeight: 700, fontSize: "0.8rem" }}>
                                     {" "}+ {items.length - 1} more
                                 </span>
                             )}
                         </p>
-                        <div className="ord-item-meta">
-                            {items[0].variant_size && <span>{items[0].variant_size}</span>}
+                        <div className="ord-item-meta d-flex flex-wrap align-items-center gap-2" style={{ fontSize: "0.75rem" }}>
+                            {items[0].variant_size && <span className="ord-meta-chip">{items[0].variant_size}</span>}
                             {items[0].variant_color && (
-                                <span className="ord-color-dot" style={{ background: items[0].variant_color }} />
+                                <span className="ord-color-dot" style={{ background: items[0].variant_color, width: 10, height: 10 }} />
                             )}
-                            <span>× {items[0].quantity}</span>
-                            <span style={{ color: "#d1d5db" }}>·</span>
-                            <span>{payMeta.icon} {payMeta.label}</span>
+                            <span className="fw-bold">× {items[0].total_quantity || items[0].quantity}</span>
+                            <span className="d-none d-sm-inline" style={{ color: "#d1d5db" }}>·</span>
+                            <span className="d-none d-sm-inline">{payMeta?.icon} {payMeta?.label}</span>
                         </div>
                     </div>
                 )}
@@ -149,49 +161,9 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
                         </div>
                     ) : (
                         <Row className="g-3">
-                            {/* All items */}
-                            {/* <Col md={6}>
+                            <Col md={6}>
                                 <p style={{ fontSize: "0.75rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
                                     Items ({items.length})
-                                </p>
-                                {items.length > 0 ? items.map((item) => (
-                                    <div key={item.id} style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "center" }}>
-                                        <img
-                                            src={Array.isArray(item.product_image_url) ? item.product_image_url[0] : item.product_image_url}
-                                            alt={item.product_title}
-                                            style={{ width: 44, height: 44, borderRadius: 8, objectFit: "cover", border: "1.5px solid #e8eaf6", flexShrink: 0 }}
-                                            onError={(e) => { e.target.src = ``; }}
-                                        />
-                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                            <p style={{ fontSize: "0.82rem", fontWeight: 800, color: "#1a1a2e", marginBottom: 1, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
-                                                {item.product_title}
-                                            </p>
-                                            <div className="ord-item-meta">
-                                                {item.variant_size && <span>{item.variant_size}</span>}
-                                                {item.variant_color && <span className="ord-color-dot" style={{ background: item.variant_color }} />}
-                                                <span>× {item.quantity}</span>
-                                                <span style={{ color: "#d1d5db" }}>·</span>
-                                                <span style={{ color: "#ff6b35", fontWeight: 900 }}>{FMT(item.line_total)}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )) : (
-                                    <p style={{ color: "#9ca3af", fontSize: "0.9rem", fontStyle: "italic" }}>
-                                        No item details available
-                                    </p>
-                                )}
-                            </Col> */}
-                            <Col md={6}>
-                                <p
-                                    style={{
-                                        fontSize: "0.75rem",
-                                        fontWeight: 800,
-                                        color: "#9ca3af",
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.05em",
-                                        marginBottom: 10
-                                    }}
-                                >
                                 </p>
 
                                 {items?.length > 0 ? (
@@ -202,29 +174,36 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
                                                 style={{
                                                     display: "flex",
                                                     gap: 10,
-                                                    marginBottom: 10,
+                                                    marginBottom: 12,
                                                     alignItems: "center"
                                                 }}
                                             >
                                                 <img
-                                                    src={
-                                                        Array.isArray(item.product_image_url)
-                                                            ? item.product_image_url[0]
-                                                            : (typeof item.product_image_url === 'string'
-                                                                ? item.product_image_url.split(',')[0].replace(/[{}"\\]/g, "")
-                                                                : item.product_image_url)
-                                                    }
+                                                    src={(() => {
+                                                        try {
+                                                            const imgData = item.product_image_url || item.image_url || "";
+                                                            if (Array.isArray(imgData)) return imgData[0];
+                                                            if (typeof imgData === 'string') {
+                                                                if (imgData.startsWith('[') || imgData.startsWith('{')) {
+                                                                    const parsed = JSON.parse(imgData);
+                                                                    return Array.isArray(parsed) ? parsed[0] : parsed;
+                                                                }
+                                                                return imgData.split(',')[0].replace(/[{}"\\]/g, "");
+                                                            }
+                                                            return imgData;
+                                                        } catch (e) { return ""; }
+                                                    })()}
                                                     alt={item.product_title || "Product"}
                                                     style={{
-                                                        width: 44,
-                                                        height: 44,
+                                                        width: 50,
+                                                        height: 50,
                                                         borderRadius: 8,
                                                         objectFit: "cover",
                                                         border: "1.5px solid #e8eaf6",
                                                         flexShrink: 0
                                                     }}
                                                     onError={(e) => {
-                                                        e.target.onerror = null; // 🔥 prevent loop
+                                                        e.target.onerror = null;
                                                         e.target.src = `https://placehold.co/44x44/f1f4ff/ff6b35?text=${encodeURIComponent(
                                                             (item.product_title || "P").slice(0, 2)
                                                         )}`;
@@ -235,7 +214,7 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
                                                 <div style={{ flex: 1, minWidth: 0 }}>
                                                     <p
                                                         style={{
-                                                            fontSize: "0.82rem",
+                                                            fontSize: "0.85rem",
                                                             fontWeight: 800,
                                                             color: "#1a1a2e",
                                                             marginBottom: 1,
@@ -248,48 +227,58 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
                                                     </p>
 
                                                     <div className="ord-item-meta" style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-
-                                                        {/* Size */}
                                                         {item.variant_size && <span>{item.variant_size}</span>}
-
-                                                        {/* Color */}
                                                         {item.variant_color && (
                                                             <span
                                                                 className="ord-color-dot"
                                                                 style={{
                                                                     background: item.variant_color,
-                                                                    width: 12,
-                                                                    height: 12,
+                                                                    width: 10,
+                                                                    height: 10,
                                                                     borderRadius: "50%",
                                                                     display: "inline-block",
                                                                     border: "1px solid #ddd"
                                                                 }}
                                                             />
                                                         )}
-
-                                                        {/* Quantity */}
                                                         <span>× {item.quantity || 1}</span>
-
-                                                        {/* Separator */}
                                                         <span style={{ color: "#d1d5db" }}>·</span>
-
-                                                        {/* Price */}
                                                         <span style={{ color: "#ff6b35", fontWeight: 900 }}>
                                                             {FMT(item.line_total || 0)}
                                                         </span>
                                                     </div>
                                                 </div>
+
+                                                {/* Item specific actions */}
+                                                {(status?.toLowerCase() === "delivered" || status?.toLowerCase() === "completed") && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (!item.is_reviewed) {
+                                                                setCurrentReviewItem(item);
+                                                                setShowReview(true);
+                                                            }
+                                                        }}
+                                                        disabled={item.is_reviewed}
+                                                        style={{
+                                                            fontSize: "0.72rem",
+                                                            padding: "5px 10px",
+                                                            borderRadius: 20,
+                                                            border: "none",
+                                                            background: item.is_reviewed ? "#f3f4f6" : "linear-gradient(135deg, #ff6b35, #f7931e)",
+                                                            color: item.is_reviewed ? "#9ca3af" : "#fff",
+                                                            fontWeight: 800,
+                                                            marginLeft: "auto"
+                                                        }}
+                                                    >
+                                                        {item.is_reviewed ? "★ Reviewed" : "★ Review"}
+                                                    </button>
+                                                )}
                                             </div>
                                         );
                                     })
                                 ) : (
-                                    <p
-                                        style={{
-                                            color: "#9ca3af",
-                                            fontSize: "0.9rem",
-                                            fontStyle: "italic"
-                                        }}
-                                    >
+                                    <p style={{ color: "#9ca3af", fontSize: "0.9rem", fontStyle: "italic" }}>
                                         No item details available
                                     </p>
                                 )}
@@ -323,56 +312,51 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
             )}
 
             {/* ── Footer ── */}
-            <div className="ord-card-footer" onClick={(e) => e.stopPropagation()}>
+            <div className="ord-card-footer d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3" onClick={(e) => e.stopPropagation()}>
                 <div>
                     <p className="ord-total-label mb-0">Total</p>
                     <p className="ord-total mb-0">{FMT(order.total_amount)}</p>
                 </div>
 
-                <Stack direction="horizontal" gap={2} className="flex-wrap">
+                <div className="d-flex align-items-center gap-2 flex-wrap w-100 w-sm-auto justify-content-start justify-content-sm-end">
                     {canCancel && (
                         <button
-                            className="ord-btn-cancel"
+                            className="ord-btn-cancel py-2 px-3 flex-fill flex-sm-none"
                             disabled={cancelling === order.id}
                             onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); setShowCancel(true); }}
                         >
                             {cancelling === order.id ? "Cancelling…" : "Cancel"}
                         </button>
                     )}
-                    {status === "delivered" && (
-                        <button 
-                            className="ord-btn-reorder" 
-                            style={{ background: reviewed ? "#f3f4f6" : "linear-gradient(135deg, #10b981, #059669)", color: reviewed ? "#9ca3af" : "#fff" }}
-                            disabled={reviewed}
-                            onClick={(e) => { e.stopPropagation(); if(!reviewed) setShowReview(true); }}
-                        >
-                            {reviewed ? "★ Reviewed" : "★ Write Review"}
-                        </button>
-                    )}
-                    {status === "delivered" && (
-                        <button className="ord-btn-reorder" onClick={(e) => e.stopPropagation()}>
+                    {status?.toLowerCase() === "delivered" && (
+                        <button className="ord-btn-reorder py-2 px-3 flex-fill flex-sm-none" onClick={(e) => e.stopPropagation()}>
                             🔁 Reorder
                         </button>
                     )}
                     <button
-                        className="ord-btn-view"
+                        className="ord-btn-view py-2 px-3 flex-fill flex-sm-none"
                         onClick={(e) => { e.stopPropagation(); handleToggle(); }}
                     >
                         {expanded ? "Hide Details ▲" : "View Details ▼"}
                     </button>
-                </Stack>
+                </div>
             </div>
 
-            <ReviewModal
-                show={showReview}
-                onHide={() => setShowReview(false)}
-                orderId={order.id}
-                sellerId={order.seller_id || items[0]?.seller_id}
-                onSuccess={() => setReviewed(true)}
-            />
+            {currentReviewItem && (
+                <ReviewModal
+                    show={showReview}
+                    onHide={() => {
+                        setShowReview(false);
+                        setCurrentReviewItem(null);
+                    }}
+                    orderId={order.id}
+                    productId={currentReviewItem.product_id}
+                    sellerId={currentReviewItem.seller_id}
+                    onSuccess={() => handleReviewSuccess(currentReviewItem.product_id)}
+                />
+            )}
         </div>
     );
-}
-
+};
 
 export default OrderCard;

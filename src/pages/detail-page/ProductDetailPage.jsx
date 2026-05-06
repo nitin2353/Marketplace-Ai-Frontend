@@ -6,15 +6,19 @@ import toast from "react-hot-toast";
 import GlobalLoader from "../../components/GlobalLoader";
 import Toolbar from "../../components/Toolbar";
 import GlobalHelper from "../../helper/GlobalHelper";
-import '../../style//productDetailPage.css'
 import wishlistApi from "../../api/wishlist.api";
 import StarRating from "../../components/StarRating";
 import cartApi from "../../api/cartApi";
 import { useAuthWrapper } from "../../helper/AuthWrapper";
 import FullScreenImageModal from "../../components/FullScreenImageModal";
 import reviewApi from "../../api/review.api";
+import chatApi from "../../api/chat.api";
+import orderApi from "../../api/order.api";
 import { FMT } from "../../helper/GlobalHelper";
 import JWTService from "../../config/jwt.config";
+import { FcRating } from "react-icons/fc";
+import { IoIosStarOutline } from "react-icons/io";
+
 
 
 
@@ -69,6 +73,8 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState("");
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsSummary, setReviewsSummary] = useState(null);
+  const [buyingNow, setBuyingNow] = useState(false);
 
 
   const { refresh, setRefresh } = useAuthWrapper()
@@ -78,6 +84,7 @@ export default function ProductDetail() {
   useEffect(() => {
     fetchProduct();
     fetchWishlist()
+    fetchReviews()
   }, [id]);
 
   const addToast = useCallback((msg, icon = "✅") => {
@@ -150,9 +157,16 @@ export default function ProductDetail() {
   const fetchReviews = async () => {
     try {
       setReviewsLoading(true);
-      const res = await reviewApi.getProductReviews(id);
-      if (res?.success) {
-        setReviews(res.data || []);
+      const [revRes, sumRes] = await Promise.all([
+        reviewApi.getProductReviews(id),
+        reviewApi.getProductRatingSummary(id)
+      ]);
+
+      if (revRes?.success) {
+        setReviews(revRes.data || []);
+      }
+      if (sumRes?.success) {
+        setReviewsSummary(sumRes.data);
       }
     } catch (err) {
       console.error("Failed to fetch reviews:", err);
@@ -161,16 +175,10 @@ export default function ProductDetail() {
     }
   };
 
-  useEffect(() => {
-    if (activeTab === "reviews" && reviews.length === 0) {
-      fetchReviews();
-    }
-  }, [activeTab]);
 
   const displayPrice = activeVariant?.price ?? product?.price ?? 0;
   const displayStock = activeVariant?.stock ?? product?.stock ?? 0;
 
-  console.log("Active variant:", displayStock);
 
   const fetchWishlist = async () => {
     try {
@@ -242,14 +250,60 @@ export default function ProductDetail() {
     } else {
       toast.success("something went wrong!!")
     }
-  }, [product, activeVariant, qty]);
+  }, [product, activeVariant, qty, refresh]);
 
 
-  const handleNavigateCustomization = async () => {
-    navigate("customization", {
-      state: JWTService.decodeTokenDetails()
-    });
-  }
+  const handleBuyNow = useCallback(async () => {
+    if (!product) return;
+
+    if (product.variants?.length && !activeVariant) {
+      toast.error("Please select a color and size.");
+      return;
+    }
+
+    if (displayStock === 0) {
+      toast.error("This product is out of stock.");
+      return;
+    }
+
+    setBuyingNow(true);
+    try {
+      const payload = {
+        product_id: product.id,
+        variant_id: activeVariant?.id || null,
+        quantity: qty
+      };
+
+      const res = await orderApi.buyNow(payload);
+      if (res.success) {
+        localStorage.setItem("buyNowData", JSON.stringify(res.data));
+        navigate("/dashboard/checkout?type=buy-now");
+      } else {
+        throw new Error(res.message || "Failed to process buy now");
+      }
+    } catch (err) {
+      console.error("BUY NOW ERROR:", err);
+      toast.error(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setBuyingNow(false);
+    }
+  }, [product, activeVariant, qty, displayStock, navigate]);
+
+
+  const handleCustomizeWithSeller = async () => {
+    try {
+      const response = await chatApi.getOrCreateConversation({
+        seller_id: product.seller_id,
+        product_id: product.id
+      });
+      if (response.status) {
+        navigate(`/chat/${response.data.id}`);
+      }
+    } catch (error) {
+      console.error("Failed to start conversation:", error);
+      toast.error("Failed to start conversation. Please try again.");
+    }
+  };
 
 
 
@@ -287,446 +341,419 @@ export default function ProductDetail() {
   return (
     <>
       <Toolbar searchRef={searchRef} search={search} cart={cart} wishlist={wishlist} setWishlist={setWishlist} setSidebar={setSidebar} addToast={addToast} setSearch={setSearch} isSideBar={false} isSearch={false} />
-      <Container fluid style={{ background: "#f1f4ff", minHeight: "100vh" }} className="p-4">
+      <Container fluid style={{ minHeight: "100vh", background: "white" }} className="p-4">
         <Container>
 
           {/* ── Breadcrumb ── */}
-          <div className="pd-breadcrumb fu">
-            <span onClick={() => navigate("/")}>🏪 Home</span>
-            <span className="sep">›</span>
-            <span onClick={() => navigate(-1)}>Products</span>
-            <span className="sep">›</span>
-            <span style={{ color: "#374151" }}>{product.title}</span>
+          <div className="pd-breadcrumb fu d-none d-sm-flex" style={{ display: "flex", gap: "8px", fontSize: "0.85rem", fontWeight: 600, color: "var(--text-light)", marginBottom: "24px" }}>
+            <span onClick={() => navigate("/")} style={{ cursor: "pointer", color: "var(--primary)" }}>Home</span>
+            <span>/</span>
+            <span onClick={() => navigate(-1)} style={{ cursor: "pointer", color: "var(--primary)" }}>Products</span>
+            <span>/</span>
+            <span style={{ color: "var(--text-main)" }}>{product.title}</span>
           </div>
 
-          <Row className="g-4">
+          <Row className="g-5">
 
             {/* ══ IMAGE COLUMN ══ */}
-            <Col md={5} className="fu">
-              <Card className="eco-card p-3">
-                {/* Discount ribbon */}
-                <div style={{ position: "relative" }}>
-                  {product.discount > 0 && (
-                    <div style={{
-                      position: "absolute", top: 12, left: 12, zIndex: 2,
-                      background: "#dc3545", color: "#fff", borderRadius: "50%",
-                      width: 52, height: 52, display: "flex", flexDirection: "column",
-                      alignItems: "center", justifyContent: "center",
-                      fontSize: "0.7rem", fontWeight: 900, lineHeight: 1.2, textAlign: "center"
-                    }}>
-                      {product.discount}%<br />OFF
-                    </div>
-                  )}
-                  {/* Hero image */}
-                  <img
-                    onClick={(e) => { setSelectedImage(e.target.src); setModalShow(true); }}
-                    key={activeImg}
-                    src={product.images[activeImg] || product.img}
-                    alt={product.title}
-                    className={`pd-hero-img ${imgLoading ? "loading" : ""}`}
-                    onLoad={() => setImgLoading(false)}
-                  // onError={e => {
-                  //   e.target.src = `https://placehold.co/600x600/f1f4ff/ff6b35?text=${encodeURIComponent(product.title.slice(0, 2))}`;
-                  //   setImgLoading(false);
-                  // }}
-                  />
-                </div>
-
-                {/* Thumbnail strip */}
-                {product.images.length > 1 && (
-                  <div className="pd-thumb-strip">
-                    {product.images.map((img, i) => (
-                      <div key={i} style={{ position: "relative" }}>
-                        <img
-                          src={img}
-                          alt={`View ${i + 1}`}
-                          className={`pd-thumb ${activeImg === i ? "active" : ""}`}
-                          onClick={() => switchImage(i)}
-                          onError={e => { e.target.src = `https://placehold.co/70x70/f1f4ff/ff6b35?text=${i + 1}`; }}
-                        />
-                        {activeImg === i && (
-                          <div style={{
-                            position: "absolute", bottom: -4, left: "50%", transform: "translateX(-50%)",
-                            width: 6, height: 6, borderRadius: "50%", background: "var(--p)"
-                          }} />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Image count badge */}
-                {product.images.length > 1 && (
-                  <div className="mt-2 text-center" style={{ fontSize: "0.74rem", color: "#9ca3af", fontWeight: 700 }}>
-                    📷 {activeImg + 1} / {product.images.length} — Click thumbnails to switch
-                  </div>
-                )}
-              </Card>
-            </Col>
-
-            {/* ══ DETAILS COLUMN ══ */}
-            <Col md={7}>
-              <Card className="eco-card p-4 fu" style={{ animationDelay: "0.06s" }}>
-
-                {/* Tags row */}
-                <div className="d-flex gap-2 flex-wrap mb-3">
-                  {product.tags.map(t => (
-                    <span key={t} className="pd-tag-pill">{t}</span>
-                  ))}
-                  {product.is_customizable && (
-                    <span style={{ display: "inline-block", padding: "4px 12px", borderRadius: 20, fontSize: "0.72rem", fontWeight: 800, background: "#ede9fe", color: "#7c3aed", border: "1.5px solid #ddd6fe" }}>
-                      ✏️ Customizable
-                    </span>
-                  )}
-                </div>
-
-                {/* Title */}
-                <h3 className="fw-bold mb-2" style={{ color: "var(--text)", lineHeight: 1.3, fontFamily: "Nunito" }}>
-                  {product.title}
-                </h3>
-
-                {/* Brand */}
-                <div className="mb-1" style={{ fontSize: "0.88rem", color: "#6b7280" }}>
-                  Brand: <b style={{ color: "var(--p)" }}>{product.brand}</b>
-                </div>
-                <div className="mb-3" style={{ fontSize: "0.88rem", color: "#6b7280" }}>
-                  Category: <b style={{ color: "var(--p)" }}>{product.category}</b>
-                </div>
-
-                {/* Rating + sold */}
-                <div className="d-flex align-items-center gap-3 mb-3 flex-wrap">
-                  <div className="d-flex align-items-center gap-1" style={{ background: "#f0fdf4", borderRadius: 10, padding: "4px 10px" }}>
-                    <StarRating rating={product.rating} />
-                    <span style={{ fontWeight: 900, fontSize: "0.9rem", color: "#16a34a", marginLeft: 4 }}>{product.rating}</span>
-                  </div>
-                  <span style={{ fontSize: "0.82rem", color: "#6b7280", fontWeight: 700 }}>
-                    ({product.reviews.toLocaleString()} reviews)
-                  </span>
-                  <span style={{ fontSize: "0.82rem", color: "#6b7280", fontWeight: 700 }}>
-                    🛒 <b style={{ color: "#f7931e" }}>{product.sold.toLocaleString()}</b>+ sold
-                  </span>
-                </div>
-
-                {/* Price block */}
-                <div className="d-flex align-items-baseline gap-3 mb-4 flex-wrap">
-                  <span className="pd-price-main">{FMT(displayPrice)}</span>
-                  {product.old_price > displayPrice && (
-                    <span className="pd-price-old">{FMT(product.old_price)}</span>
-                  )}
-                  {product.discount > 0 && (
-                    <span style={{
-                      background: "#dcfce7", color: "#166534", borderRadius: 20,
-                      padding: "4px 12px", fontSize: "0.78rem", fontWeight: 900
-                    }}>
-                      {product.discount}% OFF
-                    </span>
-                  )}
-                  {product.old_price > displayPrice && (
-                    <span style={{ fontSize: "0.78rem", color: "#22c55e", fontWeight: 800 }}>
-                      You save {FMT(product.old_price - displayPrice)}!
-                    </span>
-                  )}
-                  {/* Variant-level price tag */}
-                  {activeVariant && activeVariant.price !== product.price && (
-                    <span style={{
-                      fontSize: "0.76rem", color: "#6b7280", fontWeight: 700,
-                      background: "#f1f4ff", borderRadius: 8, padding: "2px 10px"
-                    }}>
-                      Variant price
-                    </span>
-                  )}
-                </div>
-
-                {product.variants?.length > 0 && (() => {
-                  const availableColors = [...new Set(product.variants.map(v => v.color).filter(Boolean))];
-                  const availableSizes = [...new Set(
-                    product.variants.filter(v => v.color === activeColor).map(v => v.size).filter(Boolean)
-                  )];
-
-                  return (
-                    <>
-                      {/* Color picker */}
-                      {availableColors.length > 0 && (
-                        <div className="mb-3">
-                          <div className="pd-section-title" style={{ marginBottom: 8 }}>
-                            🎨 Color
-                            {activeColor && (
-                              <span style={{ fontWeight: 700, fontSize: "0.8rem", color: "#6b7280", marginLeft: 8 }}>
-                                — <b style={{ color: "var(--p)" }}>{activeColor}</b>
-                              </span>
-                            )}
-                          </div>
-                          <div className="d-flex gap-2 flex-wrap">
-                            {availableColors.map(c => (
-                              <div
-                                key={c}
-                                onClick={() => {
-                                  setActiveColor(c);
-                                  // reset size to first available for this color
-                                  const firstSize = product.variants.find(v => v.color === c)?.size || null;
-                                  setActiveSize(firstSize);
-                                }}
-                                style={{
-                                  width: 32, height: 32, borderRadius: "50%", background: c,
-                                  cursor: "pointer", border: "3px solid",
-                                  borderColor: activeColor === c ? "var(--p)" : "transparent",
-                                  boxShadow: activeColor === c
-                                    ? "0 0 0 2px #fff, 0 0 0 4px var(--p)"
-                                    : "0 1px 4px rgba(0,0,0,0.18)",
-                                  transition: "box-shadow 0.15s, border-color 0.15s",
-                                }}
-                                title={c}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Size picker */}
-                      {availableSizes.length > 0 && (
-                        <div className="mb-4">
-                          <div className="pd-section-title" style={{ marginBottom: 8 }}>
-                            📐 Size
-                          </div>
-                          <div className="d-flex gap-2 flex-wrap">
-                            {availableSizes.map(s => {
-                              const variantForSize = product.variants.find(
-                                v => v.color === activeColor && v.size === s
-                              );
-                              const outOfStock = variantForSize?.stock === 0;
-                              return (
-                                <button
-                                  key={s}
-                                  onClick={() => !outOfStock && setActiveSize(s)}
-                                  disabled={outOfStock}
-                                  style={{
-                                    padding: "6px 18px",
-                                    borderRadius: 10,
-                                    border: `2px solid ${activeSize === s ? "var(--p)" : "#e5e7eb"}`,
-                                    background: activeSize === s ? "var(--p)" : "#fff",
-                                    color: outOfStock ? "#bbb"
-                                      : activeSize === s ? "#fff" : "#374151",
-                                    fontWeight: 800,
-                                    fontSize: "0.84rem",
-                                    fontFamily: "Nunito",
-                                    cursor: outOfStock ? "not-allowed" : "pointer",
-                                    opacity: outOfStock ? 0.5 : 1,
-                                    textDecoration: outOfStock ? "line-through" : "none",
-                                    transition: "all 0.15s",
-                                    position: "relative",
-                                  }}
-                                  title={outOfStock ? "Out of stock" : `Size ${s}`}
-                                >
-                                  {s}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Variant mismatch warning */}
-                      {activeColor && activeSize && !activeVariant && (
-                        <div style={{
-                          background: "#fff7ed", border: "1.5px solid #fed7aa",
-                          borderRadius: 10, padding: "8px 14px", marginBottom: 16,
-                          fontSize: "0.82rem", fontWeight: 700, color: "#92400e"
-                        }}>
-                          ⚠️ This combination is unavailable. Please choose another.
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
-                {/* Stock */}
-                <span className="mb-3" style={{
-                  color: displayStock === 0 ? "#dc2626"
-                    : displayStock < 15 ? "#d97706" : "#16a34a"
-                }}>
-                  {displayStock === 0 ? "❌ Out of Stock"
-                    : displayStock < 15 ? `⚠️ Limited Stock!`
-                      : `✔ in stock`}
-                </span>
-                {/* {console.log(displayStock)}
-                <ProgressBar className="mb-3" now={displayStock ? Math.min((displayStock / 200) * 100, 100) : 0} variant={displayStock === 0 ? "danger" : displayStock < 15 ? "warning" : "success"} style={{ height: 9, borderRadius: 8 }} /> */}
-
-                {/* Description tabs */}
-                <div className="mb-4">
-                  <div style={{ borderRadius: 12, overflow: "hidden", border: "2px solid #e8eaf6", display: "flex" }}>
-                    {[
-                      ["desc", "📋 Description"],
-                      ["policy", "↩️ Return Policy"],
-                      ["info", "ℹ️ Product Info"],
-                      ["reviews", "★ Reviews"],
-                    ].map(([t, l]) => (
-                      <button key={t} className={`pd-tab-btn ${activeTab === t ? "active" : ""}`} onClick={() => setActiveTab(t)}>
-                        {l}
-                      </button>
-                    ))}
-                  </div>
-                  <div style={{
-                    padding: "16px",
-                    background: "#f8f9ff",
-                    borderRadius: "0 0 12px 12px",
-                    border: "2px solid #e8eaf6",
-                    borderTop: "none",
-                    fontSize: "0.87rem",
-                    color: "#4b5563",
-                    lineHeight: 1.7,
-                    minHeight: 80,
-                  }}>
-                    {activeTab === "desc" && (product.description || "No description provided for this product.")}
-                    {activeTab === "policy" && (
-                      <div>
-                        {product.is_return || product.is_replace ? (
-                          <>
-                            <div className="d-flex flex-wrap gap-2 mb-2">
-                              {product.is_return && <span style={{ background: "#dcfce7", color: "#166534", borderRadius: 8, padding: "3px 10px", fontSize: "0.78rem", fontWeight: 800 }}>↩️ Return within {product.return_replace_duration} days</span>}
-                              {product.is_replace && <span style={{ background: "#dbeafe", color: "#1d4ed8", borderRadius: 8, padding: "3px 10px", fontSize: "0.78rem", fontWeight: 800 }}>🔄 Replace within {product.return_replace_duration} days</span>}
-                            </div>
-                            {product.return_replace_instructions && (
-                              <div style={{ marginTop: 6 }}>
-                                <b style={{ color: "#374151" }}>Instructions:</b> {product.return_replace_instructions}
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <span style={{ color: "#9ca3af" }}>No return or replacement policy available for this product.</span>
-                        )}
+            <Col lg={5} className="fu">
+              <div style={{ position: window.innerWidth >= 992 ? 'sticky' : 'relative', top: '100px' }}>
+                <Card className="eco-card overflow-hidden" style={{ border: "1px solid var(--border-light)", boxShadow: "var(--shadow-md)" }}>
+                  <div style={{ position: "relative", background: "#f8fafc", padding: "20px" }}>
+                    {product.discount > 0 && (
+                      <div style={{
+                        position: "absolute", top: 20, left: 20, zIndex: 2,
+                        background: "var(--danger)", color: "#fff",
+                        padding: "4px 12px", borderRadius: "4px",
+                        fontSize: "0.8rem", fontWeight: 700
+                      }}>
+                        {product.discount}% OFF
                       </div>
                     )}
-                    {activeTab === "info" && (
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 20px" }}>
-                        {[
-                          ["Brand", product.brand],
-                          ["Rating", `${product.rating} / 5`],
-                          ["Total Reviews", product.reviews.toLocaleString()],
-                          ["Units Sold", product.sold.toLocaleString()],
-                          ["Stock", `${product.stock} units`],
-                          ["Customizable", product.is_customizable ? "Yes" : "No"],
-                          ["Colors Available", product?.colors?.length || "N/A"],
-                          ["Listed On", product.created_at ? new Date(product.created_at).toLocaleDateString("en-IN") : "N/A"],
-                        ].map(([k, v]) => (
-                          <div key={k}>
-                            <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.04em" }}>{k}</span>
-                            <div style={{ fontWeight: 700, color: "#374151", marginTop: 1 }}>{v}</div>
-                          </div>
+                    <img
+                      onClick={(e) => { setSelectedImage(e.target.src); setModalShow(true); }}
+                      key={activeImg}
+                      src={product.images[activeImg] || product.img}
+                      alt={product.title}
+                      className={`pd-hero-img ${imgLoading ? "loading" : ""}`}
+                      style={{ width: "100%", aspectRatio: "1/1", objectFit: "contain", cursor: "zoom-in" }}
+                      onLoad={() => setImgLoading(false)}
+                    />
+                  </div>
+
+                  <div className="p-3 border-top">
+                    {product.images.length > 1 && (
+                      <div className="d-flex gap-2 overflow-auto pb-2" style={{ scrollbarWidth: "none" }}>
+                        {product.images.map((img, i) => (
+                          <img
+                            key={i}
+                            src={img}
+                            alt={`View ${i + 1}`}
+                            className={`pd-thumb ${activeImg === i ? "active" : ""}`}
+                            style={{
+                              width: "70px",
+                              height: "70px",
+                              objectFit: "contain",
+                              border: activeImg === i ? "2px solid var(--primary)" : "1px solid var(--border-light)",
+                              borderRadius: "8px",
+                              cursor: "pointer",
+                              padding: "4px",
+                              background: "#fff"
+                            }}
+                            onClick={() => switchImage(i)}
+                          />
                         ))}
                       </div>
                     )}
-                    {activeTab === "reviews" && (
-                      <div style={{ minHeight: 120 }}>
-                        {reviewsLoading ? (
-                          <div className="text-center p-4">
-                            <div className="pd-skeleton" style={{ height: 20, width: "100%", marginBottom: 10 }} />
-                            <div className="pd-skeleton" style={{ height: 20, width: "80%", marginBottom: 10 }} />
-                            <div className="pd-skeleton" style={{ height: 20, width: "60%" }} />
-                          </div>
-                        ) : reviews.length === 0 ? (
-                          <div className="text-center p-4 text-muted">
-                            <div style={{ fontSize: "2rem", marginBottom: 8 }}>💬</div>
-                            <p className="mb-0 fw-bold">No reviews yet</p>
-                            <p className="small">Be the first to share your experience after purchasing!</p>
-                          </div>
-                        ) : (
-                          <div className="d-flex flex-column gap-3">
-                            {reviews.map((r) => (
-                              <div key={r.id} style={{ borderBottom: "1.5px solid #f0f0f0", paddingBottom: 12 }}>
-                                <div className="d-flex justify-content-between align-items-start mb-1">
-                                  <div className="fw-bold" style={{ fontSize: "0.88rem", color: "#1a1a2e" }}>
-                                    {r.user_name || "Verified Customer"}
-                                  </div>
-                                  <div className="small text-muted" style={{ fontWeight: 600 }}>
-                                    {new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                                  </div>
-                                </div>
-                                <div className="mb-2" style={{ display: "flex", gap: 2 }}>
-                                  {[1, 2, 3, 4, 5].map((s) => (
-                                    <span key={s} style={{ color: s <= r.rating ? "#ffc107" : "#e4e5e9", fontSize: "0.75rem" }}>★</span>
-                                  ))}
-                                </div>
-                                <p className="mb-0" style={{ fontSize: "0.82rem", color: "#4b5563", lineHeight: 1.5 }}>
-                                  {r.comment || "No comment provided."}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                  </div>
+                </Card>
+              </div>
+            </Col>
+
+            {/* ══ DETAILS COLUMN ══ */}
+            <Col lg={7}>
+              <div className="fu" style={{ animationDelay: "0.1s" }}>
+                <div className="d-flex align-items-center gap-2 mb-2">
+                  <span style={{ fontSize: "0.85rem", color: "var(--primary)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px" }}>
+                    {product.brand}
+                  </span>
+                  <span style={{ color: "var(--border-medium)" }}>•</span>
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", fontWeight: 600 }}>
+                    {product.category}
+                  </span>
+                </div>
+
+                <h1 className="pd-title" style={{
+                  fontSize: "calc(1.1rem + 1vw)",
+                  fontWeight: 700,
+                  color: "var(--text-main)",
+                  lineHeight: 1.3,
+                  fontFamily: "var(--font-heading)",
+                  marginBottom: "16px"
+                }}>
+                  {product.title}
+                </h1>
+
+                <div className="d-flex align-items-center gap-3 mb-4">
+                  <div className="d-flex align-items-center gap-2 px-2 py-1" style={{ background: "#f0fdf4", borderRadius: "6px", border: "1px solid #dcfce7" }}>
+                    <StarRating rating={reviewsSummary?.avg_rating} />
+                    <span style={{ fontWeight: 800, fontSize: "0.95rem", color: "#16a34a" }}>
+                      {reviewsSummary?.avg_rating}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: "0.9rem", color: "var(--text-light)", fontWeight: 500 }}>
+                    {product?.reviews} Reviews
+                  </span>
+                  <span style={{ fontSize: "0.9rem", color: "var(--text-light)", fontWeight: 500 }}>
+                    |
+                  </span>
+                  <span style={{ fontSize: "0.9rem", color: "var(--text-muted)", fontWeight: 600 }}>
+                    🛒 {product.sold}+ sold
+                  </span>
+                </div>
+
+                <div className="d-flex align-items-baseline gap-3 mb-4 flex-wrap">
+                  <span style={{ fontSize: "calc(1.2rem + 1vw)", fontWeight: 800, color: "var(--text-main)" }}>
+                    {FMT(displayPrice)}
+                  </span>
+                  {product.old_price > displayPrice && (
+                    <span style={{ fontSize: "1.0rem", color: "var(--text-light)", textDecoration: "line-through" }}>
+                      {FMT(product.old_price)}
+                    </span>
+                  )}
+                  {product.discount > 0 && (
+                    <span style={{
+                      background: "#fee2e2", color: "#b91c1c",
+                      padding: "4px 12px", borderRadius: "4px", fontSize: "0.85rem", fontWeight: 800
+                    }}>
+                      -{product.discount}%
+                    </span>
+                  )}
+                </div>
+
+                <hr style={{ border: "0", borderTop: "1px solid var(--border-light)", margin: "24px 0" }} />
+
+                {product.variants?.length > 0 && (
+                  <div className="mb-4">
+                    {/* Color picker */}
+                    <div className="mb-4">
+                      <p style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-main)", marginBottom: "12px" }}>
+                        SELECT COLOR: <span style={{ color: "var(--primary)" }}>{activeColor}</span>
+                      </p>
+                      <div className="d-flex gap-3">
+                        {[...new Set(product.variants.map(v => v.color).filter(Boolean))].map(c => (
+                          <div
+                            key={c}
+                            onClick={() => {
+                              setActiveColor(c);
+                              const firstSize = product.variants.find(v => v.color === c)?.size || null;
+                              setActiveSize(firstSize);
+                            }}
+                            style={{
+                              width: "36px", height: "36px", borderRadius: "50%", background: c,
+                              cursor: "pointer", border: activeColor === c ? "2px solid white" : "2px solid transparent",
+                              boxShadow: activeColor === c ? `0 0 0 2px var(--primary)` : "0 2px 4px rgba(0,0,0,0.1)",
+                              transition: "all 0.2s"
+                            }}
+                            title={c}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Size picker */}
+                    <div className="mb-4">
+                      <p style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-main)", marginBottom: "12px" }}>
+                        SELECT SIZE:
+                      </p>
+                      <div className="d-flex gap-2">
+                        {[...new Set(product.variants.filter(v => v.color === activeColor).map(v => v.size).filter(Boolean))].map(s => {
+                          const outOfStock = product.variants.find(v => v.color === activeColor && v.size === s)?.stock === 0;
+                          const active = activeSize === s;
+                          return (
+                            <button
+                              key={s}
+                              onClick={() => !outOfStock && setActiveSize(s)}
+                              disabled={outOfStock}
+                              style={{
+                                padding: "8px 20px",
+                                borderRadius: "8px",
+                                border: active ? "1px solid var(--primary)" : "1px solid var(--border-light)",
+                                background: active ? "var(--bg-hover)" : "white",
+                                color: active ? "var(--primary)" : outOfStock ? "var(--text-light)" : "var(--text-main)",
+                                fontWeight: 700,
+                                cursor: outOfStock ? "not-allowed" : "pointer",
+                                opacity: outOfStock ? 0.5 : 1,
+                                transition: "all 0.2s"
+                              }}
+                            >
+                              {s}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="d-flex align-items-center gap-4 mb-4">
+                  <div className="d-flex align-items-center border rounded-pill p-1" style={{ background: "#f8fafc" }}>
+                    <button className="pd-qty-btn" style={{ width: "32px", height: "32px", border: "none", background: "white", borderRadius: "50%" }} disabled={qty <= 1} onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
+                    <span style={{ width: "40px", textAlign: "center", fontWeight: 700 }}>{qty}</span>
+                    <button className="pd-qty-btn" style={{ width: "32px", height: "32px", border: "none", background: "white", borderRadius: "50%" }} disabled={qty >= displayStock} onClick={() => setQty(q => Math.min(displayStock, q + 1))}>+</button>
+                  </div>
+                  <span style={{ fontSize: "0.9rem", color: displayStock < 15 ? "var(--danger)" : "var(--success)", fontWeight: 700 }}>
+                    {displayStock === 0 ? "Out of Stock" : displayStock < 15 ? `Limited Stock!` : "In Stock"}
+                  </span>
+                </div>
+
+                <div className="d-flex flex-column flex-sm-row gap-3 mb-5">
+                  <Button
+                    className="eco-btn-main flex-fill"
+                    disabled={displayStock === 0 || addedToCart}
+                    onClick={handleAddToCart}
+                    style={{ fontSize: "1rem", letterSpacing: "0.5px", height: "50px" }}
+                  >
+                    {addedToCart ? "Added to Cart" : displayStock === 0 ? "Out of Stock" : "Add to Cart"}
+                  </Button>
+                  <Button
+                    className="eco-btn-outline flex-fill py-3 bg-transparent d-flex align-items-center justify-content-center rounded-4"
+                    style={{ border: "2px solid var(--primary)", color: "var(--primary", fontWeight: 700, height: "50px" }}
+                    disabled={displayStock === 0 || buyingNow}
+                    onClick={handleBuyNow}
+                  >
+                    {buyingNow ? "Processing..." : "Buy Now"}
+                  </Button>
+                  {product.is_customizable && (
+                    <Button
+                      className="eco-btn-main flex-fill"
+                      style={{ border: "2px solid var(--primary)", color: "white", fontWeight: 700, height: "50px" }}
+                      onClick={handleCustomizeWithSeller}
+                    >
+                      Customize
+                    </Button>
+                  )}
+                </div>
+
+                <div className="pd-tabs-container mb-5">
+                  <div className="d-flex border-bottom overflow-auto" style={{ scrollbarWidth: "none" }}>
+                    {["desc", "policy", "info"].map(tab => (
+                      <button
+                        key={tab}
+                        className={`pd-tab-btn ${activeTab === tab ? "active" : ""}`}
+                        onClick={() => setActiveTab(tab)}
+                        style={{
+                          padding: "12px 20px",
+                          border: "none",
+                          background: "none",
+                          fontWeight: 700,
+                          whiteSpace: "nowrap",
+                          color: activeTab === tab ? "var(--primary)" : "var(--text-light)",
+                          borderBottom: activeTab === tab ? "3px solid var(--primary)" : "3px solid transparent",
+                          transition: "all 0.2s"
+                        }}
+                      >
+                        {tab === "desc" ? "Description" : tab === "policy" ? "Shipping & Returns" : "Product Specs"}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="py-4" style={{ color: "var(--text-muted)", lineHeight: 1.8, fontSize: "0.95rem" }}>
+                    {activeTab === "desc" && product.description}
+                    {activeTab === "policy" && (
+                      <div>
+                        <p><strong>Delivery:</strong> Free shipping on orders over ₹499. Standard delivery takes 3-5 business days.</p>
+                        <p><strong>Returns:</strong> {product.is_return ? `Easy returns within ${product.return_replace_duration} days.` : "This item is non-returnable."}</p>
+                      </div>
+                    )}
+                    {activeTab === "info" && (
+                      <div className="row g-3">
+                        <div className="col-6"><strong>Brand:</strong> {product.brand}</div>
+                        <div className="col-6"><strong>Category:</strong> {product.category}</div>
+                        <div className="col-6"><strong>Units Sold:</strong> {product.sold}+</div>
+                        <div className="col-6"><strong>Material:</strong> Premium Grade</div>
                       </div>
                     )}
                   </div>
                 </div>
 
-
-                {/* Quantity selector */}
-                <div className="d-flex align-items-center gap-3 mb-4">
-                  <span style={{ fontSize: "0.82rem", fontWeight: 800, color: "#374151" }}>Quantity:</span>
-                  <button className="pd-qty-btn" disabled={qty <= 1} onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
-                  <span style={{ fontWeight: 900, fontSize: "1.1rem", minWidth: 28, textAlign: "center", color: "var(--text)" }}>{qty}</span>
-                  <button className="pd-qty-btn" disabled={qty >= displayStock || displayStock === 0} onClick={() => setQty(q => Math.min(displayStock, q + 1))}>+</button>
-                  {product.stock > 0 && (
-                    <span style={{ fontSize: "0.78rem", color: "#6b7280", fontWeight: 700 }}>
-                      Total: <b style={{ color: "var(--p)" }}>{FMT(displayPrice * qty)}</b>
-                    </span>
-                  )}
-                </div>
-
-                {/* CTA buttons */}
-                <div className="d-flex gap-3 mb-4">
-                  <Button
-                    className="eco-btn-main text-white flex-fill py-3"
-                    disabled={
-                      (product.variants?.length > 0 && !activeVariant) ||
-                      displayStock === 0 ||
-                      addedToCart
-                    }
-                    onClick={handleAddToCart}
-                  >
-                    {product.variants?.length > 0 && !activeVariant ? "⚙️ Select a Variant"
-                      : addedToCart ? "✅ Added!"
-                        : displayStock === 0 ? "❌ Out of Stock"
-                          : (displayStock) ? "Item Added" : "🛒 Add to Cart"}
-                  </Button>
-                  <Button
-                    className="eco-btn-outline flex-fill py-3 fw-bold"
-
-                    disabled={displayStock === 0}
-                    style={{ fontSize: "0.9rem" }}
-                  >
-                    ⚡ Buy Now
-                  </Button>
-                  <Button
-                    className="eco-btn-outline flex-fill py-3 fw-bold"
-
-                    disabled={displayStock === 0}
-                    style={{ fontSize: "0.9rem" }}
-                    onClick={handleNavigateCustomization}
-                  >
-                    ⚡ Customize Now
-                  </Button>
-                </div>
-
-                {/* Policy quick cards */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div className="row g-3">
                   {[
-                    { icon: "🚚", title: "Free Delivery", sub: "On orders above ₹499" },
-                    { icon: "🔒", title: "Secure Payment", sub: "100% safe checkout" },
-                    product.is_return ? { icon: "↩️", title: `${product.return_replace_duration}-Day Return`, sub: "Easy hassle-free returns" }
-                      : { icon: "✅", title: "Quality Assured", sub: "Verified by ShopEase" },
-                    product.is_replace ? { icon: "🔄", title: `${product.return_replace_duration}-Day Replace`, sub: "Quick replacement service" }
-                      : { icon: "⚡", title: "Fast Dispatch", sub: "Ships in 24 hours" },
+                    { icon: "🚚", title: "Free Delivery", sub: "On orders over ₹499" },
+                    { icon: "🔒", title: "Secure Checkout", sub: "100% safe payment" },
+                    { icon: "✅", title: "Quality Guarantee", sub: "7-day easy returns" },
+                    { icon: "🎧", title: "24/7 Support", sub: "Get help anytime" },
                   ].map(({ icon, title, sub }) => (
-                    <div key={title} className="pd-policy-card">
-                      <span style={{ fontSize: "1.3rem", lineHeight: 1, flexShrink: 0 }}>{icon}</span>
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: "0.8rem", color: "#1a1a2e" }}>{title}</div>
-                        <div style={{ fontSize: "0.7rem", color: "#9ca3af", fontWeight: 700 }}>{sub}</div>
+                    <div key={title} className="col-6 col-sm-6 col-md-3">
+                      <div className="p-3 border rounded-3 d-flex flex-column align-items-center text-center h-100" style={{ background: "#f8fafc" }}>
+                        <span style={{ fontSize: "1.5rem", marginBottom: "8px" }}>{icon}</span>
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: "0.8rem", color: "var(--text-main)" }}>{title}</div>
+                          <div style={{ fontSize: "0.7rem", color: "var(--text-light)" }}>{sub}</div>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
+              </div>
+            </Col>
+          </Row>
+          <Row className={'mt-5 full-width'}>
+            <Col>
+              <>
+                <h4 className="fw-bold d-flex align-items-center gap-2 mb-4" style={{ fontFamily: "var(--font-heading)", color: "var(--text-main)" }}>
+                  <IoIosStarOutline size={24} color="var(--primary)" />
+                  Customer Reviews
+                </h4>
+                {reviewsSummary && (
+                  <div className="review-summary-box mb-5 p-4" style={{ background: "var(--bg-hover)", borderRadius: "var(--radius-lg)", border: "1px solid var(--border-light)" }}>
+                    <Row className="align-items-center g-4">
+                      <Col xs={12} md={4} className="text-center border-end-md">
+                        <h2 className="fw-bold mb-1" style={{ color: "var(--text-main)", fontSize: "3rem" }}>{reviewsSummary.avg_rating}</h2>
+                        <div className="mb-2"><StarRating rating={reviewsSummary.avg_rating} /></div>
+                        <div style={{ fontSize: "0.9rem", color: "var(--text-light)", fontWeight: 600 }}>{reviewsSummary.total_reviews} Global Ratings</div>
+                      </Col>
+                      <Col xs={12} md={8}>
+                        {[5, 4, 3, 2, 1].map((star) => {
+                          const key = star === 5 ? "five_star" : star === 4 ? "four_star" : star === 3 ? "three_star" : star === 2 ? "two_star" : "one_star";
+                          const count = reviewsSummary[key] || 0;
+                          const percent = reviewsSummary.total_reviews > 0 ? (count / reviewsSummary.total_reviews) * 100 : 0;
+                          return (
+                            <div key={star} className="d-flex align-items-center gap-3 mb-2">
+                              <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-light)", minWidth: 24 }}>{star}★</span>
+                              <div className="flex-fill" style={{ height: "8px", background: "white", borderRadius: "4px", overflow: "hidden", border: "1px solid var(--border-light)" }}>
+                                <div style={{ height: "100%", width: `${percent}%`, background: "var(--primary)", borderRadius: "4px" }} />
+                              </div>
+                              <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-light)", minWidth: 32 }}>{Math.round(percent)}%</span>
+                            </div>
+                          );
+                        })}
+                      </Col>
+                    </Row>
+                  </div>
+                )}
 
-              </Card>
+                {reviews.length === 0 ? (
+                  <div className="text-center py-5 border rounded-3" style={{ background: "var(--bg-surface)", borderStyle: "dashed !important" }}>
+                    <div style={{ fontSize: "2.5rem", marginBottom: 16, opacity: 0.5 }}>💬</div>
+                    <h5 className="fw-bold" style={{ color: "var(--text-main)" }}>No reviews yet</h5>
+                    <p className="text-muted mb-0">Be the first to share your thoughts on this product!</p>
+                  </div>
+                ) : (
+                  <div className="d-flex flex-column gap-4">
+                    {reviews.map((r) => (
+                      <div key={r.id} className="p-4" style={{ background: "var(--bg-surface)", borderRadius: "var(--radius-md)", border: "1px solid var(--border-light)", boxShadow: "var(--shadow-sm)" }}>
+                        <div className="d-flex justify-content-between align-items-start mb-3">
+                          <div className="d-flex align-items-center gap-3">
+                            <div style={{
+                              width: "40px",
+                              height: "40px",
+                              borderRadius: "50%",
+                              background: "var(--bg-hover)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontWeight: 700,
+                              color: "var(--primary)",
+                              border: "1px solid var(--border-light)"
+                            }}>
+                              {r.user_name?.[0] || "U"}
+                            </div>
+                            <div>
+                              <div className="fw-bold" style={{ fontSize: "1rem", color: "var(--text-main)" }}>
+                                {r.user_name || "Verified Customer"}
+                              </div>
+                              {r.order_number && (
+                                <span style={{ fontSize: "0.75rem", color: "#16a34a", fontWeight: 700 }}>
+                                  <span style={{ marginRight: "4px" }}>✓</span> Verified Purchase
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div style={{ fontSize: "0.85rem", color: "var(--text-light)", fontWeight: 600 }}>
+                            {new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                          </div>
+                        </div>
+                        <div className="mb-3 d-flex align-items-center gap-2">
+                          <StarRating rating={r.rating} />
+                          <span style={{ fontWeight: 700, fontSize: "0.9rem", color: "var(--text-main)" }}>{r.rating}/5</span>
+                        </div>
+                        <p style={{ fontSize: "1rem", color: "var(--text-main)", lineHeight: 1.6, marginBottom: r.images?.length > 0 ? "16px" : "0" }}>
+                          {r.comment || "No comment provided."}
+                        </p>
+
+                        {/* Review Images */}
+                        {r.images && r.images.length > 0 && (
+                          <div className="d-flex gap-3 flex-wrap mt-3">
+                            {r.images.map((img, idx) => (
+                              <img
+                                key={idx}
+                                src={img}
+                                alt="Review"
+                                onClick={() => { setSelectedImage(img); setModalShow(true); }}
+                                style={{ width: "80px", height: "80px", objectFit: "cover", borderRadius: "8px", cursor: "pointer", border: "1px solid var(--border-light)", transition: "all 0.2s" }}
+                                className="hover-opacity"
+                              />
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Seller Reply */}
+                        {r.seller_reply && (
+                          <div className="p-3 mt-4" style={{ background: "var(--bg-hover)", borderRadius: "8px", borderLeft: "4px solid var(--primary)" }}>
+                            <div className="d-flex align-items-center gap-2 mb-2">
+                              <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Response from Seller</span>
+                              <span style={{ color: "var(--text-light)", fontSize: "0.75rem" }}>• {new Date(r.seller_reply_at).toLocaleDateString("en-IN")}</span>
+                            </div>
+                            <p className="mb-0" style={{ fontSize: "0.9rem", color: "var(--text-muted)", fontStyle: "italic" }}>
+                              "{r.seller_reply}"
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             </Col>
           </Row>
 
@@ -788,8 +815,9 @@ export default function ProductDetail() {
                           </div>
                         )}
                         <button
+                          className="eco-btn-main flex-fill d-flex justify-content-center align-items-center"
                           style={{
-                            width: "100%", border: "none", borderRadius: 10,
+                            width: "100%", height: "40px", border: "none", borderRadius: 10,
                             background: "linear-gradient(135deg,#ff6b35,#f7931e)",
                             color: "#fff", fontWeight: 800, fontSize: "0.78rem",
                             padding: "8px", fontFamily: "Nunito", cursor: "pointer",

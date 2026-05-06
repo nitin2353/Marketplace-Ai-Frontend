@@ -11,7 +11,7 @@ import OrderDrawer from "../../components/OrderDrawer";
 import { PAYMENT_METHOD_META } from "../../helper/Constraints";
 import PayBadge from "../../components/PayBadge";
 import SellerSidebar from "../../components/SellerSidebar";
-import SellerNavbar from "../../components/Sellernavbar";
+import SellerNavbar from "../../components/SellerNavbar";
 
 const fmt = FMT;
 
@@ -397,11 +397,11 @@ export default function SellerOrders() {
             >
 
 
-                <div className="so-topbar">
+                <div style={{backgroundColor:"#3549ff"}} className="so-topbar d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
                     <Stack direction="horizontal" gap={2} className="align-items-center">
                         <span className="so-topbar-title">🏪 Orders Management</span>
                     </Stack>
-                    <div className="so-topbar-right">
+                    <div className="so-topbar-right d-flex align-items-center gap-3 w-100 w-sm-auto justify-content-between justify-content-sm-end">
                         <span
                             style={{
                                 color: "rgba(255,255,255,.8)",
@@ -456,8 +456,8 @@ export default function SellerOrders() {
                         <div
                             className="so-fu"
                             style={{
-                                background: "#fef2f2",
-                                border: "1.5px solid #fca5a5",
+                                background: "#f2f8feff",
+                                border: "1.5px solid #2a5bc5ff",
                                 borderRadius: 12,
                                 padding: "14px 18px",
                                 marginBottom: 16,
@@ -470,7 +470,7 @@ export default function SellerOrders() {
                             <span
                                 style={{
                                     fontWeight: 800,
-                                    color: "#dc2626",
+                                    color: "#2926dcff",
                                     fontSize: "0.88rem",
                                 }}
                             >
@@ -482,7 +482,7 @@ export default function SellerOrders() {
                                     marginLeft: "auto",
                                     border: "none",
                                     background: "none",
-                                    color: "#ff6b35",
+                                    color: "#2926dcff",
                                     fontWeight: 800,
                                     cursor: "pointer",
                                     fontFamily: "Nunito",
@@ -495,8 +495,8 @@ export default function SellerOrders() {
                     )}
 
                     {/* Toolbar */}
-                    <div className="so-toolbar so-fu">
-                        <div className="so-search-wrap">
+                    <div className="so-toolbar so-fu d-flex flex-wrap gap-3 align-items-center">
+                        <div className="so-search-wrap flex-fill" style={{ minWidth: "250px" }}>
                             <span className="so-search-icon">🔍</span>
                             <input
                                 className="so-search"
@@ -505,39 +505,41 @@ export default function SellerOrders() {
                                 onChange={(e) => setSearchInput(e.target.value)}
                             />
                         </div>
-                        <select
-                            className="so-select"
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                        >
-                            <option value="all">All Statuses</option>
-                            {ORDER_STATUSES.map((s) => (
-                                <option key={s.value} value={s.value}>
-                                    {s.icon} {s.label}
-                                </option>
-                            ))}
-                        </select>
-                        <select
-                            className="so-select"
-                            value={paymentFilter}
-                            onChange={(e) => setPaymentFilter(e.target.value)}
-                        >
-                            <option value="all">All Payments</option>
-                            {PAYMENT_STATUSES.map((s) => (
-                                <option key={s.value} value={s.value}>
-                                    {s.label}
-                                </option>
-                            ))}
-                        </select>
-                        <select
-                            className="so-select"
-                            value={dateSort}
-                            onChange={(e) => setDateSort(e.target.value)}
-                            style={{ minWidth: 120 }}
-                        >
-                            <option value="desc">Newest First</option>
-                            <option value="asc">Oldest First</option>
-                        </select>
+                        <div className="d-flex flex-wrap gap-2 flex-fill flex-sm-none">
+                            <select
+                                className="so-select flex-fill"
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                            >
+                                <option value="all">Statuses</option>
+                                {ORDER_STATUSES.map((s) => (
+                                    <option key={s.value} value={s.value}>
+                                        {s.icon} {s.label}
+                                    </option>
+                                ))}
+                            </select>
+                            <select
+                                className="so-select flex-fill"
+                                value={paymentFilter}
+                                onChange={(e) => setPaymentFilter(e.target.value)}
+                            >
+                                <option value="all">Payments</option>
+                                {PAYMENT_STATUSES.map((s) => (
+                                    <option key={s.value} value={s.value}>
+                                        {s.label}
+                                    </option>
+                                ))}
+                            </select>
+                            <select
+                                className="so-select flex-fill"
+                                value={dateSort}
+                                onChange={(e) => setDateSort(e.target.value)}
+                                style={{ minWidth: 120 }}
+                            >
+                                <option value="desc">Newest</option>
+                                <option value="asc">Oldest</option>
+                            </select>
+                        </div>
                         <span
                             style={{
                                 fontSize: "0.78rem",
@@ -552,7 +554,7 @@ export default function SellerOrders() {
 
                     {/* Bulk bar */}
                     {selected.size > 0 && (
-                        <div className="so-bulk-bar">
+                        <div className="so-bulk-bar" style={{ background: "#3549ffe5" }}>
                             <span className="so-bulk-label">
                                 {selected.size} order{selected.size > 1 ? "s" : ""} selected
                             </span>
@@ -610,6 +612,7 @@ export default function SellerOrders() {
                                         <input
                                             type="checkbox"
                                             className="so-chk"
+                                            style={{ accentColor: "#151c3c" }}
                                             checked={
                                                 pagedIds.length > 0 &&
                                                 pagedIds.every((id) => selected.has(id))
@@ -649,7 +652,7 @@ export default function SellerOrders() {
                                                 style={{
                                                     border: "none",
                                                     background: "none",
-                                                    color: "#ff6b35",
+                                                    color: "#3538ffff",
                                                     fontWeight: 800,
                                                     cursor: "pointer",
                                                     fontFamily: "Nunito",
@@ -749,7 +752,7 @@ export default function SellerOrders() {
                                                         style={{
                                                             fontWeight: 900,
                                                             fontSize: "0.9rem",
-                                                            color: "#ff6b35",
+                                                            color: "#3835ffff",
                                                             marginBottom: 0,
                                                         }}
                                                     >

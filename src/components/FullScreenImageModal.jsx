@@ -1,5 +1,4 @@
 import { Button, Modal } from "react-bootstrap";
-import '../style//productDetailPage.css'
 
 function FullScreenImageModal(props) {
   return (

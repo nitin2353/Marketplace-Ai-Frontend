@@ -14,12 +14,12 @@ const injectStyle = () => {
   const s = document.createElement("style");
   s.id = "seller-login-style";
   s.textContent = `
-    body { font-family: 'Nunito', sans-serif !important; background: #f1f4ff !important; }
-    .sl-hero { background: linear-gradient(145deg, #ff6b35 0%, #f7931e 55%, #ffcd3c 100%); }
-    .sl-card { border-radius: 24px; border: none; box-shadow: 0 24px 64px rgba(0,0,0,0.13); }
-    .sl-input { border-radius: 12px; border: 2px solid #e8eaf6; padding: 11px 15px; }
-    .sl-input:focus { border-color: #ff6b35; box-shadow: 0 0 0 3px rgba(255,107,53,0.15); }
-    .sl-btn { background: linear-gradient(135deg, #ff6b35, #f7931e); border: none; border-radius: 14px; font-weight: 800; padding: 12px; }
+    body { font-family: var(--font-main, 'Nunito', sans-serif) !important; background: var(--bg-main, #f1f4ff) !important; }
+    .sl-hero { background: var(--primary-gradient, linear-gradient(135deg, #2563eb, #1d4ed8)); }
+    .sl-card { border-radius: 24px; border: none; box-shadow: var(--shadow-lg, 0 24px 64px rgba(0,0,0,0.13)); }
+    .sl-input { border-radius: 12px; border: 2px solid var(--border-light, #e8eaf6); padding: 11px 15px; }
+    .sl-input:focus { border-color: var(--primary, #3b82f6); box-shadow: var(--shadow-sm); }
+    .sl-btn { background: var(--primary-gradient, linear-gradient(135deg, #2563eb, #1d4ed8)); border: none; border-radius: 14px; font-weight: 800; padding: 12px; }
   `;
   document.head.appendChild(s);
 };
@@ -49,9 +49,9 @@ export default function Login() {
         // Handle nested data structure if present
         const token = res.data?.token || res.token;
         localStorage.setItem("token", token);
-        
+
         toast.success(res.message || "Logged In Successfully");
-        
+
         const decoded = JWTService.decodeTokenDetails(token);
         const role = decoded?.role;
 
@@ -147,7 +147,7 @@ export default function Login() {
 
                   <div className="d-flex justify-content-between mb-3 flex-wrap gap-2">
                     <Form.Check label="Remember me" />
-                    <span style={{ cursor: "pointer", color: "#ff6b35" }} onClick={() => setForgot(true)}>
+                    <span style={{ cursor: "pointer", color: "var(--primary, #3b82f6)" }} onClick={() => setForgot(true)}>
                       Forgot Password?
                     </span>
                   </div>
@@ -159,7 +159,7 @@ export default function Login() {
 
                 <div className="text-center mt-3 text-muted">
                   Don&apos;t have an account?{" "}
-                  <span style={{ color: "#ff6b35", cursor: "pointer" }} onClick={handleNewUser}>
+                  <span style={{ color: "var(--primary, #3b82f6)", cursor: "pointer" }} onClick={handleNewUser}>
                     Register
                   </span>
                 </div>
@@ -190,7 +190,7 @@ export default function Login() {
 
                 <div className="text-center mt-3">
                   <span
-                    style={{ cursor: "pointer", color: "#ff6b35" }}
+                    style={{ cursor: "pointer", color: "var(--primary, #3b82f6)" }}
                     onClick={() => {
                       setForgot(false);
                       setSent(false);

@@ -7,20 +7,26 @@ import JWTService from "../config/jwt.config";
 // notification type meta
 const getNotificationMeta = (type) => {
     switch (type) {
-        case "new_task":
-            return { initials: "NT", bg: "#e8f0fe", color: "#185FA5" };
-        case "group_update":
-            return { initials: "AU", bg: "#e8f5e9", color: "#3B6D11" };
-        case "voucher_verified":
-            return { initials: "AT", bg: "#fff3e0", color: "#854F0B" };
-        case "task_update":
-            return { initials: "WT", bg: "#fce4ec", color: "#993556" };
-        case "order_approval":
-        case "new_order":
-            return { initials: "SO", bg: "#ede7f6", color: "#534AB7" };
+        case "order_placed":
+            return { initials: "OP", bg: "#e0f2fe", color: "#0369a1" };
+        case "order_confirmed":
+            return { initials: "OC", bg: "#dcfce7", color: "#15803d" };
+        case "order_shipped":
+        case "order_status_update":
+            return { initials: "OS", bg: "#fef9c3", color: "#a16207" };
+        case "order_cancelled":
+            return { initials: "OX", bg: "#fee2e2", color: "#b91c1c" };
+        case "payment_successful":
+        case "payment_received":
+            return { initials: "PR", bg: "#f0fdf4", color: "#166534" };
+        case "review_submitted":
+            return { initials: "RS", bg: "#faf5ff", color: "#7e22ce" };
         case "review_received":
-            return { initials: "RV", bg: "#fff7ed", color: "#c2410c" };
+            return { initials: "RR", bg: "#fff7ed", color: "#c2410c" };
+        case "new_order":
+            return { initials: "NO", bg: "#ede7f6", color: "#534AB7" };
         case "low_stock":
+        case "out_of_stock":
             return { initials: "LS", bg: "#fef2f2", color: "#dc2626" };
         default:
             return { initials: "NF", bg: "#f3f4f6", color: "#374151" };
@@ -70,7 +76,7 @@ function NotifItem({ notif, onRead, onDismiss, working, onUnreadChange }) {
                 borderBottom: "0.5px solid #f0f0f0",
                 cursor: "pointer",
                 position: "relative",
-                background: hovered ? "#fafafa" : notif.unread ? "rgba(255,107,53,.04)" : "#fff",
+                background: hovered ? "#fafafa" : notif.unread ? "rgba(53, 90, 255, 0.04)" : "#fff",
                 transition: "background .15s",
                 opacity: working ? 0.7 : 1,
             }}
@@ -83,7 +89,7 @@ function NotifItem({ notif, onRead, onDismiss, working, onUnreadChange }) {
                         top: 0,
                         bottom: 0,
                         width: 3,
-                        background: "#ff6b35",
+                        background: "#356bffff",
                         borderRadius: "0 2px 2px 0",
                     }}
                 />
@@ -123,7 +129,7 @@ function NotifItem({ notif, onRead, onDismiss, working, onUnreadChange }) {
                         width: 7,
                         height: 7,
                         borderRadius: "50%",
-                        background: "#ff6b35",
+                        background: "#356bffff",
                         marginTop: 6,
                         flexShrink: 0,
                     }}
@@ -177,12 +183,7 @@ export default function NotificationPanel({
     const fetchNotifications = useCallback(async () => {
         try {
             setLoading(true);
-            let response;
-            if (mode === "seller") {
-                response = await notificationApi.getSellerNotifications(entityId, 1, 10);
-            } else {
-                response = await notificationApi.getUserNotifications(entityId, 1, 10);
-            }
+            const response = await notificationApi.getMyNotifications(1, 10);
             const rows = response?.data || [];
 
             const mapped = rows.map((n) => {
@@ -207,20 +208,16 @@ export default function NotificationPanel({
         } finally {
             setLoading(false);
         }
-    }, [mode, entityId]);
-
-    useEffect(() => {
-        fetchNotifications();
     }, []);
 
     useEffect(() => {
-        if (entityId) fetchNotifications();
-    }, [entityId, fetchNotifications]);
+        fetchNotifications();
+    }, [fetchNotifications]);
 
     const markRead = async (id) => {
         try {
             setWorkingId(id);
-            await notificationApi.markAsRead(id, entityId);
+            await notificationApi.markAsRead(id);
 
             setNotifs((prev) =>
                 prev.map((n) => (n.id === id ? { ...n, unread: false } : n))
@@ -236,7 +233,7 @@ export default function NotificationPanel({
     const dismiss = async (id) => {
         try {
             setWorkingId(id);
-            await notificationApi.deleteNotification(id, entityId);
+            await notificationApi.deleteNotification(id);
 
             setNotifs((prev) => prev.filter((n) => n.id !== id));
             toast.success("Notification removed");
@@ -250,7 +247,7 @@ export default function NotificationPanel({
 
     const markAll = async () => {
         try {
-            await notificationApi.markAllAsRead(entityId);
+            await notificationApi.markAllAsRead();
 
             setNotifs((prev) => prev.map((n) => ({ ...n, unread: false })));
             onMarkAllRead?.();
@@ -262,7 +259,7 @@ export default function NotificationPanel({
     };
 
     return (
-        <div style={{ width: 320, fontFamily: "Nunito, sans-serif", borderRadius: 12, overflow: "hidden" }}>
+        <div style={{ width: '100%', fontFamily: "Nunito, sans-serif", borderRadius: 12, overflow: "hidden" }}>
             <div
                 style={{
                     display: "flex",
@@ -279,8 +276,8 @@ export default function NotificationPanel({
                     {unread > 0 && (
                         <span
                             style={{
-                                background: "#ff6b35",
-                                color: "#fff",
+                                background: "#356bffff",
+                                color: "#ffffffff",
                                 fontSize: 11,
                                 fontWeight: 700,
                                 padding: "2px 7px",
@@ -298,7 +295,7 @@ export default function NotificationPanel({
                         onClick={markAll}
                         style={{
                             fontSize: 12,
-                            color: "#ff6b35",
+                            color: "#356bffff",
                             background: "none",
                             border: "none",
                             cursor: "pointer",
@@ -343,7 +340,7 @@ export default function NotificationPanel({
                     height: "20px"
                 }}
             >
-            
+
             </div>
         </div>
     );

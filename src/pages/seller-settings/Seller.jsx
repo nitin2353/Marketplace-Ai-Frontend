@@ -3,11 +3,12 @@ import { Row, Col, Stack, InputGroup, Form } from "react-bootstrap";
 import toast from "react-hot-toast";
 import JWTService from "../../config/jwt.config";       // apna path
 import SellerSidebar from "../../components/SellerSidebar";
-import SellerNavbar from "../../components/Sellernavbar";
-import "./SellerSettings.css";
+import SellerNavbar from "../../components/SellerNavbar";
 import authApi from "../../api/authApi";
 import userSettingsApi from "../../api/userSettings.api";
 import { API_BASE_URL } from "../../helper/Constraints";
+import "../Seller-settings/Sellersettings.css";
+
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const SIDEBAR_W = 280;
@@ -19,7 +20,6 @@ const NAV_ITEMS = [
     { key: "security", icon: "🔒", label: "Security" },
     { key: "notifications", icon: "🔔", label: "Notifications" },
     { key: "payments", icon: "💳", label: "Payments" },
-    { key: "danger", icon: "⚠️", label: "Danger Zone" },
     { key: "logout", icon: "🚪", label: "Logout" },
 ];
 
@@ -478,16 +478,15 @@ function SecurityTab() {
 function NotificationsTab({ seller }) {
     const [prefs, setPrefs] = useState({
         new_order: true,
-        order_status: true,
+        order_cancelled: true,
+        payment_received: true,
         low_stock: true,
+        out_of_stock: true,
         new_review: true,
-        payment_credit: true,
-        promotions: false,
-        weekly_summary: true,
-        email_new_order: true,
-        email_review: false,
-        sms_order: true,
-        push_all: true,
+        chat_messages: true,
+        weekly_summary: false,
+        email_notifications: true,
+        sms_notifications: false
     });
     const [saving, setSaving] = useState(false);
 
@@ -502,7 +501,7 @@ function NotificationsTab({ seller }) {
     const save = async () => {
         setSaving(true);
         try {
-            await userSettingsApi.updateNotificationPrefs(JWTService.decodeTokenDetails?.()?.id, prefs);
+            await userSettingsApi.updateNotificationPrefs(prefs);
             toast.success("Notification preferences saved!");
         } catch { toast.error("Failed to save preferences"); }
         finally { setSaving(false); }
@@ -510,29 +509,33 @@ function NotificationsTab({ seller }) {
 
     const SECTIONS = [
         {
-            title: "🔔 In-App Notifications", key: "inapp",
+            title: "🔔 Order Notifications", key: "orders",
             rows: [
                 { k: "new_order", label: "New Order", desc: "When a new order is placed" },
-                { k: "order_status", label: "Order Status Update", desc: "Order confirmed, shipped, delivered" },
+                { k: "order_cancelled", label: "Order Cancelled", desc: "When an order is cancelled by customer" },
+                { k: "payment_received", label: "Payment Received", desc: "When payment for an order is successful" },
+            ],
+        },
+        {
+            title: "📦 Inventory & Feedback", key: "inventory",
+            rows: [
                 { k: "low_stock", label: "Low Stock Alert", desc: "When product stock falls below limit" },
-                { k: "new_review", label: "New Review", desc: "Customer leaves a review" },
-                { k: "payment_credit", label: "Payment Credited", desc: "When payment is credited to account" },
-                { k: "promotions", label: "Promotions & Offers", desc: "ShopEase deals and offers" },
+                { k: "out_of_stock", label: "Out of Stock", desc: "When a product becomes unavailable" },
+                { k: "new_review", label: "New Review", desc: "When a customer leaves a review" },
             ],
         },
         {
-            title: "📧 Email Notifications", key: "email",
+            title: "💬 Communication", key: "communication",
             rows: [
-                { k: "email_new_order", label: "New Order Email", desc: "Get email for every new order" },
-                { k: "email_review", label: "Review Emails", desc: "Get email when reviews arrive" },
-                { k: "weekly_summary", label: "Weekly Summary", desc: "Weekly performance digest email" },
+                { k: "chat_messages", label: "Chat Messages", desc: "Get notified when a customer messages you" },
+                { k: "weekly_summary", label: "Weekly Summary", desc: "Weekly performance digest" },
             ],
         },
         {
-            title: "📱 SMS & Push", key: "push",
+            title: "📧 External Notifications", key: "external",
             rows: [
-                { k: "sms_order", label: "SMS for Orders", desc: "Text message for new orders" },
-                { k: "push_all", label: "Push Notifications", desc: "Browser push notifications (all)" },
+                { k: "email_notifications", label: "Email Notifications", desc: "Receive important updates via email" },
+                { k: "sms_notifications", label: "SMS Notifications", desc: "Receive urgent alerts via SMS" },
             ],
         },
     ];
@@ -681,7 +684,6 @@ function PaymentsTab({ seller, onSave, saving }) {
 // ════════════════════════════════════════════════════════════════════════════
 function LogoutTab() {
     const handleLogout = async () => {
-        if (!window.confirm("Are you sure you want to logout?")) return;
         try {
             JWTService.clearTokenDetails()
             toast.success("Logged out successfully!");
@@ -700,7 +702,7 @@ function LogoutTab() {
                         Logout from your seller account. You will be redirected to the login page.
                     </p>
                     <div className="ss-danger-zone">
-                        <button className="ss-btn-danger" onClick={handleLogout}>
+                        <button className="ss-btn-logout" onClick={handleLogout}>
                             🚪 Logout
                         </button>
                     </div>
@@ -836,7 +838,6 @@ export default function SellerSettings() {
                                         {activeTab === "security" && <SecurityTab />}
                                         {activeTab === "notifications" && <NotificationsTab seller={seller} />}
                                         {activeTab === "payments" && <PaymentsTab seller={seller} onSave={handleSave} saving={saving} />}
-                                        {activeTab === "danger" && <DangerTab />}
                                         {activeTab === "logout" && <LogoutTab />}
                                     </>
                                 )}

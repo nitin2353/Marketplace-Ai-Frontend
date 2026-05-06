@@ -6,7 +6,6 @@ import Toolbar from "../../components/Toolbar";
 import { SETTINGS_TABS } from "../../helper/Constraints";
 import settingsApi from "../../api/settings.api";
 import GlobalLoader from "../../components/GlobalLoader";
-import "./Settings.css";
 import Profile from "./Profile.jsx";
 import JWTService from "../../config/jwt.config.jsx";
 import authApi from "../../api/authApi.jsx";
@@ -34,11 +33,14 @@ export default function SettingsPage() {
 
     // Notification State
     const [notifications, setNotifications] = useState({
-        emailNotifications: true,
-        smsNotifications: false,
-        orderUpdates: true,
-        promotionalEmails: true,
-        weeklyDigest: false,
+        email_notifications: true,
+        sms_notifications: false,
+        order_updates: true,
+        promotional_emails: false,
+        weekly_digest: false,
+        chat_messages: true,
+        review_replies: true,
+        payment_updates: true
     });
 
     // Privacy State
@@ -246,10 +248,10 @@ export default function SettingsPage() {
                                             </div>
                                             <Form.Check
                                                 type="switch"
-                                                id="emailNotifications"
+                                                id="email_notifications"
                                                 className="pd-switch"
-                                                checked={notifications.emailNotifications}
-                                                onChange={() => handleNotificationToggle("emailNotifications")}
+                                                checked={notifications.email_notifications}
+                                                onChange={() => handleNotificationToggle("email_notifications")}
                                             />
                                         </div>
 
@@ -260,10 +262,10 @@ export default function SettingsPage() {
                                             </div>
                                             <Form.Check
                                                 type="switch"
-                                                id="smsNotifications"
+                                                id="sms_notifications"
                                                 className="pd-switch"
-                                                checked={notifications.smsNotifications}
-                                                onChange={() => handleNotificationToggle("smsNotifications")}
+                                                checked={notifications.sms_notifications}
+                                                onChange={() => handleNotificationToggle("sms_notifications")}
                                             />
                                         </div>
 
@@ -274,10 +276,52 @@ export default function SettingsPage() {
                                             </div>
                                             <Form.Check
                                                 type="switch"
-                                                id="orderUpdates"
+                                                id="order_updates"
                                                 className="pd-switch"
-                                                checked={notifications.orderUpdates}
-                                                onChange={() => handleNotificationToggle("orderUpdates")}
+                                                checked={notifications.order_updates}
+                                                onChange={() => handleNotificationToggle("order_updates")}
+                                            />
+                                        </div>
+
+                                        <div className="pd-notification-item">
+                                            <div className="pd-notification-content">
+                                                <h6>Chat Messages</h6>
+                                                <p className="text-muted">Get notified when you receive a message</p>
+                                            </div>
+                                            <Form.Check
+                                                type="switch"
+                                                id="chat_messages"
+                                                className="pd-switch"
+                                                checked={notifications.chat_messages}
+                                                onChange={() => handleNotificationToggle("chat_messages")}
+                                            />
+                                        </div>
+
+                                        <div className="pd-notification-item">
+                                            <div className="pd-notification-content">
+                                                <h6>Review Replies</h6>
+                                                <p className="text-muted">Get notified when a seller replies to your review</p>
+                                            </div>
+                                            <Form.Check
+                                                type="switch"
+                                                id="review_replies"
+                                                className="pd-switch"
+                                                checked={notifications.review_replies}
+                                                onChange={() => handleNotificationToggle("review_replies")}
+                                            />
+                                        </div>
+
+                                        <div className="pd-notification-item">
+                                            <div className="pd-notification-content">
+                                                <h6>Payment Updates</h6>
+                                                <p className="text-muted">Get notified about your payments and refunds</p>
+                                            </div>
+                                            <Form.Check
+                                                type="switch"
+                                                id="payment_updates"
+                                                className="pd-switch"
+                                                checked={notifications.payment_updates}
+                                                onChange={() => handleNotificationToggle("payment_updates")}
                                             />
                                         </div>
 
@@ -288,10 +332,10 @@ export default function SettingsPage() {
                                             </div>
                                             <Form.Check
                                                 type="switch"
-                                                id="promotionalEmails"
+                                                id="promotional_emails"
                                                 className="pd-switch"
-                                                checked={notifications.promotionalEmails}
-                                                onChange={() => handleNotificationToggle("promotionalEmails")}
+                                                checked={notifications.promotional_emails}
+                                                onChange={() => handleNotificationToggle("promotional_emails")}
                                             />
                                         </div>
 
@@ -302,10 +346,10 @@ export default function SettingsPage() {
                                             </div>
                                             <Form.Check
                                                 type="switch"
-                                                id="weeklyDigest"
+                                                id="weekly_digest"
                                                 className="pd-switch"
-                                                checked={notifications.weeklyDigest}
-                                                onChange={() => handleNotificationToggle("weeklyDigest")}
+                                                checked={notifications.weekly_digest}
+                                                onChange={() => handleNotificationToggle("weekly_digest")}
                                             />
                                         </div>
                                     </div>
@@ -323,7 +367,7 @@ export default function SettingsPage() {
                             </Card>
                         )}
 
-                  
+
 
                         {activeTab === "addresses" && (
                             <StepAddress

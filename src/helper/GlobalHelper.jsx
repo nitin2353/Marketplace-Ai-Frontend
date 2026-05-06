@@ -55,7 +55,8 @@ const API_FIELDS_MAP = {
             id: p.id,
             title: p.title ?? "",
             description: p.description ?? "",
-            brand: p.brand ?? "Unknown",
+            brand: p.brand || p.business_name || "General",
+
             category: p.category ?? "General",
 
             price: Number(p.base_price ?? p.price ?? 0),
@@ -74,7 +75,7 @@ const API_FIELDS_MAP = {
             variants,
 
             rating: Number(p.rating ?? 0),
-            reviews: Number(p.reviews ?? 0),
+            reviews: Number(p.review_count ?? 0),
             sold: Number(p.sold ?? 0),
 
             is_return: Boolean(p.is_return),

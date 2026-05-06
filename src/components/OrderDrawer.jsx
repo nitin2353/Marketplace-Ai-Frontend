@@ -44,11 +44,6 @@ const PAYMENT_STATUSES = [
 
 
 
-
-
-
-
-
 export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentUpdate, updating }) {
     const [newStatus, setNewStatus] = useState(order.order_status || "placed");
     const [newPayment, setNewPayment] = useState(order.payment_status || "pending");
@@ -71,14 +66,14 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
 
 
     return (
-        <div className="so-drawer-overlay mt-5" onClick={onClose}>
+        <div className="so-drawer-overlay " onClick={onClose}>
 
             <div className="so-drawer" onClick={(e) => e.stopPropagation()}>
                 <div className="so-drawer-header">
                     <div>
                         <p
                             style={{
-                                color: "rgba(255,255,255,.75)",
+                                color: "rgba(255, 255, 255, 0.75)",
                                 fontSize: "0.72rem",
                                 fontWeight: 800,
                                 textTransform: "uppercase",
@@ -91,7 +86,7 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
                         </p>
                         <p
                             style={{
-                                color: "#fff",
+                                color: "#ffffffff",
                                 fontSize: "0.96rem",
                                 fontWeight: 900,
                                 marginBottom: 0,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Row, Col, Pagination } from "react-bootstrap";
 import { IoLogOutOutline, IoCloseOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,10 @@ import { useAuthWrapper } from "../../helper/AuthWrapper";
 import SkeletonCard from "../../components/SkeletonCard";
 import AddToCartModal from "../../components/AddToCartModal";
 import { FMT } from "../../helper/GlobalHelper";
+import CategorySection from "../../components/CategorySection";
+import { useLocation } from "react-router-dom";
+
+
 
 
 
@@ -22,11 +26,16 @@ const PER_PAGE = 12;
 export default function ProductDashboard() {
     const navigate = useNavigate();
 
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const initialSearch = queryParams.get("search") || "";
+
     const [rawProducts, setRawProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState(initialSearch);
+
     const [navSection, setNavSection] = useState("all");
     const [sortBy, setSortBy] = useState("relevance");
     const [view, setView] = useState("grid");
@@ -43,16 +52,44 @@ export default function ProductDashboard() {
     const [toasts, setToasts] = useState([]);
     const [selectedProduct, setSelected] = useState(null);
     const [sidebarOpen, setSidebar] = useState(window.innerWidth >= 992);
+    const [categorySections, setCategorySections] = useState([]);
+    const [isDefaultView, setIsDefaultView] = useState(true);
+
 
     const { isLike, setIsLike, globalCartLength } = useAuthWrapper()
 
     const searchRef = useRef();
 
+
     // ── Fetch products from API ────────────────────────────────────────────────
     useEffect(() => {
         fetchProductData();
-        fetchWishlist()
+        fetchWishlist();
+        fetchCategorySections();
     }, []);
+
+    // useEffect(() => {
+    //     const q = queryParams.get("search");
+    //     if (q) setSearch(q);
+    // }, [location.search]);
+
+
+    const fetchCategorySections = async () => {
+        try {
+            const res = await productApi.getCategorySections();
+            if (res.success) {
+                const mappedSections = res.data.map(section => ({
+                    ...section,
+                    products: section.products.map(GlobalHelper.API_FIELDS_MAP['products'])
+                }));
+                setCategorySections(mappedSections);
+            }
+        } catch (err) {
+            console.error("Failed to fetch category sections:", err);
+        }
+    };
+
+
 
 
 
@@ -149,50 +186,94 @@ export default function ProductDashboard() {
     }, [addToast]);
 
     // ── Filter + Sort ─────────────────────────────────────────────────────────
-    const filtered = rawProducts
-        .filter(p => {
-            if (navSection === "trending") return p.sold > 500 || p.tags.includes("Trending");
-            if (navSection === "new") return p.tags.includes("New Arrival");
-            if (navSection === "sale") return p.discount > 0;
-            if (navSection === "toprated") return p.rating >= 4.5;
-            if (navSection === "wishlist") return wishlist.includes(p.id);
+    const filtered = useMemo(() => {
+        return rawProducts
+            .filter(p => {
+                if (navSection === "trending") return p.sold > 500 || p.tags.includes("Trending");
+                if (navSection === "new") return p.tags.includes("New Arrival");
+                if (navSection === "sale") return p.discount > 0;
+                if (navSection === "toprated") return p.rating >= 4.5;
+                if (navSection === "wishlist") return wishlist.includes(p.id);
 
-            if (search) {
-                const q = search.toLowerCase();
-                if (!p.title.toLowerCase().includes(q) &&
-                    !p.brand.toLowerCase().includes(q) &&
-                    !p.tags.some(t => t.toLowerCase().includes(q)))
-                    return false;
-            }
-            if (p.price > priceMax) return false;
-            if (p.rating < minRating) return false;
-            if (activeTags.length && !activeTags.some(t => p.tags.includes(t))) return false;
-            return true;
-        })
-        .sort((a, b) => {
-            if (sortBy === "price_lo") return a.price - b.price;
-            if (sortBy === "price_hi") return b.price - a.price;
-            if (sortBy === "rating") return b.rating - a.rating;
-            if (sortBy === "newest") return new Date(b.created_at) - new Date(a.created_at);
-            if (sortBy === "popular") return b.sold - a.sold;
-            return 0;
-        });
+                if (search) {
+                    const q = search.toLowerCase();
+                    if (!p.title.toLowerCase().includes(q) &&
+                        !p.brand.toLowerCase().includes(q) &&
+                        !p.category.toLowerCase().includes(q) &&
+                        !p.tags.some(t => t.toLowerCase().includes(q)))
+                        return false;
 
-    const totalPages = Math.ceil(filtered.length / PER_PAGE);
-    const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+                }
+                if (p.price > priceMax) return false;
+                if (p.rating < minRating) return false;
+                if (activeTags.length && !activeTags.some(t => p.tags.includes(t))) return false;
+                return true;
+            })
+            .sort((a, b) => {
+                if (sortBy === "price_lo") return a.price - b.price;
+                if (sortBy === "price_hi") return b.price - a.price;
+                if (sortBy === "rating") return b.rating - a.rating;
+                if (sortBy === "newest") return new Date(b.created_at) - new Date(a.created_at);
+                if (sortBy === "popular") return b.sold - a.sold;
+                return 0;
+            });
+    }, [rawProducts, navSection, wishlist, search, priceMax, minRating, activeTags, sortBy]);
+
+    const dataMaxPrice = useMemo(() => {
+        return (rawProducts && rawProducts.length > 0)
+            ? Math.max(...rawProducts.map(p => Number(p.price || 0)), 200000)
+            : 200000;
+    }, [rawProducts]);
+
+    useEffect(() => {
+        // If there's a search, or navSection is NOT 'all', or filters are active, show grid view
+        const activeFiltersCount = (activeTags?.length || 0) + (minRating > 0 ? 1 : 0) + (priceMax < (dataMaxPrice || 200000) ? 1 : 0);
+        const hasActiveFilters = activeFiltersCount > 0 || sortBy !== "relevance";
+
+        console.log("Dashboard state:", { search, navSection, activeFiltersCount, sortBy, isDefaultView });
+
+        if (search || navSection !== "all" || hasActiveFilters) {
+            setIsDefaultView(false);
+        } else {
+            setIsDefaultView(true);
+        }
+    }, [search, navSection, activeTags, minRating, priceMax, dataMaxPrice, sortBy]);
+
+
+    const handleSeeAll = (section) => {
+        if (section.category) {
+            setNavSection("all");
+            // setSearch(section.category);
+        } else if (section.section_key === "trending") {
+            setNavSection("trending");
+        } else if (section.section_key === "new_arrivals") {
+            setNavSection("new");
+        } else if (section.section_key === "on_sale") {
+            setNavSection("sale");
+        } else if (section.section_key === "top_rated") {
+            setNavSection("toprated");
+        }
+        setPage(1);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+
+    const totalPages = Math.ceil((filtered?.length || 0) / PER_PAGE);
+    const paged = (filtered || []).slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
 
     // Compute dynamic max price from data
-    const dataMaxPrice = rawProducts.length
-        ? Math.max(...rawProducts.map(p => p.price), 200000)
-        : 200000;
-        console.log("cart", cart)
+
+
+
     const STATS = [
-        { icon: "📦", label: "Total Products", val: rawProducts.length, color: "#6366f1", bg: "#ede9fe" },
-        { icon: "🔥", label: "Trending", val: rawProducts.filter(p => p.sold > 500).length, color: "#ff6b35", bg: "#fff0e6" },
-        { icon: "💸", label: "On Sale", val: rawProducts.filter(p => p.discount > 0).length, color: "#22c55e", bg: "#dcfce7" },
-        { icon: "🛒", label: "Cart Items", val: globalCartLength, color: "#f7931e", bg: "#fff8e6" },
-        { icon: "❤️", label: "Wishlist", val: isLike.length, color: "#dc3545", bg: "#fee2e2" },
+        { icon: "📦", label: "Total Products", val: rawProducts?.length || 0, color: "#6366f1", bg: "#ede9fe" },
+        { icon: "🔥", label: "Trending", val: (rawProducts || []).filter(p => p.sold > 500).length, color: "#ff6b35", bg: "#fff0e6" },
+        { icon: "💸", label: "On Sale", val: (rawProducts || []).filter(p => p.discount > 0).length, color: "#22c55e", bg: "#dcfce7" },
+        { icon: "🛒", label: "Cart Items", val: globalCartLength || 0, color: "#f7931e", bg: "#fff8e6" },
+        { icon: "❤️", label: "Wishlist", val: (isLike || []).length, color: "#dc3545", bg: "#fee2e2" },
     ];
+
 
     const toggleTag = (tag) => {
         setActiveTags(t => t.includes(tag) ? t.filter(x => x !== tag) : [...t, tag]);
@@ -254,11 +335,12 @@ export default function ProductDashboard() {
                     <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 fu" style={{ animationDelay: ".04s" }}>
                         <div style={{ fontWeight: 700, color: "var(--muted)", fontSize: ".84rem" }}>
                             {loading ? "Loading products…" : (
-                                <>Showing <strong style={{ color: "var(--p)" }}>{filtered.length}</strong> of {rawProducts.length} products
+                                <>Showing <strong style={{ color: "var(--p)" }}>{filtered?.length || 0}</strong> of {rawProducts?.length || 0} products
                                     {search && <> for <strong style={{ color: "var(--text)" }}>"{search}"</strong></>}
                                 </>
                             )}
                         </div>
+
                         <div className="pd-toolbar">
                             <button className={`pd-filter-btn ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(f => !f)}>
                                 ⚙️ Filters {showFilters ? "▲" : "▼"}
@@ -304,12 +386,13 @@ export default function ProductDashboard() {
                                             </span>
                                         ))}
                                     </div>
-                                    {(activeTags.length > 0 || minRating > 0 || priceMax < dataMaxPrice) && (
+                                    {((activeTags?.length || 0) > 0 || minRating > 0 || priceMax < dataMaxPrice) && (
                                         <button onClick={() => { setActiveTags([]); setMinRating(0); setPriceMax(dataMaxPrice); setPage(1); }}
                                             style={{ marginTop: 10, fontSize: ".78rem", color: "var(--p)", fontWeight: 800, border: "none", background: "none", cursor: "pointer", padding: 0, fontFamily: "Nunito" }}>
                                             ✕ Clear All Filters
                                         </button>
                                     )}
+
                                 </Col>
                             </Row>
                         </div>
@@ -318,7 +401,7 @@ export default function ProductDashboard() {
                     {/* Active filter chips */}
                     {(search || activeTags.length > 0 || minRating > 0 || priceMax < dataMaxPrice) && (
                         <div className="d-flex gap-2 flex-wrap mb-3 fu">
-                            {search && <span className="pd-pill on" onClick={() => setSearch("")}>🔍 "{search}" ✕</span>}
+                            {/* {search && <span className="pd-pill on" onClick={() => setSearch("")}>🔍 "{search}" ✕</span>} */}
                             {priceMax < dataMaxPrice && <span className="pd-pill on" onClick={() => setPriceMax(dataMaxPrice)}>Under {FMT(priceMax)} ✕</span>}
                             {minRating > 0 && <span className="pd-pill on" onClick={() => setMinRating(0)}>{minRating}+ ★ ✕</span>}
                             {activeTags.map(t => <span key={t} className="pd-pill on" onClick={() => toggleTag(t)}>{t} ✕</span>)}
@@ -330,7 +413,13 @@ export default function ProductDashboard() {
                         <div className="pd-grid">
                             {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
                         </div>
-                    ) : paged.length === 0 ? (
+                    ) : (error && (!rawProducts || rawProducts.length === 0)) ? (
+                        <div className="pd-empty fu">
+                            <div style={{ fontSize: "3.5rem", marginBottom: 12 }}>⚠️</div>
+                            <div className="fw-bold" style={{ fontSize: "1.1rem", color: "#555" }}>{error}</div>
+                        </div>
+                    ) : (paged && paged.length === 0) ? (
+
                         <div className="pd-empty fu">
                             <div style={{ fontSize: "3.5rem", marginBottom: 12 }}>
                                 {navSection === "wishlist" ? "💔" : error ? "⚠️" : "🔍"}
@@ -347,11 +436,31 @@ export default function ProductDashboard() {
                                 🏪 Browse All Products
                             </button>
                         </div>
+                    ) : (isDefaultView && categorySections && categorySections.length > 0) ? (
+
+
+                        <div className="category-sections-wrapper">
+
+                            {categorySections.map((section) => (
+                                <CategorySection
+                                    key={section.section_key}
+                                    title={section.title}
+                                    products={section.products}
+                                    onSeeAll={() => handleSeeAll(section)}
+                                    setCartModal={setCartModal}
+                                    addToCart={addToCart}
+                                    createWishlist={createWishlist}
+                                    toggleCompare={toggleCompare}
+                                    setSelected={setSelected}
+                                    isLike={isLike}
+                                    compareList={compareList}
+                                />
+                            ))}
+                        </div>
                     ) : view === "grid" && (
                         <div className="pd-grid">
                             {paged.map((p, i) => {
                                 if (Number(p.stock) <= 0) return null;
-                                // console.log("product with no stock", p.stock == 0)
                                 return (
                                     <ProductCard
                                         key={p.id}
@@ -361,17 +470,19 @@ export default function ProductDashboard() {
                                         onWishlist={createWishlist}
                                         onCompare={toggleCompare}
                                         onView={setSelected}
-                                        isWished={isLike.includes(p.id)}
-                                        isCompared={!!compareList.find(x => x.id === p.id)}
+                                        isWished={isLike?.includes(p.id)}
+                                        isCompared={!!compareList?.find(x => x.id === p.id)}
                                         delay={i * 0.04}
                                     />
+
                                 );
                             })}
                         </div>
                     )}
 
-                    {/* Pagination */}
-                    {!loading && totalPages > 1 && (
+                    {/* Pagination - only show if not in default sections view */}
+                    {!loading && !isDefaultView && totalPages > 1 && (
+
                         <div className="d-flex justify-content-center align-items-center gap-2 mt-5 fu">
                             <button className="pd-pg-btn" disabled={page === 1} onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}>‹</button>
                             {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
@@ -389,11 +500,12 @@ export default function ProductDashboard() {
                         </div>
                     )}
 
-                    {!loading && filtered.length > 0 && (
+                    {!loading && !isDefaultView && filtered.length > 0 && (
                         <div className="text-center mt-2" style={{ fontSize: ".75rem", color: "#bbb", fontWeight: 700 }}>
                             Page {page} of {totalPages} · {filtered.length} products
                         </div>
                     )}
+
                 </div>
             </div>
 

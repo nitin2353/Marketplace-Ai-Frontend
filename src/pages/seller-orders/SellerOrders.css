@@ -3,8 +3,8 @@
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-    --p: #ff6b35;
-    --p2: #f7931e;
+    --p: #3549ff;
+    --p2: #1e51f7;
     --text: #1a1a2e;
     --muted: #6b7280;
     --bg: #f1f4ff;
@@ -43,7 +43,6 @@
 
 /* ── Topbar ── */
 .so-topbar {
-    background: linear-gradient(135deg, var(--p), var(--p2));
     padding: 14px 20px;
     display: flex;
     align-items: center;
@@ -58,6 +57,7 @@
     font-weight: 900;
     color: #fff;
     letter-spacing: 0.02em;
+    width: 300px;
 }
 
 .so-topbar-right {
@@ -142,8 +142,8 @@
 
 .so-search:focus {
     outline: none !important;
-    border-color: var(--p) !important;
-    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1) !important;
+    border-color: #355aff !important;
+    box-shadow: 0 0 0 3px rgba(53, 83, 255, 0.1) !important;
 }
 
 .so-search-icon {
@@ -169,13 +169,12 @@
 
 .so-select:focus {
     outline: none !important;
-    border-color: var(--p) !important;
-    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1) !important;
+    border-color: #355aff !important;
+    box-shadow: 0 0 0 3px rgba(53, 83, 255, 0.1) !important;
 }
 
 /* ── Bulk action bar ── */
 .so-bulk-bar {
-    background: linear-gradient(135deg, var(--p), var(--p2));
     border-radius: var(--r);
     padding: 11px 18px;
     display: flex;
@@ -269,25 +268,29 @@
 }
 
 .so-table tbody tr:hover {
-    background: #fdf9f7;
+    background: #f7f8fd;
 }
 
 .so-table tbody tr.selected {
-    background: #fff5f0;
+    background: #f7f8fd;
+}
+
+.selected:hover {
+    background: #f7f8fd !important;
 }
 
 /* ── Checkbox ── */
 .so-chk {
     width: 16px;
     height: 16px;
-    accent-color: var(--p);
+    /* accent-color: var(--p); */
     cursor: pointer;
 }
 
 /* ── Order number ── */
 .so-order-num {
     font-weight: 900;
-    color: var(--p);
+    color: #3549ff;
     font-size: 0.82rem;
 }
 
@@ -421,9 +424,9 @@
 
 /* ── Action dropdown trigger ── */
 .so-action-btn {
-    border: 1.5px solid var(--border) !important;
+    border: 1.5px solid #385aca !important;
     border-radius: 8px !important;
-    background: #fff !important;
+    background: #ffffff !important;
     color: var(--muted) !important;
     font-size: 0.8rem !important;
     font-weight: 800 !important;
@@ -435,8 +438,9 @@
 }
 
 .so-action-btn:hover {
-    border-color: var(--p) !important;
-    color: var(--p) !important;
+    border-color: #385aca !important;
+    color: #385aca !important;
+    background-color: #6887eb1c !important;
 }
 
 /* ── Status update select (inline) ── */
@@ -465,6 +469,7 @@
     background: rgba(17, 24, 39, 0.5);
     display: flex;
     justify-content: flex-end;
+    opacity: 1;
 }
 
 .so-drawer {
@@ -490,14 +495,14 @@
 }
 
 .so-drawer-header {
-    background: linear-gradient(135deg, var(--p), var(--p2));
+    background: linear-gradient(135deg, #5356ff, #4243aa);
     padding: 18px 22px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 10 !important;
 }
 
 .so-drawer-close {
@@ -585,8 +590,8 @@
 }
 
 .so-tl-dot.active {
-    background: var(--p);
-    box-shadow: 0 0 0 3px rgba(255, 107, 53, .2);
+    background: #5356ff;
+    box-shadow: 0 0 0 3px rgba(53, 56, 255, 0.2);
 }
 
 .so-tl-label {
@@ -676,15 +681,15 @@
 .so-btn-primary {
     border: none !important;
     border-radius: 10px !important;
-    background: linear-gradient(135deg, var(--p), var(--p2)) !important;
-    color: #fff !important;
+    background: linear-gradient(135deg, #6153ff, #5364ff) !important;
+    color: #ffffff !important;
     font-weight: 900 !important;
     font-size: 0.86rem !important;
     padding: 10px 22px !important;
     font-family: "Nunito", sans-serif !important;
     cursor: pointer;
     transition: opacity 0.15s !important;
-    box-shadow: 0 4px 14px rgba(255, 107, 53, .28) !important;
+    box-shadow: 0 4px 14px rgba(53, 67, 255, 0.28) !important;
 }
 
 .so-btn-primary:hover:not(:disabled) {
@@ -745,14 +750,14 @@
 }
 
 .so-pg-btn:hover:not(:disabled) {
-    border-color: var(--p) !important;
-    color: var(--p) !important;
+    border-color: #5356ff !important;
+    /* color: #000000 !important; */
 }
 
 .so-pg-btn.active {
-    background: var(--p) !important;
-    border-color: var(--p) !important;
-    color: #fff !important;
+    background: #5356ff !important;
+    border-color: #5356ff !important;
+    color: #ffffff !important;
 }
 
 .so-pg-btn:disabled {
@@ -765,7 +770,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, .12);
+    border: 1px solid rgba(0, 0, 0, 0.12);
     display: inline-block;
     flex-shrink: 0;
 }

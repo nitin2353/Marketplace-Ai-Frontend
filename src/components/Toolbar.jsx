@@ -12,7 +12,7 @@ import { useAuthWrapper } from '../helper/AuthWrapper';
 import { Overlay, Popover } from 'react-bootstrap';
 import NotificationPanel from './NotificationPanel';
 import JWTService from '../config/jwt.config';
-import toast from "react-hot-toast";
+import { MdOutlineLogin } from "react-icons/md";
 
 
 function debounce(fn, delay = 500) {
@@ -29,11 +29,19 @@ const Toolbar = ({
     setSidebar,
     setRawProducts,
     isSideBar = true,
-    isSearch = true
+    isSearch = true,
+    search: searchProp,
+    setSearch: setSearchProp
 }) => {
+
     const navigate = useNavigate();
 
-    const [search, setSearch] = useState("");
+    const [localSearch, setLocalSearch] = useState("");
+    const committedSearch = searchProp !== undefined ? searchProp : localSearch;
+    const setCommittedSearch = setSearchProp !== undefined ? setSearchProp : setLocalSearch;
+
+    const [inputSearch, setInputSearch] = useState(committedSearch || "");
+    const search = inputSearch;
     const [suggestions, setSuggestions] = useState([]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -53,6 +61,11 @@ const Toolbar = ({
     const entityId = userData?.id || userData?.user_id;
 
     useEffect(() => {
+        setInputSearch(committedSearch || "");
+    }, [committedSearch]);
+
+
+    useEffect(() => {
         searchValueRef.current = search;
     }, [search]);
 
@@ -64,7 +77,7 @@ const Toolbar = ({
     useEffect(() => {
         fetchCart()
         if (entityId) fetchNotificationCount();
-        
+
         const handler = (e) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setSuggestions([]);
@@ -80,7 +93,7 @@ const Toolbar = ({
 
     const fetchNotificationCount = async () => {
         try {
-            const result = await notificationApi.getUnreadCount(entityId);
+            const result = await notificationApi.getUnreadCount();
             setNotifyCount(result.data.unread_count);
         } catch (error) {
             console.error("Fetch Notification Error", error);
@@ -91,19 +104,26 @@ const Toolbar = ({
         fetchCart()
     }, [refresh])
 
-
     const fetchSuggestions = useCallback(async (query) => {
         if (!query.trim()) {
             setSuggestions([]);
             return;
         }
+
         try {
             const res = await productApi.productSuggestions(query);
-            setSuggestions(res?.data ?? []);
+            const rows = res?.data ?? [];
+
+            if (rows.length === 0) {
+                setSuggestions([{ keyword: "No items found", isEmpty: true }]);
+            } else {
+                setSuggestions(rows);
+            }
+
             setActiveIndex(0);
         } catch (err) {
             console.error("Suggestion error:", err);
-            setSuggestions([]);
+            setSuggestions([{ keyword: "No items found", isEmpty: true }]);
         }
     }, []);
 
@@ -119,7 +139,6 @@ const Toolbar = ({
                         : Array.isArray(data?.data) ? data.data
                             : Array.isArray(data?.data?.rows) ? data.data.rows
                                 : [];
-                console.log(data)
                 setRawProducts(rows.map(GlobalHelper.API_FIELDS_MAP['products']));
             } else {
                 const res = await productApi.searchProduct(query);
@@ -158,30 +177,35 @@ const Toolbar = ({
 
     const handleChange = (e) => {
         const value = e.target.value;
-        setSearch(value);
-        debouncedSuggestions(value);
 
-        if (!value.trim()) {
-            fetchProducts("");
-        }
+        setInputSearch(value);
+        searchValueRef.current = value;
+
+        debouncedSuggestions(value);
     };
 
     const handleSelect = useCallback(async (keyword) => {
         const q = keyword?.trim() ?? "";
-        setSearch(q);
+
+        setInputSearch(q);
+        setCommittedSearch(q);
         setSuggestions([]);
         setActiveIndex(0);
+
         await fetchProducts(q);
-    }, [fetchProducts]);
+    }, [fetchProducts, setCommittedSearch]);
+
 
     const handleClear = useCallback(() => {
-        setSearch("");
+        setInputSearch("");
+        setCommittedSearch("");
+
         setSuggestions([]);
         setActiveIndex(0);
+
         fetchProducts("");
         searchRef?.current?.focus();
-    }, [fetchProducts, searchRef]);
-
+    }, [fetchProducts, searchRef, setCommittedSearch]);
 
     const handleKeyDown = (e) => {
         if (!suggestions.length && e.key !== "Enter" && e.key !== "Backspace") return;
@@ -199,22 +223,44 @@ const Toolbar = ({
 
             case "Enter": {
                 e.preventDefault();
+
                 const selected = suggestions[activeIndex];
-                if (selected?.keyword) {
-                    handleSelect(selected.keyword);
-                } else {
+
+                if (selected?.isEmpty) {
                     fetchProducts(searchValueRef.current);
                     setSuggestions([]);
+                    break;
                 }
+
+                const q = selected?.keyword || searchValueRef.current || "";
+
+                setInputSearch(q);
+                setCommittedSearch(q);
+
+                setSuggestions([]);
+                setActiveIndex(0);
+
+                fetchProducts(q);
                 break;
             }
 
             case "Backspace":
 
-                if (searchValueRef.current.length <= 1) {
+                if (selected?.isEmpty) {
+                    fetchProducts(searchValueRef.current);
                     setSuggestions([]);
-                    fetchProducts("");
+                    break;
                 }
+
+                const q = selected?.keyword || searchValueRef.current || "";
+
+                setInputSearch(q);
+                setCommittedSearch(q);
+
+                setSuggestions([]);
+                setActiveIndex(0);
+
+                fetchProducts(q);
                 break;
 
             case "Escape":
@@ -227,41 +273,74 @@ const Toolbar = ({
     };
 
     return (
-        <div className="pd-topbar d-flex align-items-center gap-3">
+        <div className="pd-topbar d-flex align-items-center gap-2 gap-md-3 px-2 px-md-4 py-2" style={{
+            background: "var(--bg-surface)",
+            borderBottom: "1px solid var(--border-light)",
+            boxShadow: "var(--shadow-sm)",
+            minHeight: "64px"
+        }}>
+
 
             {
                 isSideBar ?
-                    <button onClick={() => setSidebar(s => !s)} className="toolbar-btn d-flex rounded-3 border-0 text-light" style={{height: "35px", padding: "0 12px", fontSize: "0.9rem", fontWeight: 900, background: "linear-gradient(135deg, var(--p), var(--p2)) !important",} }>
+                    <button
+                        onClick={() => setSidebar(s => !s)}
+                        className="toolbar-btn d-flex align-items-center justify-content-center rounded-3 border-0"
+                        style={{
+                            height: "40px",
+                            width: "40px",
+                            fontSize: "1.2rem",
+                            background: "var(--bg-hover)",
+                            color: "var(--text-main)",
+                            transition: "all 0.2s"
+                        }}
+                    >
                         ☰
                     </button>
                     :
-                    <div className="text-dark fw-black" style={{ fontFamily: "Nunito", fontSize: "1.7rem", cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>ShopEase</div>
+                    <div className="fw-bold d-none d-sm-block" style={{
+                        fontFamily: "var(--font-heading)",
+                        fontSize: "1.4rem",
+                        cursor: 'pointer',
+                        color: "var(--primary)",
+                        whiteSpace: "nowrap"
+                    }} onClick={() => navigate('/')}>
+                        🛍️ ShopEase
+                    </div>
             }
 
             {/* ── SEARCH BOX ── */}
-
-            <div ref={dropdownRef} style={{ position: "relative", maxWidth: 420, width: "100%" }} className='d-flex justify-content-center'>
+            <div ref={dropdownRef} style={{ position: "relative", maxWidth: 600, width: "100%" }} className='d-flex justify-content-center flex-grow-1'>
                 {isSearch &&
-                    <InputGroup>
-                        <InputGroup.Text style={{ background: "#f8f9ff", border: "2px solid #e8eaf6", borderRight: "none", borderRadius: "12px 0 0 12px" }}>
+                    <InputGroup style={{ boxShadow: "var(--shadow-sm)", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
+                        <InputGroup.Text style={{
+                            background: "var(--bg-hover)",
+                            border: "1px solid var(--border-light)",
+                            borderRight: "none",
+                            paddingLeft: "16px",
+                            color: "var(--text-light)"
+                        }}>
                             {isLoading ? (
-                                <span style={{ display: "inline-block", width: 16, height: 16, border: "2px solid #ff6b35", borderTopColor: "transparent", borderRadius: "50%", animation: "spin .6s linear infinite" }} />
+                                <span style={{ display: "inline-block", width: 18, height: 18, border: "2px solid var(--primary)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin .6s linear infinite" }} />
                             ) : "🔍"}
                         </InputGroup.Text>
 
                         <Form.Control
                             ref={searchRef}
                             value={search}
-                            placeholder="Search products, brands, tags..."
+                            placeholder="Search for products, brands and more"
                             style={{
-                                border: "2px solid #e8eaf6",
+                                border: "1px solid var(--border-light)",
                                 borderLeft: "none",
-                                borderRight: search ? "none" : "2px solid #e8eaf6",
-                                borderRadius: search ? 0 : "0 12px 12px 0",
-                                fontFamily: "Nunito, sans-serif",
-                                fontWeight: 600,
-                                fontSize: "0.9rem",
-                                background: "#f8f9ff",
+                                borderRight: search ? "none" : "1px solid var(--border-light)",
+                                borderRadius: 0,
+                                fontFamily: "var(--font-body)",
+                                fontWeight: 500,
+                                fontSize: "0.95rem",
+                                background: "var(--bg-hover)",
+                                padding: "10px 12px",
+                                outline: "none",
+                                boxShadow: "none"
                             }}
                             onChange={handleChange}
                             onKeyDown={handleKeyDown}
@@ -272,15 +351,13 @@ const Toolbar = ({
                             <InputGroup.Text
                                 style={{
                                     cursor: "pointer",
-                                    border: "2px solid #e8eaf6",
+                                    border: "1px solid var(--border-light)",
                                     borderLeft: "none",
-                                    borderRadius: "0 12px 12px 0",
-                                    background: "#f8f9ff",
-                                    color: "#9ca3af",
-                                    fontWeight: 900,
+                                    background: "var(--bg-hover)",
+                                    color: "var(--text-light)",
+                                    paddingRight: "16px"
                                 }}
                                 onClick={handleClear}
-                                title="Clear search"
                             >
                                 ✕
                             </InputGroup.Text>
@@ -293,127 +370,212 @@ const Toolbar = ({
                     <ListGroup
                         style={{
                             position: "absolute",
-                            top: "calc(100% + 4px)",
+                            top: "100%",
                             left: 0,
-                            width: "100%",
-                            zIndex: 1050,
-                            maxHeight: 240,
-                            overflowY: "auto",
-                            borderRadius: 14,
-                            border: "2px solid #e8eaf6",
-                            boxShadow: "0 12px 36px rgba(0,0,0,0.12)",
-                            background: "#fff",
+                            right: 0,
+                            zIndex: 9999,
+                            marginTop: 6,
+                            borderRadius: 12,
+                            overflow: "hidden",
+                            boxShadow: "var(--shadow-lg)",
+                            border: "1px solid var(--border-light)"
                         }}
                     >
                         {suggestions.map((item, index) => (
                             <ListGroup.Item
                                 key={index}
-                                action
-                                active={index === activeIndex}
+                                action={!item.isEmpty}
+                                active={!item.isEmpty && index === activeIndex}
                                 ref={el => (itemRefs.current[index] = el)}
-                                onMouseEnter={() => setActiveIndex(index)}
-                                onClick={() => handleSelect(item.keyword)}
+                                onMouseEnter={() => !item.isEmpty && setActiveIndex(index)}
+                                onClick={() => !item.isEmpty && handleSelect(item.keyword)}
                                 style={{
-                                    fontFamily: "Nunito, sans-serif",
-                                    fontWeight: 700,
-                                    fontSize: "0.87rem",
+                                    fontFamily: "var(--font-body)",
+                                    fontWeight: item.isEmpty ? 600 : index === activeIndex ? 600 : 500,
+                                    fontSize: "0.9rem",
                                     border: "none",
-                                    borderBottom: "1px solid #f1f4ff",
-                                    padding: "10px 16px",
-                                    cursor: "pointer",
-                                    background: index === activeIndex ? "linear-gradient(135deg,#fff0e6,#fff8f4)" : "#fff",
-                                    color: index === activeIndex ? "#ff6b35" : "#374151",
+                                    borderBottom: "1px solid var(--border-light)",
+                                    padding: "12px 20px",
+                                    cursor: item.isEmpty ? "default" : "pointer",
+
+                                    background: item.isEmpty
+                                        ? "#f8fafc" // light solid bg for empty
+                                        : index === activeIndex
+                                            ? "var(--bg-hover)"
+                                            : "#ffffff", // normal solid bg
+
+                                    color: item.isEmpty
+                                        ? "#94a3b8" // muted text
+                                        : index === activeIndex
+                                            ? "var(--primary)"
+                                            : "var(--text-main)",
+
                                     display: "flex",
                                     alignItems: "center",
-                                    gap: 10,
+                                    gap: 12,
                                 }}
                             >
-                                <span style={{ fontSize: "0.8rem", opacity: 0.5 }}>🔍</span>
-                                {/* Highlight matching part */}
-                                {highlightMatch(item.keyword, search)}
+                                <span style={{ fontSize: "0.9rem", opacity: 0.4 }}>
+                                    {item.isEmpty ? "📭" : "🔍"}
+                                </span>
+
+                                {item.isEmpty ? item.keyword : highlightMatch(item.keyword, search)}
                             </ListGroup.Item>
                         ))}
                     </ListGroup>
                 )}
-
             </div>
 
             {/* ── RIGHT ICONS ── */}
-            <div className="d-flex gap-2 ms-auto">
+            <div className="d-flex align-items-center gap-3 ms-auto">
 
                 {/* Cart */}
                 <div
                     style={{ position: "relative", cursor: "pointer" }}
                     onClick={() => navigate('/dashboard/cart')}
-                    title="Cart"
+                    className="toolbar-icon-wrapper"
                 >
                     {cartQuantity > 0 && (
-                        <div className="badge-number">
+                        <div style={{
+                            position: "absolute",
+                            top: "4px",
+                            right: "-6px",
+                            background: "var(--primary)",
+                            color: "white",
+                            fontSize: "0.7rem",
+                            fontWeight: 700,
+                            width: "18px",
+                            height: "18px",
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            zIndex: 2,
+                            boxShadow: "var(--shadow-sm)"
+                        }}>
                             {cartQuantity}
                         </div>
                     )}
-                    <div className="toolbar-btn rounded-3 border">🛒</div>
+                    <div style={{ fontSize: "1.4rem", padding: "8px", borderRadius: "var(--radius-sm)", transition: "background 0.2s" }} className="hover-bg">🛒</div>
                 </div>
 
                 {/* Wishlist */}
-                <div style={{ position: "relative", cursor: "pointer" }} onClick={() => navigate('/dashboard/wishlist')} title="Wishlist">
+                <div style={{ position: "relative", cursor: "pointer" }} onClick={() => navigate('/dashboard/wishlist')} className="toolbar-icon-wrapper">
                     {isLike.length > 0 && (
-                        <div className="badge-number">
+                        <div style={{
+                            position: "absolute",
+                            top: "4px",
+                            right: "-6px",
+                            background: "var(--danger)",
+                            color: "white",
+                            fontSize: "0.7rem",
+                            fontWeight: 700,
+                            width: "18px",
+                            height: "18px",
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            zIndex: 2,
+                            boxShadow: "var(--shadow-sm)"
+                        }}>
                             {isLike.length}
                         </div>
                     )}
-                    <div className="toolbar-btn d-flex rounded-3 border">❤️</div>
+                    <div style={{ fontSize: "1.4rem", padding: "8px", borderRadius: "var(--radius-sm)", transition: "background 0.2s" }} className="hover-bg">❤️</div>
+                </div>
+
+                {/* Chat */}
+                <div style={{ position: "relative", cursor: "pointer" }} onClick={() => navigate('/chat')} className="toolbar-icon-wrapper">
+                    <div style={{ fontSize: "1.4rem", padding: "8px", borderRadius: "var(--radius-sm)", transition: "background 0.2s" }} className="hover-bg">💬</div>
                 </div>
 
                 {/* Notifications */}
-                <div style={{ position: "relative", cursor: "pointer" }} ref={bellRef} onClick={() => setShowNotif(!showNotif)} title="Notifications">
-                    <div className="toolbar-btn rounded-3 border">
+                <div style={{ position: "relative", cursor: "pointer" }} ref={bellRef} onClick={() => setShowNotif(!showNotif)} className="toolbar-icon-wrapper">
+                    <div style={{ fontSize: "1.4rem", padding: "8px", borderRadius: "var(--radius-sm)", transition: "background 0.2s" }} className="hover-bg">
                         🔔
                         {notifyCount > 0 && (
-                            <span className="badge-number" style={{ top: -5, right: -5 }}>
-                                {notifyCount > 9 ? "9+" : notifyCount}
-                            </span>
+                            <span style={{
+                                position: "absolute",
+                                top: "2px",
+                                right: "2px",
+                                background: "var(--primary)",
+                                color: "white",
+                                fontSize: "0.7rem",
+                                fontWeight: 700,
+                                width: "18px",
+                                height: "18px",
+                                borderRadius: "50%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                zIndex: 2,
+                                boxShadow: "var(--shadow-sm)"
+                            }}>
+                        {notifyCount > 9 ? "9+" : notifyCount}
+                    </span>
                         )}
-                    </div>
-                </div>
-
-                <Overlay
-                    target={bellRef.current}
-                    show={showNotif}
-                    placement="bottom-end"
-                    rootClose
-                    onHide={() => setShowNotif(false)}
-                >
-                    <Popover style={{
-                        maxWidth: 340, padding: 0,
-                        border: "0.5px solid #e5e7eb",
-                        borderRadius: 12,
-                        boxShadow: "0 8px 32px rgba(0,0,0,.12)",
-                        overflow: "hidden",
-                    }}>
-                        <NotificationPanel 
-                            mode="user" 
-                            refreshNotify={refreshNotify} 
-                            setRefreshNotify={setRefreshNotify}
-                            onMarkAllRead={() => setRefreshNotify(r => !r)}
-                        />
-                    </Popover>
-                </Overlay>
-
-                {/* Profile */}
-                <div 
-                    className="toolbar-btn rounded-3 border" 
-                    title="Profile" 
-                    onClick={() => navigate('/dashboard/settings/profile')}
-                    style={{ background: "linear-gradient(135deg,#ff6b35,#f7931e)", color: "#fff", fontWeight: 900, fontSize: "0.8rem" }}
-                >
-                    {userData?.firstName?.[0] || userData?.name?.[0] || "U"}
                 </div>
             </div>
 
-            {/* Spinner keyframe (injected once) */}
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            <Overlay
+                target={bellRef.current}
+                show={showNotif}
+                placement="bottom-end"
+                rootClose
+                onHide={() => setShowNotif(false)}
+            >
+                <Popover style={{
+                    maxWidth: 360,
+                    width: "100%",
+                    padding: 0,
+                    border: "1px solid var(--border-light)",
+                    borderRadius: "var(--radius-md)",
+                    boxShadow: "var(--shadow-lg)",
+                    overflow: "hidden",
+                }}>
+                    <NotificationPanel
+                        mode="user"
+                        refreshNotify={refreshNotify}
+                        setRefreshNotify={setRefreshNotify}
+                        onMarkAllRead={() => setRefreshNotify(r => !r)}
+                    />
+                </Popover>
+            </Overlay>
+
+            {/* Profile */}
+            <div
+                className="profile-trigger"
+                title="Profile"
+                onClick={() => navigate('/dashboard/settings')}
+                style={{
+                    background: "linear-gradient(135deg, var(--primary), var(--primary-dark))",
+                    color: "#fff",
+                    fontWeight: 700,
+                    fontSize: "0.9rem",
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    boxShadow: "var(--shadow-sm)",
+                    marginLeft: "8px"
+                }}
+            >
+                {userData?.firstName?.[0] || userData?.name?.[0] || (<MdOutlineLogin style={{marginLeft: "-7px", fontSize: "1.3rem" }}/>)}
+            </div>
         </div>
+
+            {/* Spinner keyframe (injected once) */ }
+    <style>{`
+                @keyframes spin { to { transform: rotate(360deg); } }
+                .hover-bg:hover { background: var(--bg-hover); }
+                .toolbar-icon-wrapper { transition: transform 0.1s; }
+                .toolbar-icon-wrapper:active { transform: scale(0.95); }
+            `}</style>
+        </div >
     );
 };
 
@@ -427,7 +589,7 @@ function highlightMatch(text, query) {
         const parts = text.split(regex);
         return parts.map((part, i) =>
             regex.test(part)
-                ? <span key={i} style={{ color: "#ff6b35", fontWeight: 900 }}>{part}</span>
+                ? <span key={i} style={{ color: "var(--primary)", fontWeight: 800 }}>{part}</span>
                 : part
         );
     } catch {

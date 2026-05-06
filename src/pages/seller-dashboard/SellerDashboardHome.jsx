@@ -10,8 +10,7 @@ import { useNavigate } from "react-router-dom";
 import SellerSidebar from "../../components/SellerSidebar";
 import GlobalLoader from "../../components/GlobalLoader";
 import productApi from "../../api/product.api";
-import "./SellerDashboardHome.css";
-import SellerNavbar from "../../components/Sellernavbar";
+import SellerNavbar from "../../components/SellerNavbar";
 import DataTable from "../../components/DataTable";
 import reportApi from "../../api/reportApi";
 import orderApi from "../../api/order.api";
@@ -25,7 +24,7 @@ const fmtL = (n) => n >= 100000 ? `₹${(n / 100000).toFixed(1)}L` : n >= 1000 ?
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const PIE_COLORS = ["#ff6b35", "#f7931e", "#3b82f6", "#22c55e", "#8b5cf6"];
+const PIE_COLORS = ["#3b82f6", "#60a5fa", "#93c5fd", "#2563eb", "#1d4ed8"];
 
 // ── Custom Tooltip ─────────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }) => {
@@ -434,8 +433,8 @@ export default function SellerDashboardHome() {
                           <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                             <defs>
                               <linearGradient id="gradRev" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#ff6b35" stopOpacity={0.3} />
-                                <stop offset="95%" stopColor="#ff6b35" stopOpacity={0} />
+                                <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
                               </linearGradient>
                               <linearGradient id="gradOrd" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
@@ -469,9 +468,9 @@ export default function SellerDashboardHome() {
                             <Area
                               yAxisId="revenue"
                               type="monotone" dataKey="revenue"
-                              stroke="#ff6b35" strokeWidth={2.5}
+                              stroke="var(--primary)" strokeWidth={2.5}
                               fill="url(#gradRev)" dot={false}
-                              activeDot={{ r: 5, fill: "#ff6b35" }}
+                              activeDot={{ r: 5, fill: "var(--primary)" }}
                             />
                             <Area
                               yAxisId="orders"
@@ -559,7 +558,7 @@ export default function SellerDashboardHome() {
                           <YAxis tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend wrapperStyle={{ fontSize: ".72rem", fontFamily: "Nunito", fontWeight: 800 }} />
-                          <Bar dataKey="orders" fill="#ff6b35" radius={[5, 5, 0, 0]} maxBarSize={28} />
+                          <Bar dataKey="orders" fill="var(--primary)" radius={[5, 5, 0, 0]} maxBarSize={28} />
                           <Bar dataKey="returns" fill="#e8eaf6" radius={[5, 5, 0, 0]} maxBarSize={28} />
                         </BarChart>
                       </ResponsiveContainer>

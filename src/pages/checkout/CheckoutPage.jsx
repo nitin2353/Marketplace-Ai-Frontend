@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import "./checkoutpage.css";
 import cartApi from "../../api/cartApi";
 import orderApi from "../../api/order.api";
 import GlobalHelper from "../../helper/GlobalHelper";
@@ -17,6 +16,7 @@ import addressApi from "../../api/address.api";
 import { useRazorpay } from "../../helper/useRazorpay";
 import JWTService from "../../config/jwt.config";
 import paymentApi from "../../api/payment.api";
+import "../../style/checkout.css"
 
 
 const COUPONS = { SAVE10: 10, SHOP20: 20, FIRST50: 50 };
@@ -38,14 +38,14 @@ const calcTotals = (cart, discount) => {
 
 function Stepper({ step }) {
     return (
-        <div className="co-stepper co-fu">
+        <div className="co-stepper co-fu overflow-auto pb-2" style={{ scrollbarWidth: "none" }}>
             {STEPS.slice(0, 3).map((label, i) => (
-                <div key={label} style={{ display: "flex", alignItems: "center", flex: 1 }}>
+                <div key={label} style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
                     <div className={`co-step ${i === step ? "active" : i < step ? "done" : ""}`}>
                         <div className="co-step-circle">{i < step ? "✓" : i + 1}</div>
-                        <span className="co-step-label">{label}</span>
+                        <span className="co-step-label d-none d-sm-inline">{label}</span>
                     </div>
-                    {i < 2 && <div className={`co-step-line ${i < step ? "done" : ""}`} />}
+                    {i < 2 && <div className={`co-step-line ${i < step ? "done" : ""}`} style={{ minWidth: "30px" }} />}
                 </div>
             ))}
         </div>
@@ -61,6 +61,7 @@ export default function CheckoutPage() {
 
     const [cart, setCart] = useState([]);
     const [cartLoading, setCartLoading] = useState(true);
+    const [isBuyNow, setIsBuyNow] = useState(false);
 
     const [addresses, setAddresses] = useState([]);
     const [selectedAddr, setSelectedAddr] = useState(null);
@@ -83,6 +84,27 @@ export default function CheckoutPage() {
 
 
     const fetchCart = useCallback(async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get("type");
+
+        if (type === "buy-now") {
+            const data = JSON.parse(localStorage.getItem("buyNowData"));
+            if (data) {
+                setCart(data.items.map(i => ({
+                    product_id: i.product_id,
+                    variant_id: i.variant_id,
+                    title: i.title,
+                    product_price: i.price,
+                    qty: i.quantity,
+                    price: i.price, // For consistency
+                    total: i.total
+                })));
+                setIsBuyNow(true);
+                setCartLoading(false);
+                return;
+            }
+        }
+
         setCartLoading(true);
         try {
             const { data } = await cartApi.getAllCart();
@@ -172,8 +194,12 @@ export default function CheckoutPage() {
         setOrderId(id || `ORD-${Date.now().toString().slice(-8)}`);
         setStep(3);
         toast.success("🎉 Order placed successfully!");
-        try { await cartApi.allRemoveFromCart(); } catch { /* non-critical */ }
-    }, []);
+        if (isBuyNow) {
+            localStorage.removeItem("buyNowData");
+        } else {
+            try { await cartApi.allRemoveFromCart(); } catch { /* non-critical */ }
+        }
+    }, [isBuyNow]);
 
 
     const placeCODOrder = async () => {
@@ -231,6 +257,7 @@ export default function CheckoutPage() {
                 discount_percentage: discount,
                 subtotal_amount: subtotal,
                 notes: selectedAddr?.instructions || null,
+                cart_items: buildCartPayload(),
             };
 
 
@@ -272,6 +299,7 @@ export default function CheckoutPage() {
                             discount_amount: couponSave,
                             delivery_charge: delivery,
                             notes: selectedAddr?.instructions || null,
+                            cart_items: buildCartPayload(),
                         };
 
                         console.log("Verify And Create Order Payload:", verifyPayload);
@@ -329,18 +357,18 @@ export default function CheckoutPage() {
         <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
 
             {/* Topbar */}
-            <div className="co-topbar">
+            <div className="co-topbar d-flex align-items-center justify-content-between px-3" style={{ borderBottom: "1px solid var(--border-light)", height: "64px" }}>
                 <button
-                    className="pt-1 d-flex align-itme-center fw-bold rounded-2 border-0 text-white" 
-                    style={{height: "35px", padding: "0 12px", fontSize: "0.9rem", fontWeight: 900, background: "linear-gradient(135deg, var(--p), var(--p2)) !important",} }
+                    className="d-flex align-items-center justify-content-center fw-bold rounded-2 border-0 text-white"
+                    style={{ height: "32px", width: "32px", fontSize: "0.9rem", fontWeight: 900, background: "var(--primary-gradient)", }}
                     onClick={() => step > 0 ? setStep((s) => s - 1) : navigate(-1)}
                 >
                     ←
                 </button>
-                <span className="co-topbar-brand text-dark" onClick={() => navigate("/")}>
-                    🛍️ ShopEase
+                <span className="co-topbar-brand d-none d-sm-block" style={{ color: "var(--primary)", fontSize: "1.1rem", fontWeight: 800, cursor: "pointer" }} onClick={() => navigate("/")}>
+                    MarketPlace
                 </span>
-                <span style={{ color: "rgba(255,255,255,.8)", fontWeight: 700, fontSize: "0.98rem" }} className="text-dark">
+                <span style={{ fontWeight: 700, fontSize: "0.9rem" }} className="text-dark">
                     Checkout 🔒
                 </span>
             </div>
@@ -360,7 +388,7 @@ export default function CheckoutPage() {
                         <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🛒</div>
                         <h4 className="mb-3">Your cart is empty</h4>
                         <p className="text-muted mb-4">Add some items before checkout.</p>
-                        <Button className="co-btn-main px-4" onClick={() => navigate("/dashboard")}>
+                        <Button className="co-btn px-4" style={{ background: "#4261ecff", color: "white", border: "none", padding: "10px 0", fontWeight: 600, fontSize: "1.1rem", borderRadius: "10px" }} onClick={() => navigate("/")}>
                             Continue Shopping
                         </Button>
                     </div>

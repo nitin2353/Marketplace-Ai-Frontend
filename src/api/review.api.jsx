@@ -3,7 +3,12 @@ import API from "./axios";
 // CREATE REVIEW
 const createReview = async (data) => {
     try {
-        const response = await API.post("/review", data);
+        const isFormData = data instanceof FormData;
+        const response = await API.post("/review", data, {
+            headers: {
+                "Content-Type": isFormData ? "multipart/form-data" : "application/json",
+            },
+        });
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error creating review" };
@@ -71,12 +76,32 @@ const updateReview = async (reviewId, data) => {
 };
 
 // DELETE REVIEW
-const deleteReview = async (reviewId, userId) => {
+const deleteReview = async (reviewId) => {
     try {
-        const response = await API.delete(`/review/${reviewId}/user/${userId}`);
+        const response = await API.delete(`/review/${reviewId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error deleting review" };
+    }
+};
+
+// UPDATE SELLER REPLY
+const updateSellerReply = async (reviewId, reply) => {
+    try {
+        const response = await API.patch(`/review/${reviewId}/reply`, { reply });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: "Error updating reply" };
+    }
+};
+
+// DELETE SELLER REPLY
+const deleteSellerReply = async (reviewId) => {
+    try {
+        const response = await API.delete(`/review/${reviewId}/reply`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: "Error deleting reply" };
     }
 };
 
@@ -89,4 +114,6 @@ export default {
     getUserReviews,
     updateReview,
     deleteReview,
+    updateSellerReply,
+    deleteSellerReply,
 };

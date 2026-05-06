@@ -9,7 +9,7 @@ body {
 }
 
 .eco-hero {
-    background: linear-gradient(145deg, #ff6b35 0%, #f7931e 55%, #ffcd3c 100%) !important;
+    background: linear-gradient(145deg, #3835ff 0%, #1e46f7 55%, #493cff 100%) !important;
 }
 
 .eco-sidebar-stat {
@@ -57,13 +57,13 @@ body {
 }
 
 .eco-input:focus {
-    border-color: #ff6b35 !important;
-    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15) !important;
+    border-color: #5350e7 !important;
+    box-shadow: 0 0 0 3px rgba(53, 124, 255, 0.15) !important;
     outline: none !important;
 }
 
 .eco-btn-main {
-    background: linear-gradient(135deg, #ff6b35, #f7931e) !important;
+    background: linear-gradient(135deg, #3553ff, #5242e6) !important;
     border: none !important;
     border-radius: 12px !important;
     font-weight: 800 !important;
@@ -75,7 +75,7 @@ body {
 
 .eco-btn-main:hover {
     transform: translateY(-1px) !important;
-    box-shadow: 0 8px 22px rgba(255, 107, 53, 0.38) !important;
+    box-shadow: 0 8px 22px rgba(53, 134, 255, 0.38) !important;
 }
 
 .eco-btn-outline {
@@ -90,9 +90,9 @@ body {
 }
 
 .eco-btn-outline:hover {
-    border-color: #ff6b35 !important;
-    color: #ff6b35 !important;
-    background: #fff7f4 !important;
+    border-color: #435ceb !important;
+    color: #3538ff !important;
+    background: #f4f5ff !important;
 }
 
 .product-card {
@@ -129,7 +129,7 @@ body {
 .eco-badge-stock-low {
     background: #fef2f2 !important;
     color: #dc2626 !important;
-    border: 1px solid #fca5a5 !important;
+    border: 1px solid #5242e6 !important;
 }
 
 .eco-badge-stock-ok {
@@ -145,9 +145,9 @@ body {
 }
 
 .eco-badge-tag {
-    background: #fff3ee !important;
-    color: #ff6b35 !important;
-    border: 1.5px solid #ffcdb8 !important;
+    background: #eef4ff !important;
+    color: #5242e6 !important;
+    border: 1.5px solid #6251f7 !important;
     border-radius: 20px !important;
     font-size: 0.7rem !important;
     font-weight: 700 !important;
@@ -160,7 +160,7 @@ body {
     font-size: 0.8rem !important;
     padding: 6px 16px !important;
     border: 2px solid #e8eaf6 !important;
-    background: #fff !important;
+    background: #ffffff !important;
     color: #777 !important;
     cursor: pointer;
     transition: all 0.15s;
@@ -168,9 +168,9 @@ body {
 }
 
 .eco-filter-pill.active {
-    border-color: #ff6b35 !important;
-    background: linear-gradient(135deg, #fff3ee, #fff8f4) !important;
-    color: #ff6b35 !important;
+    border-color: #5242e6 !important;
+    background: linear-gradient(135deg, #eef4ff, #f4f8ff) !important;
+    color: #5242e6 !important;
 }
 
 .stat-chip {

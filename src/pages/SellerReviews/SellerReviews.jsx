@@ -10,7 +10,7 @@ import "./SellerReviews.css";
 // ── Constants ─────────────────────────────────────────────────────────────────
 const PER_PAGE = 10;
 const SIDEBAR_W = 280;
-const AVATAR_COLORS = ["#ff6b35", "#f7931e", "#22c55e", "#3b82f6", "#a855f7", "#ec4899", "#14b8a6", "#f59e0b"];
+const AVATAR_COLORS = ["#3b82f6", "#1d4ed8", "#22c55e", "#10b981", "#8b5cf6", "#ec4899", "#14b8a6", "#f59e0b"];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const initials = (name = "") =>
@@ -25,7 +25,7 @@ const fmtDate = (d) =>
 const Stars = ({ rating = 0, size = 14 }) => (
     <span className="sr-stars">
         {[1, 2, 3, 4, 5].map(i => (
-            <span key={i} className="sr-star" style={{ fontSize: size, color: i <= rating ? "#f59e0b" : "#e5e7eb" }}>★</span>
+            <span key={i} className="sr-star" style={{ fontSize: size, color: i <= rating ? "#eab308" : "#e5e7eb" }}>★</span>
         ))}
     </span>
 );
@@ -55,7 +55,7 @@ function RatingBar({ star, count, total }) {
 }
 
 // ── Reply Section ─────────────────────────────────────────────────────────────
-function ReplySection({ review, onReplySubmit, submitting }) {
+function ReplySection({ review, onReplySubmit, onReplyDelete, submitting, clearing }) {
     const [open, setOpen] = useState(false);
     const [text, setText] = useState(review.seller_reply || "");
 
@@ -67,17 +67,28 @@ function ReplySection({ review, onReplySubmit, submitting }) {
         setOpen(false);
     };
 
+    const handleDelete = async () => {
+        if (window.confirm("Delete your reply?")) {
+            await onReplyDelete(review.id);
+        }
+    };
+
     return (
         <div style={{ marginTop: 8 }}>
             {hasReply && !open && (
                 <div className="sr-reply-existing">
-                    <div style={{ fontSize: "0.72rem", fontWeight: 900, color: "#ff6b35", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+                    <div style={{ fontSize: "0.72rem", fontWeight: 900, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
                         Your Reply
                     </div>
                     <p style={{ fontSize: "0.84rem", color: "#374151", margin: 0, lineHeight: 1.5 }}>{review.seller_reply}</p>
-                    <button className="sr-btn-ghost" style={{ marginTop: 8, fontSize: "0.75rem", padding: "4px 12px" }} onClick={() => setOpen(true)}>
-                        ✏️ Edit Reply
-                    </button>
+                    <div className="d-flex gap-2 mt-2">
+                        <button className="sr-btn-ghost" style={{ fontSize: "0.75rem", padding: "4px 12px" }} onClick={() => setOpen(true)}>
+                            ✏️ Edit Reply
+                        </button>
+                        <button className="sr-btn-ghost text-danger" style={{ fontSize: "0.75rem", padding: "4px 12px" }} onClick={handleDelete} disabled={clearing}>
+                            {clearing ? "..." : "🗑️ Clear"}
+                        </button>
+                    </div>
                 </div>
             )}
 
@@ -89,7 +100,7 @@ function ReplySection({ review, onReplySubmit, submitting }) {
 
             {open && (
                 <div className="sr-reply-box">
-                    <p style={{ fontSize: "0.73rem", fontWeight: 800, color: "#ff6b35", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+                    <p style={{ fontSize: "0.73rem", fontWeight: 800, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
                         {hasReply ? "Edit your reply" : "Write a reply"}
                     </p>
                     <textarea
@@ -113,10 +124,12 @@ function ReplySection({ review, onReplySubmit, submitting }) {
 }
 
 // ── Single Review Card ────────────────────────────────────────────────────────
-function ReviewCard({ review, onReply, onDelete, submittingId, deletingId, idx }) {
+function ReviewCard({ review, onReply, onReplyDelete, onDelete, submittingId, clearingId, deletingId, idx }) {
     const name = review.user_name || review.user?.full_name || "Anonymous";
     const color = avatarColor(name);
     const images = Array.isArray(review.images) ? review.images : [];
+
+    const productImg = Array.isArray(review.product_image_url) ? review.product_image_url[0] : review.product_image_url;
 
     return (
         <div className="sr-review-row sr-fade" style={{ animationDelay: `${idx * 0.04}s` }}>
@@ -129,9 +142,7 @@ function ReviewCard({ review, onReply, onDelete, submittingId, deletingId, idx }
                 <div className="d-flex align-items-start justify-content-between gap-2 flex-wrap mb-1">
                     <div>
                         <span style={{ fontWeight: 800, fontSize: "0.9rem", color: "#1a1a2e" }}>{name}</span>
-                        {review.is_verified_purchase && (
-                            <span className="sr-badge sr-badge-verified ms-2">✔ Verified</span>
-                        )}
+                        <span style={{ fontSize: "0.75rem", color: "#9ca3af", marginLeft: 8 }}>Order # {review.order_number}</span>
                     </div>
                     <div className="d-flex align-items-center gap-2">
                         <Stars rating={review.rating} />
@@ -140,21 +151,18 @@ function ReviewCard({ review, onReply, onDelete, submittingId, deletingId, idx }
                 </div>
 
                 {/* Product name */}
-                {(review.product_title || review.product?.title) && (
+                {review.product_title && (
                     <div className="d-flex align-items-center gap-2 mb-2" style={{ flexWrap: "wrap" }}>
-                        {review.product_image && (
-                            <img src={review.product_image} alt="" className="sr-product-img" style={{ width: 28, height: 28 }}
+                        {productImg && (
+                            <img src={productImg} alt="" className="sr-product-img" style={{ width: 32, height: 32, borderRadius: 6, objectFit: "cover" }}
                                 onError={e => { e.target.style.display = "none"; }} />
                         )}
-                        <span className="sr-badge sr-badge-product">{review.product_title || review.product?.title}</span>
+                        <span className="sr-badge sr-badge-product">{review.product_title}</span>
                     </div>
                 )}
 
                 {/* Review text */}
-                {review.title && (
-                    <p style={{ fontWeight: 800, fontSize: "0.88rem", color: "#1a1a2e", margin: "0 0 3px" }}>{review.title}</p>
-                )}
-                <p style={{ fontSize: "0.86rem", color: "#4b5563", margin: 0, lineHeight: 1.6 }}>{review.comment || review.body || "—"}</p>
+                <p style={{ fontSize: "0.86rem", color: "#4b5563", margin: 0, lineHeight: 1.6 }}>{review.comment || "No comment provided."}</p>
 
                 {/* Images */}
                 {images.length > 0 && (
@@ -170,7 +178,9 @@ function ReviewCard({ review, onReply, onDelete, submittingId, deletingId, idx }
                 <ReplySection
                     review={review}
                     onReplySubmit={onReply}
+                    onReplyDelete={onReplyDelete}
                     submitting={submittingId === review.id}
+                    clearing={clearingId === review.id}
                 />
             </div>
 
@@ -180,6 +190,7 @@ function ReviewCard({ review, onReply, onDelete, submittingId, deletingId, idx }
                 style={{ alignSelf: "flex-start", padding: "5px 10px", fontSize: "0.78rem", flexShrink: 0 }}
                 onClick={() => onDelete(review.id)}
                 disabled={deletingId === review.id}
+                title="Delete this review from customer"
             >
                 {deletingId === review.id ? "…" : "🗑️"}
             </button>
@@ -291,30 +302,34 @@ export default function SellerReviews() {
     const handleReply = useCallback(async (reviewId, text) => {
         setSubmittingId(reviewId);
         try {
-            await reviewApi.updateReview(reviewId, { seller_reply: text });
+            await reviewApi.updateSellerReply(reviewId, text);
             setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, seller_reply: text } : r));
             toast.success("Reply saved!");
-        } catch {
-            toast.error("Failed to save reply.");
+        } catch (err) {
+            toast.error(err.message || "Failed to save reply.");
         } finally {
             setSubmittingId(null);
         }
     }, []);
 
-    // Delete handler
-    const handleDelete = useCallback(async (reviewId) => {
-        if (!window.confirm("Delete this review? This cannot be undone.")) return;
-        setDeletingId(reviewId);
+    // Clear reply handler
+    const [clearingId, setClearingId] = useState(null);
+    const handleClearReply = useCallback(async (reviewId) => {
+        setClearingId(reviewId);
         try {
-            await reviewApi.deleteReview(reviewId, sellerId);
-            setReviews(prev => prev.filter(r => r.id !== reviewId));
-            toast.success("Review deleted.");
-        } catch {
-            toast.error("Failed to delete review.");
+            await reviewApi.deleteSellerReply(reviewId);
+            setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, seller_reply: null } : r));
+            toast.success("Reply cleared.");
+        } catch (err) {
+            toast.error(err.message || "Failed to clear reply.");
         } finally {
-            setDeletingId(null);
+            setClearingId(null);
         }
-    }, [sellerId]);
+    }, []);
+
+    const handleDelete = useCallback(async (reviewId) => {
+        toast.error("Sellers cannot delete customer reviews.");
+    }, []);
 
     // Filter + sort
     const filtered = useMemo(() => {
@@ -395,7 +410,7 @@ export default function SellerReviews() {
                             <div style={{ background: "#fef2f2", border: "1.5px solid #fca5a5", borderRadius: 12, padding: "14px 18px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
                                 <span>⚠️</span>
                                 <span style={{ fontWeight: 800, color: "#dc2626", fontSize: "0.88rem" }}>{error}</span>
-                                <button onClick={fetchData} style={{ marginLeft: "auto", background: "none", border: "none", color: "#ff6b35", fontWeight: 800, cursor: "pointer", fontSize: "0.82rem" }}>Retry</button>
+                                <button onClick={fetchData} style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--primary)", fontWeight: 800, cursor: "pointer", fontSize: "0.82rem" }}>Retry</button>
                             </div>
                         )}
 
@@ -478,8 +493,10 @@ export default function SellerReviews() {
                                                 review={review}
                                                 idx={i}
                                                 onReply={handleReply}
+                                                onReplyDelete={handleClearReply}
                                                 onDelete={handleDelete}
                                                 submittingId={submittingId}
+                                                clearingId={clearingId}
                                                 deletingId={deletingId}
                                             />
                                         ))

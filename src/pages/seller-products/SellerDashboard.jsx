@@ -15,8 +15,8 @@ import GlobalLoader from "../../components/GlobalLoader";
 import productApi from "../../api/product.api";
 import { requestFormReset } from "react-dom";
 import toast from "react-hot-toast";
-import './SellerDashboard.css'
-import SellerNavbar from "../../components/Sellernavbar";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
+import "./SellerDashboard.css";
 
 
 const FILTERS = ["All", "In Stock", "Low Stock", "Out of Stock", "Customizable", "Returnable"];
@@ -250,7 +250,7 @@ export default function SellerProducts() {
                     {/* Result count */}
                     <div className="mb-3 d-flex align-items-center justify-content-between">
                         <span style={{ fontSize: "0.83rem", color: "#6b7280", fontWeight: 700 }}>
-                            Showing <span style={{ color: "#ff6b35" }}>{filtered.length}</span> of {products.length} products
+                            Showing <span style={{ color: "#3538ffff" }}>{filtered.length}</span> of {products.length} products
                         </span>
                         {search && (
                             <button type="button" className="eco-filter-pill" style={{ fontSize: "0.78rem" }} onClick={() => setSearch("")}>✕ Clear search</button>

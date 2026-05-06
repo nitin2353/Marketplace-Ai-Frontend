@@ -6,39 +6,30 @@ import Toolbar from "../../components/Toolbar";
 import orderApi from "../../api/order.api";
 import { useAuthWrapper } from "../../helper/AuthWrapper";
 import JWTService from "../../config/jwt.config";
-import "./orderpage.css";
 import { FMT, FMT_DATE, TABS, STATUS_META } from "../../helper/GlobalHelper";
 import OrderCard from "./OrderCard";
 import ConfirmModal from "../../components/ConfirmModal";
+import "./orderpage.css";
 
 
 
 function SkeletonCard() {
     return (
-        <div className="ord-card" style={{ cursor: "default", transform: "none" }}>
-            <div className="ord-card-header">
-                <div className="ord-skel" style={{ width: 140, height: 14 }} />
-                <div className="ord-skel" style={{ width: 80, height: 22, borderRadius: 20 }} />
+        <div className="app-card p-4 mb-3 border-light shadow-sm opacity-50">
+            <div className="d-flex justify-content-between mb-3">
+                <div className="bg-light rounded" style={{ width: 140, height: 16 }} />
+                <div className="bg-light rounded-pill" style={{ width: 80, height: 24 }} />
             </div>
-            <div className="ord-card-body">
-                <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="ord-skel" style={{ width: 52, height: 52, borderRadius: 10 }} />
-                    ))}
-                </div>
-                <div className="ord-skel" style={{ height: 13, width: "60%", marginBottom: 6 }} />
-                <div className="ord-skel" style={{ height: 13, width: "40%" }} />
+            <div className="d-flex gap-2 mb-3">
+                {[1, 2, 3].map((i) => (
+                    <div key={i} className="bg-light rounded-3" style={{ width: 50, height: 50 }} />
+                ))}
             </div>
-            <div className="ord-card-footer">
-                <div className="ord-skel" style={{ width: 80, height: 20 }} />
-                <div className="ord-skel" style={{ width: 100, height: 34, borderRadius: 10 }} />
-            </div>
+            <div className="bg-light rounded mb-2" style={{ height: 14, width: "60%" }} />
+            <div className="bg-light rounded" style={{ height: 14, width: "40%" }} />
         </div>
     );
 }
-
-
-
 
 export default function OrdersPage() {
     const navigate = useNavigate();
@@ -58,35 +49,25 @@ export default function OrdersPage() {
 
     // ── Fetch orders ──────────────────────────────────────────────────────
     const fetchOrders = useCallback(async () => {
+        const userId = user?.id || user?.user_id || JWTService.decodeTokenDetails()?.id;
+        if (!userId) return;
+
         setLoading(true);
         setError(null);
         try {
-            const userData = JWTService.decodeTokenDetails();
-            const userId = userData?.id || userData?.user_id || user?.id;
-            if (!userId) throw new Error("User not authenticated.");
-
             const response = await orderApi.getCustomerOrders(userId);
-            if (response?.success && Array.isArray(response.data)) {
-                // Normalize the order data to match expected structure
-                const normalizedOrders = response.data.map(order => ({
+            const rawOrders = response?.data || response || [];
+
+            if (Array.isArray(rawOrders)) {
+                const normalizedOrders = rawOrders.map(order => ({
                     ...order,
-                    // Ensure consistent field names and types
-                    order_status: order.order_status,
-                    payment_status: order.payment_status,
-                    payment_method: order.payment_method,
+                    order_status: order.order_status || order.status || 'placed',
+                    payment_status: order.payment_status || 'pending',
+                    payment_method: order.payment_method || 'cod',
                     total_amount: parseFloat(order.total_amount || 0),
-                    subtotal: parseFloat(order.subtotal || 0),
-                    delivery_charge: parseFloat(order.delivery_charge || 0),
-                    discount_amount: parseFloat(order.discount_amount || 0),
-                    tax_amount: parseFloat(order.tax_amount || 0),
-                    total_items: parseInt(order.total_items || 0),
-                    total_quantity: parseInt(order.total_quantity || 0),
-                    created_time: order.created_time,
-                    modified_time: order.modified_time,
-                    // Add fallback for items (will be fetched separately if needed)
-                    items: order.items || [],
-                    // Add fallback for address snapshot (will be fetched separately if needed)
+                    items: Array.isArray(order.items) ? order.items : [],
                     address_snapshot: order.address_snapshot || null,
+                    created_time: order.created_time || order.created_at || new Date().toISOString(),
                 }));
                 setOrders(normalizedOrders);
             } else {
@@ -94,11 +75,11 @@ export default function OrdersPage() {
             }
         } catch (err) {
             console.error("Fetch orders error:", err);
-            setError("Failed to load orders. Please try again.");
+            setError("Connectivity error. Please retry synchronization.");
         } finally {
             setLoading(false);
         }
-    }, [user]);
+    }, [user?.id]);
 
     useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
@@ -114,12 +95,12 @@ export default function OrdersPage() {
                         o.id === order.id ? { ...o, order_status: "cancelled" } : o
                     )
                 );
-                toast.success("Order cancelled successfully.");
+                toast.success("Transaction cancelled successfully.");
             } else {
-                throw new Error(response?.message || "Failed to cancel order.");
+                throw new Error(response?.message || "Failed to terminate order.");
             }
         } catch (err) {
-            toast.error(err?.response?.data?.message || err?.message || "Failed to cancel order.");
+            toast.error(err?.response?.data?.message || err?.message || "Termination failed.");
         } finally {
             setCancelling(null);
         }
@@ -147,9 +128,7 @@ export default function OrdersPage() {
                     o.order_number?.toLowerCase().includes(q) ||
                     o.order_status?.toLowerCase().includes(q) ||
                     o.payment_method?.toLowerCase().includes(q) ||
-                    // Search in items if available
                     o.items?.some((i) => i.product_title?.toLowerCase().includes(q)) ||
-                    // Search in order details if loaded
                     (o.orderDetails?.items?.some((i) => i.product_title?.toLowerCase().includes(q)))
                 );
             });
@@ -179,11 +158,8 @@ export default function OrdersPage() {
         return orders.filter((o) => o.order_status === key).length;
     }, [orders]);
 
-    // ─────────────────────────────────────────────────────────────────────
-    //  Render
-    // ─────────────────────────────────────────────────────────────────────
     return (
-        <div className="ord-page">
+        <div className="app-page min-vh-100 bg-light">
             <Toolbar
                 cart={[]} wishlist={[]}
                 setSidebar={setSidebar}
@@ -191,162 +167,169 @@ export default function OrdersPage() {
                 isSideBar={false} isSearch={false}
             />
 
-            {/* ── Hero ── */}
-            <div className="ord-hero">
-                <Container>
-                    <div className="d-flex align-items-center gap-3 mb-1">
-                        <button
-                            onClick={() => navigate(-1)}
-                            style={{ background: "rgba(255,255,255,.2)", border: "none", color: "#fff", borderRadius: "50%", width: 34, height: 34, cursor: "pointer", fontSize: "1.1rem", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
-                        >
-                            ←
-                        </button>
-                        <div>
-                            <h4 className="ord-hero-title mb-0">My Orders</h4>
-                            <p className="ord-hero-sub mb-0">Track and manage your purchases</p>
-                        </div>
-                    </div>
-
-                    {/* Stats */}
-                    {!loading && orders.length > 0 && (
-                        <div className="ord-stat-row ord-fu">
-                            {[
-                                { val: stats.total, label: "Total Orders" },
-                                { val: stats.delivered, label: "Delivered" },
-                                { val: stats.active, label: "Active" },
-                                { val: FMT(stats.spent), label: "Total Spent" },
-                            ].map(({ val, label }) => (
-                                <div key={label} className="ord-stat">
-                                    <span className="ord-stat-val">{val}</span>
-                                    <span className="ord-stat-label">{label}</span>
+            {/* ── Professional Hero ── */}
+            <div className="bg-primary py-5 position-relative overflow-hidden shadow-sm">
+                <div className="position-absolute top-0 start-0 w-100 h-100 opacity-10" style={{ background: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                <Container className="position-relative">
+                    <Row className="align-items-center g-4">
+                        <Col lg={6}>
+                            <div className="d-flex align-items-center gap-3 mb-3">
+                                <button
+                                    onClick={() => navigate(-1)}
+                                    className="app-btn border-0 bg-white bg-opacity-20 text-white rounded-circle d-flex align-items-center justify-content-center hover-scale"
+                                    style={{ width: '40px', height: '40px' }}
+                                >
+                                    <i className="fas fa-arrow-left small"></i>
+                                </button>
+                                <h2 className="fw-black text-white mb-0 fs-1">Command History</h2>
+                            </div>
+                            <p className="text-white opacity-75 fw-bold uppercase letter-spacing-2 tiny">Securely track and manage your neural marketplace transactions</p>
+                        </Col>
+                        <Col lg={6}>
+                            {!loading && orders.length > 0 && (
+                                <div className="d-flex gap-3 overflow-auto pb-2 scroll-hide">
+                                    {[
+                                        { val: stats.total, label: "Total Logs", icon: "clipboard-list" },
+                                        { val: stats.delivered, label: "Deployed", icon: "check-double" },
+                                        { val: stats.active, label: "In Flux", icon: "sync" },
+                                        { val: FMT(stats.spent), label: "Net Asset Flow", icon: "layer-group" },
+                                    ].map(({ val, label, icon }) => (
+                                        <div key={label} className="bg-white bg-opacity-10 border border-white border-opacity-10 rounded-4 p-3 min-w-150 shadow-sm backdrop-blur">
+                                            <div className="d-flex align-items-center gap-2 mb-1">
+                                                <i className={`fas fa-${icon} text-white opacity-50 tiny`}></i>
+                                                <span className="text-white fw-black fs-5">{val}</span>
+                                            </div>
+                                            <span className="tiny fw-bold text-white opacity-75 uppercase letter-spacing-1">{label}</span>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            )}
+                        </Col>
+                    </Row>
                 </Container>
             </div>
 
-            <Container className="py-4">
-
+            <Container className="py-5">
                 {/* ── Error ── */}
                 {error && (
-                    <div className="ord-fu" style={{ background: "#fef2f2", border: "2px solid #fca5a5", borderRadius: 14, padding: "16px 20px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
-                        <span style={{ fontSize: 20 }}>⚠️</span>
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: 800, color: "#dc2626", fontSize: "0.88rem" }}>{error}</div>
-                            <button onClick={fetchOrders} style={{ marginTop: 4, border: "none", background: "none", color: "#ff6b35", fontWeight: 800, cursor: "pointer", fontFamily: "Nunito", fontSize: "0.8rem", padding: 0 }}>
-                                🔄 Retry
+                    <div className="app-card p-4 border-danger bg-danger bg-opacity-5 mb-5 animate__animated animate__shakeX">
+                        <div className="d-flex align-items-center gap-3">
+                            <div className="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '40px', height: '40px' }}>
+                                <i className="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div className="flex-grow-1">
+                                <h6 className="fw-bold text-danger mb-0 uppercase letter-spacing-1">Protocol Failure</h6>
+                                <p className="tiny fw-bold text-muted mb-0">{error}</p>
+                            </div>
+                            <button onClick={fetchOrders} className="app-btn app-btn-outline border-danger text-danger py-1 px-3 tiny fw-bold uppercase">
+                                RE-SYNC
                             </button>
                         </div>
                     </div>
                 )}
 
-                {/* ── Loading ── */}
+                {/* ── Content ── */}
                 {loading ? (
-                    <>
-                        {[1, 2, 3].map((i) => <SkeletonCard key={i} />)}
-                    </>
-
+                    <Row className="g-4">
+                        {[1, 2, 3].map((i) => <Col key={i} xs={12}><SkeletonCard /></Col>)}
+                    </Row>
                 ) : orders.length === 0 ? (
-
-                    /* ── Empty state ── */
-                    <div className="ord-empty ord-fu">
-                        <div style={{ fontSize: "3.5rem", marginBottom: 14 }}>📦</div>
-                        <h5 className="fw-bold mb-2" style={{ color: "#1a1a2e" }}>No orders yet</h5>
-                        <p className="text-muted mb-4" style={{ fontSize: "0.88rem" }}>
-                            Start shopping and your orders will appear here.
-                        </p>
+                    <div className="text-center py-5 animate__animated animate__fadeIn">
+                        <div className="display-1 text-primary opacity-10 mb-4"><i className="fas fa-box-open"></i></div>
+                        <h3 className="fw-black text-dark mb-2">Registry Empty</h3>
+                        <p className="app-muted mb-5 fw-bold">No transactions detected in your command history.</p>
                         <button
                             onClick={() => navigate("/dashboard")}
-                            style={{ border: "none", borderRadius: 12, background: "linear-gradient(135deg,#ff6b35,#f7931e)", color: "#fff", fontWeight: 800, padding: "12px 32px", fontFamily: "Nunito", cursor: "pointer", fontSize: "0.9rem" }}
+                            className="app-btn app-btn-primary px-5 py-3 shadow-lg fs-6 fw-bold transition-all hover-scale"
                         >
-                            🛍️ Start Shopping
+                            <i className="fas fa-shopping-cart me-2"></i>INITIALIZE SHOPPING
                         </button>
                     </div>
-
                 ) : (
                     <>
-                        {/* ── Search ── */}
-                        <div className="ord-search-wrap ord-fu">
-                            <span className="ord-search-icon">🔍</span>
-                            <input
-                                className="ord-search"
-                                placeholder="Search by order number or product name…"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
+                        {/* ── Filters & Search ── */}
+                        <div className="app-card p-2 bg-white shadow-sm border-light mb-5">
+                            <Row className="g-2 align-items-center">
+                                <Col lg={4}>
+                                    <div className="position-relative">
+                                        <i className="fas fa-search position-absolute start-0 top-50 translate-middle-y ms-3 text-muted small"></i>
+                                        <input
+                                            className="app-input border-0 shadow-none ps-5"
+                                            placeholder="Query order # or node name…"
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                        />
+                                    </div>
+                                </Col>
+                                <Col lg={8}>
+                                    <div className="d-flex gap-1 overflow-auto scroll-hide p-1">
+                                        {TABS.map(({ key, label }) => {
+                                            const count = tabCount(key);
+                                            return (
+                                                <button
+                                                    key={key}
+                                                    className={`app-btn py-2 px-3 small fw-bold uppercase letter-spacing-1 transition-all flex-shrink-0 ${activeTab === key ? 'app-btn-primary shadow-sm' : 'bg-transparent text-muted hover-bg-light border-0 shadow-none'}`}
+                                                    onClick={() => setActiveTab(key)}
+                                                >
+                                                    {label} {count > 0 && <span className="opacity-50 ms-1 tiny">[{count}]</span>}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </Col>
+                            </Row>
                         </div>
 
-                        {/* ── Tabs ── */}
-                        <div className="ord-tabs ord-fu">
-                            {TABS.map(({ key, label }) => {
-                                const count = tabCount(key);
-                                return (
-                                    <button
-                                        key={key}
-                                        className={`ord-tab ${activeTab === key ? "active" : ""}`}
-                                        onClick={() => setActiveTab(key)}
-                                    >
-                                        {label}
-                                        {count > 0 && (
-                                            <span style={{ marginLeft: 5, opacity: 0.8, fontSize: "0.7rem" }}>
-                                                ({count})
-                                            </span>
-                                        )}
-                                    </button>
-                                );
-                            })}
+                        {/* ── Results Info ── */}
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <p className="tiny fw-bold text-muted mb-0 uppercase letter-spacing-2">
+                                GRID: <span className="text-dark">{paginatedOrders.length}</span> / {filtered.length} LOGS
+                                {search && <span> · FILTER: <span className="text-primary">"{search}"</span></span>}
+                            </p>
+                            {totalPages > 1 && <span className="tiny fw-bold text-muted uppercase">PAGE {currentPage} OF {totalPages}</span>}
                         </div>
 
-                        {/* ── Results count ── */}
-                        <p style={{ fontSize: "0.8rem", fontWeight: 700, color: "#9ca3af", marginBottom: 16 }}>
-                            Showing <strong style={{ color: "#374151" }}>{paginatedOrders.length}</strong> of {filtered.length} orders
-                            {search && <> for <strong style={{ color: "#ff6b35" }}>"{search}"</strong></>}
-                            {totalPages > 1 && <> (Page {currentPage} of {totalPages})</>}
-                        </p>
-
-                        {/* ── No filter results ── */}
+                        {/* ── No filtered results ── */}
                         {filtered.length === 0 ? (
-                            <div className="ord-empty ord-fu">
-                                <div style={{ fontSize: "2.5rem", marginBottom: 12 }}>🔍</div>
-                                <p className="fw-bold mb-1" style={{ color: "#1a1a2e" }}>No orders found</p>
-                                <p className="text-muted mb-3" style={{ fontSize: "0.84rem" }}>
-                                    Try a different filter or search term.
-                                </p>
+                            <div className="app-card p-5 text-center bg-white border-light shadow-sm animate__animated animate__fadeIn">
+                                <div className="fs-1 text-muted opacity-25 mb-3"><i className="fas fa-search-minus"></i></div>
+                                <h6 className="fw-bold text-dark mb-1 uppercase letter-spacing-1">No matches found in grid</h6>
+                                <p className="tiny fw-bold text-muted mb-4 opacity-75">Adjust your neural filters or query parameters.</p>
                                 <button
                                     onClick={() => { setActiveTab("all"); setSearch(""); }}
-                                    style={{ border: "none", background: "none", color: "#ff6b35", fontWeight: 800, cursor: "pointer", fontFamily: "Nunito", fontSize: "0.84rem" }}
+                                    className="app-btn app-btn-outline py-2 px-4 tiny fw-bold uppercase letter-spacing-1"
                                 >
-                                    Clear filters →
+                                    WIPE FILTERS
                                 </button>
                             </div>
                         ) : (
                             <>
-                                {/* ── Order cards ── */}
-                                {paginatedOrders.map((order, i) => (
-                                    <div key={order.id} style={{ animationDelay: `${i * 0.04}s` }}>
-                                        <OrderCard
-                                            order={order}
-                                            setSelectedOrder={setSelectedOrder}
-                                            onCancel={handleCancel}
-                                            cancelling={cancelling}
-                                            setShowCancel={setShowCancel}
-                                        />
-                                    </div>
-                                ))}
+                                <Stack gap={4}>
+                                    {paginatedOrders.map((order, i) => (
+                                        <div key={order.id} className="animate__animated animate__fadeInUp" style={{ animationDelay: `${i * 0.05}s` }}>
+                                            <OrderCard
+                                                order={order}
+                                                setSelectedOrder={setSelectedOrder}
+                                                onCancel={handleCancel}
+                                                cancelling={cancelling}
+                                                setShowCancel={setShowCancel}
+                                            />
+                                        </div>
+                                    ))}
+                                </Stack>
 
                                 {/* ── Pagination ── */}
                                 {totalPages > 1 && (
-                                    <div className="ord-pagination ord-fu">
+                                    <div className="d-flex justify-content-center align-items-center gap-2 mt-5">
                                         <button
-                                            className="ord-page-btn"
+                                            className="app-btn app-btn-outline py-2 px-3 border-0 shadow-none hover-bg-light"
                                             disabled={currentPage === 1}
                                             onClick={() => handlePageChange(currentPage - 1)}
                                         >
-                                            ‹ Previous
+                                            <i className="fas fa-chevron-left"></i>
                                         </button>
 
-                                        <div className="ord-page-numbers">
+                                        <div className="d-flex gap-1">
                                             {Array.from({ length: totalPages }, (_, i) => i + 1)
                                                 .filter(page => {
                                                     const distance = Math.abs(page - currentPage);
@@ -355,10 +338,10 @@ export default function OrdersPage() {
                                                 .map((page, index, arr) => (
                                                     <React.Fragment key={page}>
                                                         {index > 0 && arr[index - 1] !== page - 1 && (
-                                                            <span className="ord-page-dots">...</span>
+                                                            <span className="px-2 py-2 text-muted fw-bold">...</span>
                                                         )}
                                                         <button
-                                                            className={`ord-page-btn ${page === currentPage ? 'active' : ''}`}
+                                                            className={`app-btn shadow-none px-3 py-2 small fw-black ${page === currentPage ? 'app-btn-primary shadow-sm' : 'bg-transparent text-muted hover-bg-light border-0'}`}
                                                             onClick={() => handlePageChange(page)}
                                                         >
                                                             {page}
@@ -368,11 +351,11 @@ export default function OrdersPage() {
                                         </div>
 
                                         <button
-                                            className="ord-page-btn"
+                                            className="app-btn app-btn-outline py-2 px-3 border-0 shadow-none hover-bg-light"
                                             disabled={currentPage === totalPages}
                                             onClick={() => handlePageChange(currentPage + 1)}
                                         >
-                                            Next ›
+                                            <i className="fas fa-chevron-right"></i>
                                         </button>
                                     </div>
                                 )}
@@ -381,12 +364,13 @@ export default function OrdersPage() {
                     </>
                 )}
             </Container>
+
             <ConfirmModal
                 show={showCancel}
                 onConfirm={() => handleCancel(selectedOrder)}
                 onCancel={() => setShowCancel(false)}
-                title="Cancel Order?"
-                message={`Are you sure you want to cancel order #${selectedOrder?.order_number}?`}
+                title="Terminate Order Process?"
+                message={`Are you sure you want to cancel log #${selectedOrder?.order_number}? This action might be permanent depending on the node status.`}
                 loading={cancelling}
             />
         </div>

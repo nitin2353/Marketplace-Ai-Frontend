@@ -3,7 +3,6 @@ import { Container, Row, Col } from "react-bootstrap";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import Toolbar from "../../components/Toolbar";
-import './Cart.css'
 import cartApi from "../../api/cartApi";
 import GlobalLoader from "../../components/GlobalLoader";
 import GlobalHelper from "../../helper/GlobalHelper";
@@ -37,7 +36,7 @@ export default function CartPage() {
             if (data.success && Array.isArray(data.data)) {
                 setItems(data.data.map(GlobalHelper.API_FIELDS_MAP['cart']));
             } else {
-                setItems(data.data[0].GlobalHelper.API_FIELDS_MAP['cart']);
+                setItems([]);
             }
         } catch (error) {
             console.error("Cart fetch error:", error.message);
@@ -48,24 +47,21 @@ export default function CartPage() {
     };
 
     useEffect(() => { fetchCart(); }, []);
-    
+
 
     const updateQty = async (cartId, delta) => {
-
         const item = items.find(i => i.id === cartId);
         if (!item) return;
 
         const newQty = Math.max(1, Math.min(item.stock, item.qty + delta));
-
         if (newQty === item.qty) return;
 
         setItems(prev => prev.map(i => i.id === cartId ? { ...i, qty: newQty } : i));
         setUpdatingQty(cartId);
-        console.log({ quantity: newQty })
+
         try {
             await cartApi.updateCart(cartId, { quantity: newQty });
         } catch (error) {
-            // Rollback on failure
             setItems(prev => prev.map(i => i.id === cartId ? { ...i, qty: item.qty } : i));
             toast.error("Could not update quantity. Please try again.");
         } finally {
@@ -76,13 +72,13 @@ export default function CartPage() {
 
     const removeItem = async (cartId) => {
         setRemoving(cartId);
-        // Short delay for fade-out animation
         await new Promise(r => setTimeout(r, 300));
 
         const snapshot = [...items];
         setItems(prev => prev.filter(i => i.id !== cartId));
         setRemoving(null);
         setRefresh(!refresh);
+
         try {
             await cartApi.deleteCart(cartId);
             addToast("Item removed from cart");
@@ -103,7 +99,7 @@ export default function CartPage() {
             setItems(snapshot);
             toast.error("Could not clear cart. Please try again.");
         } finally {
-            setRefresh(!refresh)
+            setRefresh(!refresh);
         }
     };
 
@@ -124,14 +120,12 @@ export default function CartPage() {
     const saved = items.reduce((s, i) => s + Math.max(0, i.old_price - i.price) * i.qty, 0);
     const couponSave = Math.round(subtotal * discount / 100);
     const delivery = subtotal > 0 && subtotal >= 499 ? 0 : subtotal > 0 ? 49 : 0;
-    console.log(items);
     const total = subtotal - couponSave + delivery;
     const totalItems = items.reduce((s, i) => s + i.qty, 0);
 
     useEffect(() => {
-        if (coupon)
-            applyCoupon()
-    }, [])
+        if (coupon) applyCoupon();
+    }, []);
 
 
     return (
@@ -158,12 +152,11 @@ export default function CartPage() {
                             Looks like you haven't added anything yet.
                         </p>
                         <button
-                            onClick={() => navigate("/dashboard")}
-                            style={{
-                                border: "none", borderRadius: 12,
-                                background: "linear-gradient(135deg,#ff6b35,#f7931e)",
+                            onClick={() => navigate("/")}
+                            style={{border: "none", borderRadius: 12,
+                                background: "var(--primary-gradient)",
                                 color: "#fff", fontWeight: 800, padding: "12px 32px",
-                                fontFamily: "Nunito", cursor: "pointer", fontSize: ".95rem"
+                                fontFamily: "var(--font-main)", cursor: "pointer", fontSize: ".95rem"
                             }}
                         >
                             🛍️ Start Shopping
@@ -172,6 +165,7 @@ export default function CartPage() {
 
                 ) : (
                     <Row className="g-4">
+
                         {/* ══ CART ITEMS ══ */}
                         <Col lg={8}>
                             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -185,13 +179,13 @@ export default function CartPage() {
                                         <button
                                             onClick={clearCart}
                                             style={{
-                                                border: "1.5px solid #fca5a5", borderRadius: 8,
-                                                background: "#fff", color: "#dc2626",
+                                                border: "1.5px solid #262fdcff", borderRadius: 8,
+                                                background: "#fff", color: "#262fdcff",
                                                 fontWeight: 700, fontSize: ".78rem",
                                                 padding: "5px 14px", fontFamily: "Nunito", cursor: "pointer",
                                                 transition: "background .15s"
                                             }}
-                                            onMouseEnter={e => e.currentTarget.style.background = "#fff0f0"}
+                                            onMouseEnter={e => e.currentTarget.style.background = "#f0f1ffff"}
                                             onMouseLeave={e => e.currentTarget.style.background = "#fff"}
                                         >
                                             🗑️ Clear Cart
@@ -214,153 +208,156 @@ export default function CartPage() {
                                     </div>
                                 )}
 
-
-                                {items.map((item, i) => (
+                                {/* ── Cart Items ── */}
+                                {items.map((item) => (
                                     <div
                                         key={item.id}
-                                        className={`cart-item fu ${removing === item.id ? "opacity-25" : ""}`}
-                                        style={{ animationDelay: `${i * 0.06}s`, transition: "opacity .3s" }}
+                                        className="eco-card p-3"
+                                        style={{
+                                            borderRadius: 16,
+                                            background: "#fff",
+                                            opacity: removing === item.id ? 0 : 1,
+                                            transition: "opacity .3s"
+                                        }}
                                     >
-                                        {console.log("itemitem", )}
-                                        <div style={{ position: "relative", flexShrink: 0 }}>
-                                            {item.image_url
-                                                ? <img src={item.image_url.split(',')[0].replaceAll('"{\\"', "").replaceAll('\\"', "")} alt={item.title} className="cart-img"
-                                                    onError={e => { e.target.src = `https://placehold.co/100x100/f1f4ff/ff6b35?text=${encodeURIComponent(item.title.slice(0, 2))}`; }}
-                                                    style={{ cursor: "pointer" }}
-                                                    onClick={() => navigate(`/product/${item.product_id}`)}
-                                                />
-                                                : <div className="cart-img-placeholder">📦</div>
-                                            }
+                                        <div className="d-flex flex-column flex-sm-row gap-3">
 
-                                        </div>
-
-                                        {/* Product Info */}
-                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                            <div className="d-flex justify-content-between align-items-start gap-2">
-                                                <div style={{ minWidth: 0, flex: 1 }}>
-
-                                                    {/* Brand */}
-                                                    <div style={{
-                                                        fontSize: ".7rem", fontWeight: 800, color: "var(--p)",
-                                                        textTransform: "uppercase", letterSpacing: ".04em", marginBottom: 2
-                                                    }}>
-                                                        {item.brand}
-                                                    </div>
-
-                                                    {/* Title */}
-                                                    <div
-                                                        className="fw-bold"
-                                                        style={{
-                                                            fontSize: ".95rem", color: "#1a1a2e",
-                                                            lineHeight: 1.35, marginBottom: 6,
-                                                            cursor: "pointer",
-                                                            overflow: "hidden", display: "-webkit-box",
-                                                            WebkitLineClamp: 2, WebkitBoxOrient: "vertical"
-                                                        }}
+                                            {/* Image */}
+                                            <div style={{ position: "relative", flexShrink: 0, textAlign: "center" }}>
+                                                {item.image_url
+                                                    ? <img
+                                                        src={item.image_url.split(',')[0].replaceAll('"{\\"', "").replaceAll('\\"', "")}
+                                                        alt={item.title}
+                                                        className="cart-img"
+                                                        onError={e => { e.target.src = `https://placehold.co/100x100/f1f4ff/ff6b35?text=${encodeURIComponent(item.title.slice(0, 2))}`; }}
+                                                        style={{ cursor: "pointer", width: "100px", height: "100px", objectFit: "cover", borderRadius: 12 }}
                                                         onClick={() => navigate(`/product/${item.product_id}`)}
-                                                    >
-                                                        {item.title}
-                                                    </div>
+                                                    />
+                                                    : <div className="cart-img-placeholder" style={{ width: "100px", height: "100px" }}>📦</div>
+                                                }
+                                            </div>
 
-                                                    {/* ── Variant info chips ── */}
-                                                    <div className="d-flex flex-wrap gap-2 mb-2 align-items-center">
-                                                        {item.color && (
-                                                            <div className="d-flex align-items-center gap-1"
-                                                                style={{
+                                            {/* Product Info */}
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <div className="d-flex justify-content-between align-items-start gap-2">
+                                                    <div style={{ minWidth: 0, flex: 1 }}>
+
+                                                        {/* Brand */}
+                                                        <div style={{
+                                                            fontSize: ".7rem", fontWeight: 800, color: "var(--primary)",
+                                                            textTransform: "uppercase", letterSpacing: ".04em", marginBottom: 2
+                                                        }}>
+                                                            {item.brand}
+                                                        </div>
+
+                                                        {/* Title */}
+                                                        <div
+                                                            className="fw-bold"
+                                                            style={{
+                                                                fontSize: ".95rem", color: "#1a1a2e",
+                                                                lineHeight: 1.35, marginBottom: 6,
+                                                                cursor: "pointer",
+                                                                overflow: "hidden", display: "-webkit-box",
+                                                                WebkitLineClamp: 2, WebkitBoxOrient: "vertical"
+                                                            }}
+                                                            onClick={() => navigate(`/product/${item.product_id}`)}
+                                                        >
+                                                            {item.title}
+                                                        </div>
+
+                                                        {/* Variant info chips */}
+                                                        <div className="d-flex flex-wrap gap-2 mb-2 align-items-center">
+                                                            {item.color && (
+                                                                <div className="d-flex align-items-center gap-1"
+                                                                    style={{
+                                                                        background: "#f8f9ff", border: "1px solid #e8eaf6",
+                                                                        borderRadius: 8, padding: "3px 10px",
+                                                                        fontSize: ".72rem", fontWeight: 700, color: "#374151"
+                                                                    }}>
+                                                                    <span style={{
+                                                                        width: 12, height: 12, borderRadius: "50%",
+                                                                        background: item.color,
+                                                                        display: "inline-block", flexShrink: 0,
+                                                                        border: "1.5px solid rgba(0,0,0,.12)"
+                                                                    }} />
+                                                                    {item.color}
+                                                                </div>
+                                                            )}
+                                                            {item.size && (
+                                                                <div style={{
                                                                     background: "#f8f9ff", border: "1px solid #e8eaf6",
                                                                     borderRadius: 8, padding: "3px 10px",
-                                                                    fontSize: ".72rem", fontWeight: 700, color: "#374151"
+                                                                    fontSize: ".72rem", fontWeight: 800, color: "#374151"
                                                                 }}>
-                                                                <span style={{
-                                                                    width: 12, height: 12, borderRadius: "50%",
-                                                                    background: item.color,
-                                                                    display: "inline-block", flexShrink: 0,
-                                                                    border: "1.5px solid rgba(0,0,0,.12)"
-                                                                }} />
-                                                                {item.color}
+                                                                    Size: {item.size}
+                                                                </div>
+                                                            )}
+                                                            {discount > 0 && (
+                                                                <div style={{
+                                                                    background: "#dcfce7", color: "#166534",
+                                                                    borderRadius: 8, padding: "3px 10px",
+                                                                    fontSize: ".72rem", fontWeight: 900
+                                                                }}>
+                                                                    {discount}% OFF
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Stock warning */}
+                                                        {item.stock > 0 && item.stock < 15 && (
+                                                            <div style={{ fontSize: ".7rem", color: "#d97706", fontWeight: 800, marginBottom: 4 }}>
+                                                                ⚠️ Limited stock!
                                                             </div>
                                                         )}
-                                                        {console.log("item", item)}
-                                                        {item.size && (
-                                                            <div style={{
-                                                                background: "#f8f9ff", border: "1px solid #e8eaf6",
-                                                                borderRadius: 8, padding: "3px 10px",
-                                                                fontSize: ".72rem", fontWeight: 800, color: "#374151"
-                                                            }}>
-                                                                Size: {item.size}
-                                                            </div>
-                                                        )}
-                                                        {discount > 0 && (
-                                                            <div style={{
-                                                                background: "#dcfce7", color: "#166534",
-                                                                borderRadius: 8, padding: "3px 10px",
-                                                                fontSize: ".72rem", fontWeight: 900
-                                                            }}>
-                                                                {discount}% OFF
+                                                        {item.stock === 0 && (
+                                                            <div style={{ fontSize: ".7rem", color: "#dc2626", fontWeight: 800, marginBottom: 4 }}>
+                                                                ❌ Out of stock
                                                             </div>
                                                         )}
                                                     </div>
 
-                                                    {/* Stock warning */}
-                                                    {item.stock > 0 && item.stock < 15 && (
-                                                        <div style={{ fontSize: ".7rem", color: "#d97706", fontWeight: 800, marginBottom: 4 }}>
-                                                            ⚠️ Limited stock!
-                                                        </div>
-                                                    )}
-                                                    {item.stock === 0 && (
-                                                        <div style={{ fontSize: ".7rem", color: "#dc2626", fontWeight: 800, marginBottom: 4 }}>
-                                                            ❌ Out of stock
-                                                        </div>
-                                                    )}
+                                                    {/* Remove button */}
+                                                    <button
+                                                        className="remove-btn"
+                                                        style={{color:'#262fdcff', background: '#efefffff', border: "1px solid #262fdcff"}}
+                                                        onClick={() => removeItem(item.id)}
+                                                        disabled={removing === item.id}
+                                                        title="Remove from cart"
+                                                    >✕</button>
                                                 </div>
 
-                                                {/* Remove button */}
-                                                <button
-                                                    className="remove-btn"
-                                                    onClick={() => removeItem(item.id)}
-                                                    disabled={removing === item.id}
-                                                    title="Remove from cart"
-                                                >✕</button>
+                                                {/* Price + Qty row */}
+                                                <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-3">
+                                                    <div className="d-flex align-items-baseline gap-2">
+                                                        <span style={{ fontWeight: 900, fontSize: "1.2rem", color: "var(--primary)" }}>
+                                                            {FMT(item.product_price)}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Qty controls */}
+                                                    <div className="d-flex align-items-center gap-2">
+                                                        <button
+                                                            className="qty-btn"
+                                                            disabled={item.qty <= 1 || updatingQty === item.id || removing === item.id}
+                                                            onClick={() => updateQty(item.id, -1)}
+                                                        >−</button>
+
+                                                        <span style={{
+                                                            fontWeight: 900, fontSize: "1rem",
+                                                            minWidth: 28, textAlign: "center"
+                                                        }}>
+                                                            {item.qty}
+                                                        </span>
+
+                                                        <button
+                                                            className="qty-btn"
+                                                            disabled={item.qty >= item.stock || updatingQty === item.id || removing === item.id}
+                                                            onClick={() => updateQty(item.id, 1)}
+                                                        >+</button>
+                                                    </div>
+                                                </div>
                                             </div>
 
-                                            {/* ── Price + Qty row ── */}
-                                            <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-1">
-                                                {console.log(item)}
-                                                {/* Price */}
-                                                <div className="d-flex align-items-baseline gap-2 flex-wrap">
-                                                    <span style={{ fontWeight: 900, fontSize: "1.1rem", color: "var(--p)" }}>
-                                                        {FMT(item.product_price)}
-                                                    </span>
-                                                </div>
-
-                                                {/* Qty controls */}
-                                                <div className="d-flex align-items-center gap-2">
-                                                    <button
-                                                        className="qty-btn"
-                                                        disabled={item.qty <= 1 || updatingQty === item.id || removing === item.id}
-                                                        onClick={() => updateQty(item.id, -1)}
-                                                    >−</button>
-
-                                                    <span style={{
-                                                        fontWeight: 900, fontSize: "1rem",
-                                                        minWidth: 28, textAlign: "center",
-                                                        opacity: updatingQty === item.id ? 0.4 : 1,
-                                                        transition: "opacity .2s"
-                                                    }}>
-                                                        {item.qty}
-                                                    </span>
-
-                                                    <button
-                                                        className="qty-btn"
-                                                        disabled={item.qty >= item.stock || updatingQty === item.id || removing === item.id}
-                                                        onClick={() => updateQty(item.id, 1)}
-                                                    >+</button>
-
-                                                    <span style={{ fontSize: ".75rem", color: "#9ca3af", fontWeight: 700, marginLeft: 4 }}>
-                                                        = <b style={{ color: "#374151" }}>{FMT(item.product_price * item.qty)}</b>
-                                                    </span>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -456,7 +453,7 @@ export default function CartPage() {
 
                                 <div className="d-flex justify-content-between align-items-center mb-4">
                                     <span style={{ fontWeight: 900, fontSize: "1rem", color: "#1a1a2e" }}>Total Amount</span>
-                                    <span style={{ fontWeight: 900, fontSize: "1.3rem", color: "var(--p)" }}>{FMT(total)}</span>
+                                    <span style={{ fontWeight: 900, fontSize: "1.3rem", color: "var(--primary)" }}>{FMT(total)}</span>
                                 </div>
 
                                 {/* Free delivery nudge */}

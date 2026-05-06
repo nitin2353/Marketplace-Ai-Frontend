@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import './Settings.css'
 import { Card, Col, Row, Form, Button } from 'react-bootstrap';
 import { IoSave } from 'react-icons/io5';
 import toast from 'react-hot-toast';

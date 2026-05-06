@@ -64,7 +64,7 @@ export default function OrderSummary({
                         onChange={(e) => onCouponChange(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && onCouponApply()}
                     />
-                    <button className="co-coupon-btn" onClick={onCouponApply}>Apply</button>
+                    <button className="w-25" style={{ background: "#4261ecff", color: "white", border: "none", padding: "10px 0", fontWeight: 600, fontSize: "1.1rem", borderRadius: "10px" }} onClick={onCouponApply}>Apply</button>
                 </div>
                 {couponMsg && (
                     <p style={{ fontSize: "0.75rem", fontWeight: 700, marginTop: 5, color: couponMsg.type === "success" ? "#16a34a" : "#dc2626" }}>

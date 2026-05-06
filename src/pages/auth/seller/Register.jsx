@@ -27,26 +27,26 @@ const injectStyle = () => {
   const s = document.createElement("style");
   s.id = "seller-reg-style";
   s.textContent = `
-    body { font-family: 'Nunito', sans-serif !important; background: #f1f4ff !important; }
-    .sr-hero { background: linear-gradient(145deg, #ff6b35 0%, #f7931e 55%, #ffcd3c 100%) !important; }
-    .sr-card { border-radius: 24px !important; border: none !important; box-shadow: 0 24px 64px rgba(0,0,0,0.13) !important; }
-    .sr-input { border-radius: 12px !important; border: 2px solid #e8eaf6 !important; padding: 11px 15px !important; font-size: 0.93rem !important; transition: border-color 0.2s, box-shadow 0.2s !important; font-family: 'Nunito', sans-serif !important; }
-    .sr-input:focus { border-color: #ff6b35 !important; box-shadow: 0 0 0 3px rgba(255,107,53,0.15) !important; outline: none !important; }
+    body { font-family: var(--font-main, 'Nunito', sans-serif) !important; background: var(--bg-main, #f1f4ff) !important; }
+    .sr-hero { background: var(--primary-gradient) !important; }
+    .sr-card { border-radius: 24px !important; border: none !important; box-shadow: var(--shadow-lg) !important; }
+    .sr-input { border-radius: 12px !important; border: 2px solid var(--border-light) !important; padding: 11px 15px !important; font-size: 0.93rem !important; transition: border-color 0.2s, box-shadow 0.2s !important; font-family: var(--font-main) !important; }
+    .sr-input:focus { border-color: var(--primary) !important; box-shadow: var(--shadow-sm) !important; outline: none !important; }
     .sr-input.is-invalid { border-color: #dc3545 !important; }
-    .sr-btn-main { background: linear-gradient(135deg, #ff6b35, #f7931e) !important; border: none !important; border-radius: 14px !important; font-weight: 800 !important; font-size: 1rem !important; padding: 13px 28px !important; letter-spacing: 0.4px !important; font-family: 'Nunito', sans-serif !important; transition: transform 0.15s, box-shadow 0.15s !important; }
-    .sr-btn-main:hover:not(:disabled) { transform: translateY(-2px) !important; box-shadow: 0 10px 28px rgba(255,107,53,0.4) !important; }
+    .sr-btn-main { background: var(--primary-gradient) !important; border: none !important; border-radius: 14px !important; font-weight: 800 !important; font-size: 1rem !important; padding: 13px 28px !important; letter-spacing: 0.4px !important; font-family: var(--font-main) !important; transition: transform 0.15s, box-shadow 0.15s !important; }
+    .sr-btn-main:hover:not(:disabled) { transform: translateY(-2px) !important; box-shadow: var(--shadow-md) !important; }
     .sr-btn-main:disabled { opacity: 0.65 !important; }
-    .sr-btn-back { border-radius: 14px !important; font-weight: 700 !important; font-size: 1rem !important; padding: 12px 28px !important; border: 2px solid #e8eaf6 !important; background: #fff !important; color: #555 !important; font-family: 'Nunito', sans-serif !important; transition: border-color 0.2s, color 0.2s !important; }
-    .sr-btn-back:hover { border-color: #ff6b35 !important; color: #ff6b35 !important; background: #fff7f4 !important; }
+    .sr-btn-back { border-radius: 14px !important; font-weight: 700 !important; font-size: 1rem !important; padding: 12px 28px !important; border: 2px solid var(--border-light) !important; background: #fff !important; color: #555 !important; font-family: var(--font-main) !important; transition: border-color 0.2s, color 0.2s !important; }
+    .sr-btn-back:hover { border-color: var(--primary) !important; color: var(--primary) !important; background: var(--bg-hover) !important; }
     .sr-step-bubble { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.88rem; transition: background 0.3s, color 0.3s, box-shadow 0.3s; }
-    .sr-step-bubble.done { background: linear-gradient(135deg, #ff6b35, #f7931e); color: #fff; box-shadow: 0 4px 12px rgba(255,107,53,0.35); }
-    .sr-step-bubble.active { background: linear-gradient(135deg, #ff6b35, #f7931e); color: #fff; box-shadow: 0 4px 16px rgba(255,107,53,0.45); }
-    .sr-step-bubble.pending { background: #f0f4ff; color: #aab; border: 2px solid #e0e4f0; }
-    .sr-connector { flex: 1; height: 3px; border-radius: 4px; background: #e0e4f0; transition: background 0.4s; }
-    .sr-connector.done { background: linear-gradient(90deg, #ff6b35, #f7931e); }
+    .sr-step-bubble.done { background: var(--primary-gradient); color: #fff; box-shadow: var(--shadow-sm); }
+    .sr-step-bubble.active { background: var(--primary-gradient); color: #fff; box-shadow: var(--shadow-md); }
+    .sr-step-bubble.pending { background: var(--bg-hover); color: #aab; border: 2px solid var(--border-light); }
+    .sr-connector { flex: 1; height: 3px; border-radius: 4px; background: var(--border-light); transition: background 0.4s; }
+    .sr-connector.done { background: var(--primary-gradient); }
     .sr-feature-card { background: rgba(255,255,255,0.2) !important; border-radius: 14px !important; border: 1px solid rgba(255,255,255,0.3) !important; }
     .sr-label { font-weight: 800 !important; color: #555 !important; font-size: 0.77rem !important; text-transform: uppercase !important; letter-spacing: 0.06em !important; margin-bottom: 6px !important; }
-    .sr-success-ring { width: 84px; height: 84px; border-radius: 50%; background: linear-gradient(135deg,#ff6b35,#ffcd3c); display:flex; align-items:center; justify-content:center; font-size:2.2rem; margin: 0 auto 16px; }
+    .sr-success-ring { width: 84px; height: 84px; border-radius: 50%; background: var(--primary-gradient); display:flex; align-items:center; justify-content:center; font-size:2.2rem; margin: 0 auto 16px; }
     .sr-section-title { font-weight: 900; color: #1a1a2e; font-size: 1.3rem; margin-bottom: 4px; }
     .sr-section-sub { font-size: 0.85rem; color: #888; margin-bottom: 20px; }
     .sr-strength-bar { height: 6px !important; border-radius: 8px !important; }
@@ -117,7 +117,7 @@ function StepIndicator({ current }) {
             <div className={`sr-step-bubble ${current > step.id ? "done" : current === step.id ? "active" : "pending"}`}>
               {current > step.id ? "✓" : step.icon}
             </div>
-            <div className="mt-1 text-center" style={{ fontSize: "0.67rem", color: current >= step.id ? "#ff6b35" : "#aab", whiteSpace: "nowrap", fontWeight: 700 }}>
+            <div className="mt-1 text-center" style={{ fontSize: "0.67rem", color: current >= step.id ? "var(--primary)" : "#aab", whiteSpace: "nowrap", fontWeight: 700 }}>
               {step.label}
             </div>
           </div>
@@ -235,7 +235,7 @@ export default function SellerRegister() {
           <div className="sr-success-ring">🎊</div>
           <h2 className="fw-black mb-2" style={{ fontFamily: "Nunito", fontSize: "1.85rem" }}>Seller Account Created!</h2>
           <p className="text-muted mb-3">
-            Welcome, <strong style={{ color: "#ff6b35" }}>{v.name}</strong>! Your application is under review.
+            Welcome, <strong style={{ color: "var(--primary)" }}>{v.name}</strong>! Your application is under review.
             We'll notify you at <strong>{v.email}</strong> within 24–48 hours.
           </p>
           <Alert variant="warning" className="rounded-4 border-0 fw-bold py-2 mb-3" style={{ background: "#fff8e6" }}>
@@ -317,7 +317,7 @@ export default function SellerRegister() {
 
             {/* Mobile logo */}
             <div className="d-lg-none text-center mb-4">
-              <div className="fw-black" style={{ fontFamily: "Nunito", fontSize: "1.9rem", color: "#ff6b35", fontWeight: 900 }}>🛍️ ShopEase Seller</div>
+              <div className="fw-black" style={{ fontFamily: "var(--font-heading)", fontSize: "1.9rem", color: "var(--primary)", fontWeight: 900 }}>🛍️ ShopEase Seller</div>
             </div>
 
             <Card className="sr-card p-4 p-md-5">
@@ -327,12 +327,12 @@ export default function SellerRegister() {
                 <span className="fw-bold text-muted" style={{ fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                   Registration Progress
                 </span>
-                <span className="fw-bold" style={{ fontSize: "0.82rem", color: "#ff6b35" }}>{step} / {STEPS.length} Steps</span>
+                <span className="fw-bold" style={{ fontSize: "0.82rem", color: "var(--primary)" }}>{step} / {STEPS.length} Steps</span>
               </div>
               <ProgressBar
                 now={progress + 25}
                 style={{ height: 7, borderRadius: 8, marginBottom: 28 }}
-                variant="warning"
+                variant="primary"
               />
 
               <StepIndicator current={step} />
@@ -416,7 +416,7 @@ export default function SellerRegister() {
                   {strength && (
                     <div className="mb-3 mt-2">
                       <ProgressBar now={strength.now} variant={strength.variant} style={{ height: 5, borderRadius: 8 }} />
-                      <div className="mt-1 fw-bold" style={{ fontSize: "0.76rem", color: strength.variant === "danger" ? "#dc3545" : strength.variant === "warning" ? "#f7931e" : "#22c55e" }}>
+                      <div className="mt-1 fw-bold" style={{ fontSize: "0.76rem", color: strength.variant === "danger" ? "#dc3545" : strength.variant === "warning" ? "#eab308" : "#22c55e" }}>
                         Strength: {strength.label}
                       </div>
                     </div>

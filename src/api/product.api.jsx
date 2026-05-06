@@ -73,6 +73,15 @@ const createProduct = async (payload) => {
   }
 };
 
+const getCategorySections = async () => {
+  try {
+    const response = await apiConfig.get('/product/category-sections');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Error fetching category sections' };
+  }
+};
+
 
 export default {
   getAllProducts,
@@ -81,5 +90,6 @@ export default {
   updateProduct,
   deleteProduct,
   searchProduct,
-  productSuggestions
+  productSuggestions,
+  getCategorySections
 }

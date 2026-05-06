@@ -125,7 +125,7 @@ function StepAddress({ selectedAddr, onSelect, onNext, addresses, onSaveAddress 
 
     return (
         <div className="co-fu">
-            <SectionTitle icon="📍">Delivery Address</SectionTitle>
+            <SectionTitle>Delivery Address</SectionTitle>
 
             {/* Saved addresses */}
             <Stack gap={3} className="mb-4">
@@ -133,12 +133,12 @@ function StepAddress({ selectedAddr, onSelect, onNext, addresses, onSaveAddress 
                     <div
                         key={addr.id}
                         className={`co-address-card ${selectedAddr?.id === addr.id ? "selected" : ""} p-4 rounded-4`}
-                        style={{ background: "#f5ede7" }}
-                        onClick={() => onSelect(addr)}
+                        style={{ background: "#e8e7f5ff" }}
+                        onClick={(e) =>{ onSelect(addr); handleEdit(addr, e)}}
                     >
                         <div className="d-flex align-items-start justify-content-between gap-2">
                             <div className="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                                <span>📌  {addr.label}</span>
+                                <span>{(addr.label)[0].toUpperCase() + (addr.label).slice(1).toLowerCase()}</span>
                                 {addr.isDefault && (
                                     <span style={{ fontSize: "0.62rem", fontWeight: 900, background: "#dcfce7", color: "#166534", borderRadius: 20, padding: "2px 9px", border: "1.5px solid #86efac" }}>
                                         Default
@@ -155,7 +155,7 @@ function StepAddress({ selectedAddr, onSelect, onNext, addresses, onSaveAddress 
                         <div style={{ fontSize: "0.84rem", color: "#6b7280", fontWeight: 600, lineHeight: 1.6 }}>
                             {addr.address_line_1}{addr.address_line_2 ? `, ${addr.address_line_2}` : ""}<br />
                             {addr.city}, {addr.state} — {addr.pincode}<br />
-                            📞 {addr.mobile}
+                            Mobile: {addr.mobile}
                         </div>
                         <div className="d-flex justify-content-end gap-2">
                             {selectedAddr?.id === addr.id && (
@@ -180,7 +180,7 @@ function StepAddress({ selectedAddr, onSelect, onNext, addresses, onSaveAddress 
                     <Row className="g-3">
                         <Col sm={6}>
                             <Label required>Full Name</Label>
-                            <Form.Control className={`co-input ${errors.name ? "is-invalid" : ""}`} {...register("name", { required: "Required" })} placeholder="Rahul Sharma" />
+                            <Form.Control className={`co-input ${errors.name ? "is-invalid" : ""}`} {...register("name", { required: "Required" })} placeholder="Nitin verma" />
                             {errors.name && <div className="invalid-feedback d-block" style={{ fontSize: "0.78rem" }}>{errors.name.message}</div>}
                         </Col>
                         <Col sm={6}>
@@ -224,7 +224,7 @@ function StepAddress({ selectedAddr, onSelect, onNext, addresses, onSaveAddress 
                             <div className="d-flex gap-2">
                                 {["home", "office", "other"].map(l => (
                                     <button key={l} type="button"
-                                        style={{ padding: "7px 16px", borderRadius: 9, border: `2px solid ${labelValue === l ? "var(--p)" : "var(--border)"}`, background: labelValue === l ? "#fff3ee" : "#fff", color: labelValue === l ? "var(--p)" : "#6b7280", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer", fontFamily: "Nunito", transition: "all 0.15s" }}
+                                        style={{ padding: "7px 16px", borderRadius: 9, border: `2px solid ${labelValue === l ? "#1346cfff" : "var(--border)"}`, background: labelValue === l ? "#c8dcffff" : "#fff", color: labelValue === l ? "black" : "#6b7280", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer", fontFamily: "Nunito", transition: "all 0.15s" }}
                                         onClick={() => setValue("label", l)}>
                                         {l.charAt(0).toUpperCase() + l.slice(1)}
                                     </button>
@@ -250,14 +250,14 @@ function StepAddress({ selectedAddr, onSelect, onNext, addresses, onSaveAddress 
                         </Col>
                     </Row>
                     <div className="d-flex gap-2 mt-4">
-                        <Button type="submit" className="co-btn-main px-4" disabled={saving}>{saving ? "Saving..." : "Save Address"}</Button>
-                        <Button className="co-btn-outline" onClick={() => { setAddingNew(false); setEditingId(null); reset(); }} disabled={saving}>Cancel</Button>
+                        <Button type="submit" className="eco-btn-main px-4" disabled={saving}>{saving ? "Saving..." : "Save Address"}</Button>
+                        <Button className="px-4 rounded-4" style={{ border: "3px solid #1859dbff", background: "white", color: "var(--text)" }} onClick={() => { setAddingNew(false); setEditingId(null); reset(); }} disabled={saving}>Cancel</Button>
                     </div>
                 </Form>
             )}
 
             {onNext &&
-                <Button className="co-btn-main w-100" onClick={() => selectedAddr ? onNext() : toast.error("Please select a delivery address")}>
+                <Button className="w-100" style={{ background: "#3b5ff1ff", border: "none", padding: "10px 0", fontWeight: 600, fontSize: "1.1rem", borderRadius: "10px" }} onClick={() => selectedAddr ? onNext() : toast.error("Please select a delivery address")}>
                     Continue to Payment →
                 </Button>}
 

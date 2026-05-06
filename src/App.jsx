@@ -1,14 +1,18 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./helper/AuthWrapper.jsx";
-import NavigationInitializer from "./config/NavigationInitializer.jsx";
 import ROUTE from "./helper/Route.jsx";
 import ProtectedRoute from "./helper/ProtectedRoute.jsx";
 import Toaster from "./components/Toaster.jsx";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./App.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import "bootstrap/dist/css/bootstrap.min.css";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import "./styles/theme.css";
+import "./styles/global.css";
+import "./styles/utilities.css";
+import "./styles/components.css";
+import "./styles/responsive.css";
+import "./style/Dashboard.css";
+import "./App.css";
 import NotFound from './pages/errors/NotFound'
 import Dashboard from './pages/dashboard'
 import CustomerRegister from "./pages/auth/customer/Register.jsx";
@@ -27,11 +31,10 @@ import CheckoutPage from "./pages/checkout/Checkoutpage";
 import OrdersPage from "./pages/customer-order-list/OrdersPage.jsx";
 import SettingsPage from "./pages/setting/Settings.jsx";
 import ChatPage from "./pages/requirements/ChatPage";
+import CustomizationChatPage from "./pages/chat/ChatPage";
 import SellerProductDetail from "./pages/seller-detail-page/SellerProductDetail";
 import SellerDashboardHome from "./pages/seller-dashboard/Sellerdashboardhome";
 import SellerOrders from "./pages/seller-orders/SellerOrders";
-import Invoice from "./components/Invoice.jsx";
-import InvoiceDownloadPage from "./components/InvoiceDownloadPage.jsx";
 import InvoicePage from "./components/InvoicePage.jsx";
 import SellerReviews from "./pages/SellerReviews/SellerReviews";
 import SellerSettings from "./pages/seller-settings/Seller.jsx";
@@ -52,8 +55,8 @@ const App = () => {
           <Route path={ROUTE.CART} element={<ProtectedRoute moduleName="cart"><Cart /></ProtectedRoute>} />
           <Route path={ROUTE.ORDERS} element={<ProtectedRoute moduleName="orders"><OrdersPage /></ProtectedRoute>} />
           <Route path={ROUTE.WISHLIST} element={<ProtectedRoute moduleName="wishlist"><WishlistPage /></ProtectedRoute>} />
-          <Route path={ROUTE.LANDING_PAGE} element={<ProtectedRoute moduleName="landing_page"><LandingPage /></ProtectedRoute>} />
-          <Route path={ROUTE.DASHBOARD} element={<ProtectedRoute moduleName="dashboard"><Dashboard /></ProtectedRoute>} />
+          <Route path={ROUTE.LANDING_PAGE} element={<Dashboard />} />
+          {/* <Route path={ROUTE.DASHBOARD} element={<ProtectedRoute moduleName="dashboard"><Dashboard /></ProtectedRoute>} /> */}
           <Route path={ROUTE.PRODUCT_DETAIL_PAGE} element={<ProtectedRoute moduleName="detail_page"><ProductDetailPage /></ProtectedRoute>} />
           <Route path={ROUTE.CREATE_PRODUCT} element={<ProtectedRoute moduleName="create_product"><CreateProduct /></ProtectedRoute>} />
           <Route path={ROUTE.SELLER_PRODUCTS} element={<ProtectedRoute moduleName="seller_products"><SellerProducts /></ProtectedRoute>} />
@@ -66,6 +69,8 @@ const App = () => {
           <Route path={ROUTE.SELLER_REVIEWS} element={<ProtectedRoute moduleName="seller-reviews"><SellerReviews /></ProtectedRoute>} />
           <Route path={ROUTE.SELLER_PRODUCT_DETAIL_PAGE} element={<ProtectedRoute moduleName="seller-product-detail-page"><SellerProductDetail /></ProtectedRoute>} />
           <Route path={ROUTE.CHAT} element={<ProtectedRoute moduleName="requirement"><ChatPage /></ProtectedRoute>} />
+          <Route path={ROUTE.CHAT_LIST} element={<ProtectedRoute moduleName="chat"><CustomizationChatPage /></ProtectedRoute>} />
+          <Route path={ROUTE.CHAT_CONVERSATION} element={<ProtectedRoute moduleName="chat"><CustomizationChatPage /></ProtectedRoute>} />
           <Route path={ROUTE.CUSTOMER_REQUIREMENTS_LISTING} element={<ProtectedRoute moduleName="curstomer_requirements_list"><RequirementListing /></ProtectedRoute>} />
           <Route path={ROUTE.SELLER_SETTING} element={<ProtectedRoute moduleName="seller_setting"><SellerSettings /></ProtectedRoute>} />
           <Route element={<ProtectedRoute />}>

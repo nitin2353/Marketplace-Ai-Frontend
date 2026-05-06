@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Row, Col, Form, Button, Card, Alert } from "react-bootstrap";
 import { IoSave } from "react-icons/io5";
 import toast from "react-hot-toast";
-import "./Settings.css";
 import authApi from "../../api/authApi.jsx";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
@@ -81,13 +80,13 @@ const Security = () => {
                 <p className="text-muted">Manage your account security</p>
             </Card.Header>
 
-            <Card.Body>
+            <Card.Body className="p-3">
                 <Alert variant="info" className="pd-alert">
                     ℹ️ Keep your password strong and unique. Use a combination of uppercase,
                     lowercase, numbers, and special characters.
                 </Alert>
 
-                <Row className="g-3">
+                <Row className="g-3 p-3">
                     <Col md={6}>
                         <Form.Group>
                             <Form.Label className="fw-bold">Current Password *</Form.Label>

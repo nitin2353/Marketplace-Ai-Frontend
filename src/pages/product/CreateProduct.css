@@ -17,7 +17,7 @@
     transition: border-color 0.2s;
 }
 .cp-card.active-step {
-    border-color: #ff6b35;
+    border-color: #355aff;
 }
 
 /* ── Section title ── */
@@ -26,7 +26,7 @@
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: #ff6b35;
+    color: #355aff;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -36,7 +36,7 @@
     content: '';
     flex: 1;
     height: 2px;
-    background: linear-gradient(90deg, #ff6b35 0%, transparent 100%);
+    background: linear-gradient(90deg, #3835ff 0%, transparent 100%);
     border-radius: 2px;
 }
 
@@ -64,8 +64,8 @@
     color: #1a1a2e !important;
 }
 .cp-input:focus {
-    border-color: #ff6b35 !important;
-    box-shadow: 0 0 0 3px rgba(255,107,53,0.12) !important;
+    border-color: #355aff !important;
+    box-shadow: 0 0 0 3px rgba(53, 100, 255, 0.12) !important;
     outline: none !important;
 }
 .cp-input.is-invalid {
@@ -90,8 +90,8 @@
     color: #1a1a2e !important;
 }
 .cp-textarea:focus {
-    border-color: #ff6b35 !important;
-    box-shadow: 0 0 0 3px rgba(255,107,53,0.12) !important;
+    border-color: #355aff !important;
+    box-shadow: 0 0 0 3px rgba(53, 100, 255, 0.12) !important;
     outline: none !important;
 }
 
@@ -109,8 +109,8 @@
     cursor: pointer;
 }
 .cp-select:focus {
-    border-color: #ff6b35 !important;
-    box-shadow: 0 0 0 3px rgba(255,107,53,0.12) !important;
+    border-color: #355aff !important;
+    box-shadow: 0 0 0 3px rgba(53, 100, 255, 0.12) !important;
     outline: none !important;
 }
 
@@ -141,7 +141,7 @@
 
 /* ── Primary button ── */
 .cp-btn-primary {
-    background: linear-gradient(135deg, #ff6b35, #f7931e) !important;
+    background: linear-gradient(135deg, #355aff, #3577ff) !important;
     border: none !important;
     border-radius: 12px !important;
     font-weight: 800 !important;
@@ -154,7 +154,7 @@
 }
 .cp-btn-primary:hover:not(:disabled) {
     transform: translateY(-2px) !important;
-    box-shadow: 0 8px 24px rgba(255,107,53,0.38) !important;
+    box-shadow: 0 8px 24px rgba(53, 100, 255, 0.38) !important;
 }
 .cp-btn-primary:disabled {
     opacity: 0.7 !important;
@@ -176,9 +176,9 @@
     padding: 11px 22px !important;
 }
 .cp-btn-outline:hover {
-    border-color: #ff6b35 !important;
-    color: #ff6b35 !important;
-    background: #fff7f4 !important;
+    border-color: #355aff !important;
+    color: #355aff !important;
+    background: #f0f8ff !important;
 }
 
 /* ── Small button ── */
@@ -202,9 +202,9 @@
     font-family: 'Nunito', sans-serif !important;
 }
 .cp-toggle.on {
-    border-color: #ff6b35 !important;
-    background: linear-gradient(135deg, #fff3ee, #fff8f4) !important;
-    color: #ff6b35 !important;
+    border-color: #355aff !important;
+    background: linear-gradient(135deg, #f0f8ff, #f0f8ff) !important;
+    color: #355aff !important;
 }
 .cp-toggle.off-active {
     border-color: #6b7280 !important;
@@ -225,16 +225,16 @@
     user-select: none;
 }
 .cp-type-card:hover {
-    border-color: #ffb89a;
-    background: #fffaf8;
+    border-color: #355aff;
+    background: #f0f8ff;
 }
 .cp-type-card.selected-single {
-    border-color: #22c55e;
-    background: #f0fdf4;
+    border-color: #355aff;
+    background: #f0f8ff;
 }
 .cp-type-card.selected-variant {
-    border-color: #ff6b35;
-    background: #fff7f0;
+    border-color: #355aff;
+    background: #f0f8ff;
 }
 
 /* ── Tag pill ── */
@@ -242,8 +242,8 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    background: #fff3ee;
-    color: #ff6b35;
+    background: #f0f8ff;
+    color: #355aff;
     border-radius: 20px;
     padding: 4px 12px;
     font-size: 0.78rem;
@@ -252,7 +252,7 @@
 .cp-tag-pill button {
     background: none;
     border: none;
-    color: #ff6b35;
+    color: #3543ff;
     font-size: 0.88rem;
     padding: 0;
     line-height: 1;
@@ -271,7 +271,7 @@
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    background: linear-gradient(135deg, #355aff, #355aff);
     color: #fff;
     font-size: 0.7rem;
     font-weight: 900;
@@ -297,7 +297,7 @@
 }
 .cp-image-zone:hover,
 .cp-image-zone.drag {
-    border-color: #ff6b35;
+    border-color: #3553ff;
     background: #fff7f4;
 }
 .cp-img-thumb {
@@ -339,7 +339,7 @@
     text-align: center;
     font-size: 0.55rem;
     font-weight: 900;
-    background: #ff6b35;
+    background: #355aff;
     color: #fff;
     border-radius: 0 0 8px 8px;
     padding: 1px 0;
@@ -361,8 +361,8 @@
     flex-shrink: 0;
 }
 .cp-img-add-box:hover {
-    border-color: #ff6b35;
-    color: #ff6b35;
+    border-color: #3564ff;
+    color: #3543ff;
 }
 
 /* ── Discount badge ── */
@@ -381,7 +381,7 @@
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #ff6b35, #ffcd3c);
+    background: linear-gradient(135deg, #355aff, #355aff);
     display: flex;
     align-items: center;
     justify-content: center;

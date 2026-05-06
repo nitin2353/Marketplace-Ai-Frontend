@@ -70,8 +70,8 @@ export default function SellerNavbar({
 
     const btnStyle = (active = false) => ({
         width: 40, height: 40, borderRadius: 10,
-        border: `1.5px solid ${active ? "#ff6b35" : "#e8eaf6"}`,
-        background: active ? "#fff3ee" : "#f8f9ff",
+        border: `1.5px solid ${active ? "var(--primary)" : "#e8eaf6"}`,
+        background: active ? "var(--bg-hover)" : "#f8f9ff",
         cursor: "pointer", display: "flex",
         alignItems: "center", justifyContent: "center",
         fontSize: "1.05rem", transition: "all 0.2s",
@@ -81,7 +81,7 @@ export default function SellerNavbar({
 
     const fetchNotificationCount = async () => {
         try {
-            const result = await notificationApi.getUnreadCount(userInfo.id);
+            const result = await notificationApi.getUnreadCount();
             setNotifyCount(result.data.unread_count)
         } catch (error) {
             toast.error("Fetch Notification Error");
@@ -94,80 +94,44 @@ export default function SellerNavbar({
             style={{
                 position: "sticky",
                 top: 0,
-                zIndex: 1030,
+                // zIndex: 1030,
                 width: "100%",
-                background: "#ffffff",
-                borderBottom: "1.5px solid #e8eaf6",
-                fontFamily: "Nunito, sans-serif",
-                height: 60,
+                background: "var(--bg-surface)",
+                borderBottom: "1px solid var(--border-light)",
+                boxShadow: "var(--shadow-sm)",
+                height: "72px",
                 display: "flex",
                 alignItems: "center",
-                paddingInline: 16,
-                gap: 12,
+                paddingInline: "24px",
+                gap: "16px",
             }}
         >
             <button
                 type="button"
                 onClick={() => setIsOpen((prev) => !prev)}
-                title={isOpen ? "Close sidebar" : "Open sidebar"}
+                className="d-flex align-items-center justify-content-center rounded-3 border-0"
                 style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 10,
-                    border: `1.5px solid ${isOpen ? "#ff6b35" : "#e8eaf6"}`,
-                    background: isOpen ? "#fff3ee" : "#f8f9ff",
+                    width: 42,
+                    height: 42,
+                    background: "var(--bg-hover)",
                     cursor: "pointer",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 5,
-                    flexShrink: 0,
                     transition: "all 0.2s",
+                    flexShrink: 0
                 }}
             >
-                <span
-                    style={{
-                        display: "block",
-                        width: 18,
-                        height: 2,
-                        borderRadius: 2,
-                        background: "#ff6b35",
-                        transformOrigin: "center",
-                        transition: "transform 0.25s",
-                        transform: isOpen ? "translateY(7px) rotate(45deg)" : "none",
-                    }}
-                />
-                <span
-                    style={{
-                        display: "block",
-                        width: 18,
-                        height: 2,
-                        borderRadius: 2,
-                        background: "#ff6b35",
-                        transition: "opacity 0.2s",
-                        opacity: isOpen ? 0 : 1,
-                    }}
-                />
-                <span
-                    style={{
-                        display: "block",
-                        width: 18,
-                        height: 2,
-                        borderRadius: 2,
-                        background: "#ff6b35",
-                        transformOrigin: "center",
-                        transition: "transform 0.25s",
-                        transform: isOpen ? "translateY(-7px) rotate(-45deg)" : "none",
-                    }}
-                />
+                <div style={{ width: 20, height: 14, position: "relative", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <span style={{ display: "block", width: "100%", height: 2, background: "var(--primary)", borderRadius: 2, transition: "0.3s", transform: isOpen ? "rotate(45deg) translateY(6px) translateX(2px)" : "none" }} />
+                    {!isOpen && <span style={{ display: "block", width: "100%", height: 2, background: "var(--primary)", borderRadius: 2, transition: "0.3s" }} />}
+                    <span style={{ display: "block", width: "100%", height: 2, background: "var(--primary)", borderRadius: 2, transition: "0.3s", transform: isOpen ? "rotate(-45deg) translateY(-6px) translateX(2px)" : "none" }} />
+                </div>
             </button>
 
             <div
                 style={{
-                    fontWeight: 800,
-                    fontSize: "1.05rem",
-                    color: "#1a1a2e",
+                    fontWeight: 700,
+                    fontSize: "1.2rem",
+                    color: "var(--text-main)",
+                    fontFamily: "var(--font-heading)",
                     flex: 1,
                     overflow: "hidden",
                     whiteSpace: "nowrap",
@@ -178,31 +142,44 @@ export default function SellerNavbar({
             </div>
 
             {/* ── Right actions ── */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
 
                 {/* ── Bell button ── */}
-                <button
+                <div 
                     ref={bellRef}
-                    type="button"
                     onClick={() => setShowNotif((v) => !v)}
-                    style={{ ...btnStyle(showNotif), position: "relative"}}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "#fff3ee"; e.currentTarget.style.borderColor = "#ff6b35"; }}
-                    onMouseLeave={(e) => { if (!showNotif) { e.currentTarget.style.background = "#f8f9ff"; e.currentTarget.style.borderColor = "#e8eaf6"; } }}
+                    style={{ 
+                        position: "relative",
+                        width: 42, 
+                        height: 42, 
+                        borderRadius: "10px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: "var(--bg-hover)",
+                        fontSize: "1.3rem",
+                        cursor: "pointer",
+                        transition: "all 0.2s"
+                    }}
                 >
                     🔔
                     {notifyCount > 0 && (
                         <span style={{
-                            position: "absolute", top: -5, right: -5,
-                            background: "#ff6b35", color: "#fff",
-                            fontSize: "0.69rem", fontWeight: 900,
-                            borderRadius: "50%", width: 20, height: 20,
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            border: "2px solid #fff",
+                            position: "absolute", 
+                            top: 2, 
+                            right: 2,
+                            background: "var(--primary)", 
+                            color: "#fff",
+                            fontSize: "0.65rem", 
+                            fontWeight: 700,
+                            padding: "1px 5px",
+                            borderRadius: "10px",
+                            boxShadow: "var(--shadow-sm)"
                         }}>
                             {notifyCount > 9 ? "9+" : notifyCount}
                         </span>
                     )}
-                </button>
+                </div>
 
                 <Overlay
                     target={bellRef.current}
@@ -212,10 +189,12 @@ export default function SellerNavbar({
                     onHide={() => setShowNotif(false)}
                 >
                     <Popover style={{
-                        maxWidth: 340, padding: 0,
-                        border: "0.5px solid #e5e7eb",
-                        borderRadius: 12,
-                        boxShadow: "0 8px 32px rgba(0,0,0,.12)",
+                        maxWidth: 360, 
+                        width: "100%",
+                        padding: 0,
+                        border: "1px solid var(--border-light)",
+                        borderRadius: "var(--radius-md)",
+                        boxShadow: "var(--shadow-lg)",
                         overflow: "hidden",
                     }}>
                         <NotificationPanel mode={"seller"} refreshNotify={refreshNotify} setRefreshNotify={setRefreshNotify}  />
@@ -223,42 +202,63 @@ export default function SellerNavbar({
                 </Overlay>
 
                 {/* ── Store button ── */}
-                <button
-                    type="button"
+                <div
                     onClick={() => navigate("/")}
-                    title="View store"
-                    style={btnStyle()}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "#fff3ee"; e.currentTarget.style.borderColor = "#ff6b35"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "#f8f9ff"; e.currentTarget.style.borderColor = "#e8eaf6"; }}
+                    title="View Storefront"
+                    style={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: "10px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: "var(--bg-hover)",
+                        fontSize: "1.3rem",
+                        cursor: "pointer",
+                        transition: "all 0.2s"
+                    }}
                 >
                     🏪
-                </button>
+                </div>
 
                 {/* ── User pill ── */}
                 <div
                     onClick={() => navigate("/seller/settings")}
                     style={{
-                        display: "flex", alignItems: "center", gap: 8,
-                        background: "#f8f9ff", border: "1.5px solid #e8eaf6",
-                        borderRadius: 24, padding: "5px 12px 5px 5px",
-                        cursor: "pointer", transition: "all 0.2s",
+                        display: "flex", 
+                        alignItems: "center", 
+                        gap: 10,
+                        background: "var(--bg-hover)", 
+                        border: "1px solid var(--border-light)",
+                        borderRadius: "30px", 
+                        padding: "5px 16px 5px 5px",
+                        cursor: "pointer", 
+                        transition: "all 0.2s",
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "#fff3ee"; e.currentTarget.style.borderColor = "#ff6b35"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "#f8f9ff"; e.currentTarget.style.borderColor = "#e8eaf6"; }}
                 >
                     <div style={{
-                        width: 30, height: 30, borderRadius: "50%",
-                        background: "linear-gradient(135deg, #ff6b35, #f7931e)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: "0.72rem", fontWeight: 900, color: "#fff",
-                        flexShrink: 0, letterSpacing: 0.5,
+                        width: 34, 
+                        height: 34, 
+                        borderRadius: "50%",
+                        background: "var(--primary-gradient)",
+                        display: "flex", 
+                        alignItems: "center", 
+                        justifyContent: "center",
+                        fontSize: "0.85rem", 
+                        fontWeight: 700, 
+                        color: "#fff",
+                        boxShadow: "var(--shadow-sm)"
                     }}>
                         {initials}
                     </div>
-                    <span className="d-none d-sm-block" style={{
-                        color: "#1a1a2e", fontSize: "0.82rem", fontWeight: 700,
-                        maxWidth: 110, overflow: "hidden",
-                        whiteSpace: "nowrap", textOverflow: "ellipsis",
+                    <span className="d-none d-md-block" style={{
+                        color: "var(--text-main)", 
+                        fontSize: "0.9rem", 
+                        fontWeight: 600,
+                        maxWidth: 120, 
+                        overflow: "hidden",
+                        whiteSpace: "nowrap", 
+                        textOverflow: "ellipsis",
                     }}>
                         {displayName}
                     </span>
