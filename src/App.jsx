@@ -33,7 +33,7 @@ import SettingsPage from "./pages/setting/Settings.jsx";
 import ChatPage from "./pages/requirements/ChatPage";
 import CustomizationChatPage from "./pages/chat/ChatPage";
 import SellerProductDetail from "./pages/seller-detail-page/SellerProductDetail";
-import SellerDashboardHome from "./pages/seller-dashboard/Sellerdashboardhome";
+import SellerDashboardHome from "./pages/seller-dashboard/SellerDashboardHome";
 import SellerOrders from "./pages/seller-orders/SellerOrders";
 import InvoicePage from "./components/InvoicePage.jsx";
 import SellerReviews from "./pages/SellerReviews/SellerReviews";

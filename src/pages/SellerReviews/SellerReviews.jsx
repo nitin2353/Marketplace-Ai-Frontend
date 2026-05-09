@@ -4,8 +4,9 @@ import toast from "react-hot-toast";
 import reviewApi from "../../api/review.api";       // apna path adjust karo
 import JWTService from "../../config/jwt.config";    // apna path adjust karo
 import SellerSidebar from "../../components/SellerSidebar";
-import SellerNavbar from "../../components/Sellernavbar";
+import SellerNavbar from "../../components/SellerNavbar";
 import "./SellerReviews.css";
+import { useNavigate } from "react-router-dom";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const PER_PAGE = 10;
@@ -13,11 +14,15 @@ const SIDEBAR_W = 280;
 const AVATAR_COLORS = ["#3b82f6", "#1d4ed8", "#22c55e", "#10b981", "#8b5cf6", "#ec4899", "#14b8a6", "#f59e0b"];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const initials = (name = "") =>
-    name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() || "??";
+const initials = (name = "") => {
+    if (!name || typeof name !== "string") return "??";
+    return name.trim().split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase() || "??";
+};
 
-const avatarColor = (name = "") =>
-    AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+const avatarColor = (name = "") => {
+    if (!name || typeof name !== "string") return AVATAR_COLORS[0];
+    return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+};
 
 const fmtDate = (d) =>
     d ? new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—";
@@ -129,6 +134,8 @@ function ReviewCard({ review, onReply, onReplyDelete, onDelete, submittingId, cl
     const color = avatarColor(name);
     const images = Array.isArray(review.images) ? review.images : [];
 
+    const navigate = useNavigate()
+
     const productImg = Array.isArray(review.product_image_url) ? review.product_image_url[0] : review.product_image_url;
 
     return (
@@ -142,7 +149,7 @@ function ReviewCard({ review, onReply, onReplyDelete, onDelete, submittingId, cl
                 <div className="d-flex align-items-start justify-content-between gap-2 flex-wrap mb-1">
                     <div>
                         <span style={{ fontWeight: 800, fontSize: "0.9rem", color: "#1a1a2e" }}>{name}</span>
-                        <span style={{ fontSize: "0.75rem", color: "#9ca3af", marginLeft: 8 }}>Order # {review.order_number}</span>
+                        <span style={{ fontSize: "0.75rem", color: "#3532e9ff", marginLeft: 8, cursor: "pointer" }} onClick={() => navigate(`/seller/orders/${review.order_id}`)}>Order # {review.order_number}</span>
                     </div>
                     <div className="d-flex align-items-center gap-2">
                         <Stars rating={review.rating} />
@@ -157,7 +164,7 @@ function ReviewCard({ review, onReply, onReplyDelete, onDelete, submittingId, cl
                             <img src={productImg} alt="" className="sr-product-img" style={{ width: 32, height: 32, borderRadius: 6, objectFit: "cover" }}
                                 onError={e => { e.target.style.display = "none"; }} />
                         )}
-                        <span className="sr-badge sr-badge-product">{review.product_title}</span>
+                        <span className="sr-badge sr-badge-product"  onClick={() => navigate(`/seller/product/${review?.product_id}`)}>{review.product_title}</span>
                     </div>
                 )}
 
@@ -183,26 +190,21 @@ function ReviewCard({ review, onReply, onReplyDelete, onDelete, submittingId, cl
                     clearing={clearingId === review.id}
                 />
             </div>
-
-            {/* Delete */}
-            <button
-                className="sr-btn-danger"
-                style={{ alignSelf: "flex-start", padding: "5px 10px", fontSize: "0.78rem", flexShrink: 0 }}
-                onClick={() => onDelete(review.id)}
-                disabled={deletingId === review.id}
-                title="Delete this review from customer"
-            >
-                {deletingId === review.id ? "…" : "🗑️"}
-            </button>
         </div>
     );
 }
 
 // ── Summary Panel ─────────────────────────────────────────────────────────────
 function SummaryPanel({ summary, totalReviews }) {
-    const avg = summary?.average_rating || 0;
-    const dist = summary?.rating_distribution || {};
+    const avg = summary?.avg_rating || 0;
     const total = totalReviews || summary?.total_reviews || 0;
+    const dist = {
+        5: summary?.five_star || 0,
+        4: summary?.four_star || 0,
+        3: summary?.three_star || 0,
+        2: summary?.two_star || 0,
+        1: summary?.one_star || 0
+    };
 
     const pct5 = dist[5] || 0, pct4 = dist[4] || 0, pct3 = dist[3] || 0;
     const positive = total > 0 ? Math.round(((pct5 + pct4) / total) * 100) : 0;
@@ -264,6 +266,14 @@ export default function SellerReviews() {
     const [page, setPage] = useState(1);
     const [submittingId, setSubmittingId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
+    const [winW, setWinW] = useState(window.innerWidth);
+
+    // Resize listener for responsive layout
+    useEffect(() => {
+        const handleResize = () => setWinW(window.innerWidth);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     // Debounce search
     useEffect(() => {
@@ -371,9 +381,9 @@ export default function SellerReviews() {
             <div style={{ display: "flex" }}>
                 <SellerSidebar />
 
-                <div style={{ flex: 1, marginLeft: window.innerWidth >= 992 ? SIDEBAR_W : 0, minWidth: 0 }}>
+                <div style={{ flex: 1, marginLeft: winW >= 992 ? SIDEBAR_W : 0, minWidth: 0 }}>
 
-                    {/* Orange topbar */}
+                    {/* Blue topbar */}
                     <div className="sr-topbar">
                         <span className="sr-topbar-title">⭐ Reviews Management</span>
                         <div className="d-flex align-items-center gap-2 flex-wrap">

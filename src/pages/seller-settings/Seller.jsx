@@ -132,37 +132,6 @@ function ProfileTab({ seller, onSave, saving }) {
         <form onSubmit={handleSubmit}>
             <Stack gap={4}>
 
-                {/* Avatar */}
-                <div className="ss-card ss-fade ss-fade-1">
-                    <SectionHead icon="🖼️" title="Profile Picture" />
-                    <div className="ss-card-body">
-                        <div className="d-flex align-items-center gap-4 flex-wrap">
-                            <div className="ss-avatar-wrap" onClick={() => fileRef.current?.click()}>
-                                {avatarPreview
-                                    ? <img src={avatarPreview} alt="avatar" className="ss-avatar" style={{ display: "block" }} />
-                                    : <div className="ss-avatar">{initials(displayName)}</div>
-                                }
-                                <div className="ss-avatar-edit">✏️</div>
-                                <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleAvatarChange} />
-                            </div>
-                            <div>
-                                <p style={{ fontWeight: 800, fontSize: "1rem", color: "#1a1a2e", marginBottom: 4 }}>{displayName}</p>
-                                <p style={{ fontSize: "0.8rem", color: "#9ca3af", marginBottom: 10 }}>JPG, PNG or WEBP · Max 2MB</p>
-                                <div className="d-flex gap-2">
-                                    <button type="button" className="ss-btn-outline" style={{ fontSize: "0.8rem", padding: "6px 14px" }} onClick={() => fileRef.current?.click()}>
-                                        📁 Upload Photo
-                                    </button>
-                                    {avatarPreview && (
-                                        <button type="button" className="ss-btn-danger" style={{ fontSize: "0.8rem", padding: "6px 14px" }} onClick={() => { setAvatarFile(null); setAvatarPreview(null); }}>
-                                            Remove
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 {/* Personal Info */}
                 <div className="ss-card ss-fade ss-fade-2">
                     <SectionHead icon="👤" title="Personal Information" />
@@ -186,14 +155,9 @@ function ProfileTab({ seller, onSave, saving }) {
                             <Col md={6}>
                                 <Field label="Mobile Number">
                                     <InputGroup>
-                                        <InputGroup.Text className="ss-addon ss-addon-l">+91</InputGroup.Text>
-                                        <input className="ss-input ss-input-il" type="tel" value={form.mobile} onChange={set("mobile")} placeholder="9876543210" />
+                                        {/* <InputGroup.Text className="ss-addon ss-addon-l">+91</InputGroup.Text> */}
+                                        <input className="ss-input" type="tel" value={form.mobile} onChange={set("mobile")} placeholder="9876543210" />
                                     </InputGroup>
-                                </Field>
-                            </Col>
-                            <Col md={6}>
-                                <Field label="Date of Birth">
-                                    <input className="ss-input" type="date" value={form.dob} onChange={set("dob")} />
                                 </Field>
                             </Col>
                             <Col md={6}>
@@ -210,14 +174,6 @@ function ProfileTab({ seller, onSave, saving }) {
                             <Col xs={12}>
                                 <Field label="Bio" hint="Brief description about yourself, shown on your store page.">
                                     <textarea className="ss-textarea" value={form.bio} onChange={set("bio")} placeholder="Tell customers about yourself…" rows={3} />
-                                </Field>
-                            </Col>
-                            <Col md={6}>
-                                <Field label="Website">
-                                    <InputGroup>
-                                        <InputGroup.Text className="ss-addon ss-addon-l" style={{ fontSize: "0.75rem" }}>https://</InputGroup.Text>
-                                        <input className="ss-input ss-input-il" value={form.website} onChange={set("website")} placeholder="yoursite.com" />
-                                    </InputGroup>
                                 </Field>
                             </Col>
                         </Row>
@@ -310,8 +266,8 @@ function StoreTab({ seller, onSave, saving }) {
                             <Col md={6}>
                                 <Field label="GSTIN" hint="15-digit Goods and Services Tax Identification Number">
                                     <input
-                                        className={`ss-input ${form.gstin && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(form.gstin) ? 'is-invalid' : ''}`}
-                                        value={form.gstin}
+                                        className={`ss-input ${form.gstin.toUpperCase() && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(form.gstin.toUpperCase()) ? 'is-invalid' : ''}`}
+                                        value={form.gstin.toUpperCase()}
                                         onChange={set("gstin")}
                                         placeholder="22AAAAA0000A1Z5"
                                         maxLength={15}
@@ -322,9 +278,9 @@ function StoreTab({ seller, onSave, saving }) {
                             <Col md={6}>
                                 <Field label="PAN Number" hint="Permanent Account Number">
                                     <input
-                                        className={`ss-input ${form.pan && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(form.pan) ? 'is-invalid' : ''}`}
-                                        value={form.pan}
-                                        onChange={set("pan")}
+                                        className={`ss-input ${form.pan.toUpperCase() && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(form.pan.toUpperCase()) ? 'is-invalid' : ''}`}
+                                        value={form.pan.toUpperCase()}
+                                        onChange={set("pan")}   
                                         placeholder="ABCDE1234F"
                                         maxLength={10}
                                         style={{ textTransform: "uppercase" }}
@@ -377,43 +333,146 @@ function StoreTab({ seller, onSave, saving }) {
 // TAB: SECURITY
 // ════════════════════════════════════════════════════════════════════════════
 function SecurityTab() {
-    const [form, setForm] = useState({ current: "", newPw: "", confirm: "" });
-    const [show, setShow] = useState({ current: false, newPw: false, confirm: false });
-    const [saving, setSaving] = useState(false);
-    const strength = pwStrength(form.newPw);
+    const [form, setForm] = useState({
+        current_password: "",
+        new_password: "",
+        confirm_password: "",
+    });
 
-    const set = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.value }));
-    const flip = (k) => setShow(p => ({ ...p, [k]: !p[k] }));
+    const [show, setShow] = useState({
+        current_password: false,
+        new_password: false,
+        confirm_password: false,
+    });
+
+    const [saving, setSaving] = useState(false);
+    const strength = pwStrength(form.new_password);
+
+    const set = (key) => (e) => {
+        setForm((prev) => ({
+            ...prev,
+            [key]: e.target.value,
+        }));
+    };
+
+    const flip = (key) => {
+        setShow((prev) => ({
+            ...prev,
+            [key]: !prev[key],
+        }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!form.current) { toast.error("Current password required"); return; }
-        if (form.newPw.length < 8) { toast.error("New password must be ≥ 8 chars"); return; }
-        if (form.newPw !== form.confirm) { toast.error("Passwords do not match"); return; }
+
+        const currentPassword = form.current_password.trim();
+        const newPassword = form.new_password.trim();
+        const confirmPassword = form.confirm_password.trim();
+
+        if (!currentPassword) {
+            toast.error("Current password required");
+            return;
+        }
+
+        if (!newPassword) {
+            toast.error("New password required");
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            toast.error("New password must be at least 8 characters");
+            return;
+        }
+
+        if (currentPassword === newPassword) {
+            toast.error("New password must be different from current password");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            toast.error("Passwords do not match");
+            return;
+        }
+
         setSaving(true);
+
         try {
-            await authApi.changePassword({ current_password: form.current, new_password: form.newPw });
-            toast.success("Password updated successfully!");
-            setForm({ current: "", newPw: "", confirm: "" });
+            const payload = {
+                current_password: currentPassword,
+                old_password: currentPassword,
+                password: currentPassword,
+
+                new_password: newPassword,
+                newPassword: newPassword,
+
+                confirm_password: confirmPassword,
+                confirmPassword: confirmPassword,
+            };
+
+            const res = await authApi.changePassword(payload);
+
+            if (res?.data?.success === false) {
+                toast.error(res?.data?.message || "Failed to update password");
+                return;
+            }
+
+            toast.success(res?.data?.message || "Password updated successfully!");
+
+            setForm({
+                current_password: "",
+                new_password: "",
+                confirm_password: "",
+            });
+
+            setShow({
+                current_password: false,
+                new_password: false,
+                confirm_password: false,
+            });
         } catch (err) {
-            toast.error(err?.message || "Failed to update password");
-        } finally { setSaving(false); }
+            toast.error(
+                err?.response?.data?.message ||
+                err?.response?.data?.error ||
+                err?.message ||
+                "Failed to update password"
+            );
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const PwField = ({ label, fkey }) => (
+    const renderPwField = (label, name) => (
         <Field label={label}>
             <div style={{ position: "relative" }}>
                 <input
                     className="ss-input"
-                    type={show[fkey] ? "text" : "password"}
-                    value={form[fkey]}
-                    onChange={set(fkey)}
+                    name={name}
+                    type={show[name] ? "text" : "password"}
+                    value={form[name]}
+                    onChange={set(name)}
                     placeholder="••••••••"
+                    autoComplete="new-password"
+                    disabled={saving}
                     style={{ paddingRight: 44 }}
                 />
-                <button type="button" onClick={() => flip(fkey)}
-                    style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "1rem", color: "#9ca3af" }}>
-                    {show[fkey] ? "🙈" : "👁️"}
+
+                <button
+                    type="button"
+                    onClick={() => flip(name)}
+                    disabled={saving}
+                    style={{
+                        position: "absolute",
+                        right: 12,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "1rem",
+                        color: "#9ca3af",
+                    }}
+                >
+                    {show[name] ? "🙈" : "👁️"}
                 </button>
             </div>
         </Field>
@@ -424,40 +483,44 @@ function SecurityTab() {
             <Stack gap={4}>
                 <div className="ss-card ss-fade ss-fade-1">
                     <SectionHead icon="🔑" title="Change Password" />
+
                     <div className="ss-card-body">
                         <Row className="g-3">
-                            <Col md={6}><PwField label="Current Password" fkey="current" /></Col>
                             <Col md={6}>
-                                <PwField label="New Password" fkey="newPw" />
-                                {form.newPw && (
+                                {renderPwField("Current Password", "current_password")}
+                            </Col>
+
+                            <Col md={6}>
+                                {renderPwField("New Password", "new_password")}
+
+                                {form.new_password && (
                                     <>
-                                        <div className="ss-pw-strength" style={{ background: strength.color, width: `${(strength.score / 4) * 100}%` }} />
-                                        <p className="ss-pw-label" style={{ color: strength.color }}>{strength.label}</p>
+                                        <div
+                                            className="ss-pw-strength"
+                                            style={{
+                                                background: strength.color,
+                                                width: `${(strength.score / 4) * 100}%`,
+                                            }}
+                                        />
+                                        <p className="ss-pw-label" style={{ color: strength.color }}>
+                                            {strength.label}
+                                        </p>
                                     </>
                                 )}
                             </Col>
+
                             <Col md={6}>
-                                <PwField label="Confirm New Password" fkey="confirm" />
-                                {form.confirm && form.newPw !== form.confirm && (
-                                    <p className="ss-error">Passwords do not match</p>
-                                )}
+                                {renderPwField("Confirm New Password", "confirm_password")}
+
+                                {form.confirm_password &&
+                                    form.new_password !== form.confirm_password && (
+                                        <p className="ss-error">Passwords do not match</p>
+                                    )}
                             </Col>
                         </Row>
+
                         <div className="ss-info mt-3">
                             🔒 Use at least 8 characters with a mix of uppercase, numbers and symbols.
-                        </div>
-                    </div>
-                </div>
-
-                <div className="ss-card ss-fade ss-fade-2">
-                    <SectionHead icon="🛡️" title="Login Sessions" />
-                    <div className="ss-card-body">
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid #f1f4ff" }}>
-                            <div>
-                                <p style={{ fontWeight: 800, fontSize: "0.88rem", color: "#1a1a2e", marginBottom: 2 }}>Current Session</p>
-                                <p style={{ fontSize: "0.76rem", color: "#9ca3af", margin: 0 }}>This device · Active now</p>
-                            </div>
-                            <span style={{ background: "#dcfce7", color: "#166534", fontSize: "0.72rem", fontWeight: 900, padding: "3px 10px", borderRadius: 20 }}>Active</span>
                         </div>
                     </div>
                 </div>
@@ -566,87 +629,222 @@ function NotificationsTab({ seller }) {
 // ════════════════════════════════════════════════════════════════════════════
 function PaymentsTab({ seller, onSave, saving }) {
     const [form, setForm] = useState({
-        bank_name: "", account_holder: "", account_number: "",
-        confirm_account: "", ifsc: "", account_type: "savings",
+        bank_name: "",
+        account_holder: "",
+        account_number: "",
+        confirm_account: "",
+        ifsc: "",
+        account_type: "savings",
         upi_id: "",
     });
 
+    const [isMaskedAccount, setIsMaskedAccount] = useState(false);
+
     useEffect(() => {
         if (!seller) return;
+
         setForm({
             bank_name: seller.bank_name || "",
             account_holder: seller.account_holder || "",
-            account_number: seller.account_number ? "•".repeat(8) : "",
-            confirm_account: "",
+            account_number: seller.account_number || "",
+            confirm_account: seller.account_number || "",
             ifsc: seller.ifsc || "",
             account_type: seller.account_type || "savings",
             upi_id: seller.upi_id || "",
         });
+
+        setIsMaskedAccount(Boolean(seller.account_number));
     }, [seller]);
 
-    const set = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.value }));
+    const handleChange = (key) => (e) => {
+        let value = e.target.value;
+
+        if (key === "ifsc") {
+            value = value.toUpperCase().replace(/\s/g, "");
+        }
+
+        if (key === "account_number" || key === "confirm_account") {
+            value = value.replace(/\D/g, "");
+        }
+
+        if (key === "account_number" && isMaskedAccount) {
+            setIsMaskedAccount(false);
+            value = value.replace(/•/g, "");
+        }
+
+        setForm((prev) => ({
+            ...prev,
+            [key]: value,
+        }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (form.account_number !== form.confirm_account && !form.account_number.startsWith("•")) {
-            toast.error("Account numbers do not match"); return;
+
+        const payload = {
+            bank_name: form.bank_name.trim(),
+            account_holder: form.account_holder.trim(),
+            account_number: form.account_number.trim(),
+            confirm_account: form.confirm_account.trim(),
+            ifsc: form.ifsc.trim().toUpperCase(),
+            account_type: form.account_type,
+            upi_id: form.upi_id.trim(),
+        };
+
+        if (!payload.bank_name) {
+            toast.error("Bank name is required");
+            return;
         }
 
-        // Filter out masked values if they weren't changed
-        const filtered = { ...form };
-        if (filtered.account_number.startsWith("•")) delete filtered.account_number;
-        delete filtered.confirm_account;
+        if (!payload.account_holder) {
+            toast.error("Account holder name is required");
+            return;
+        }
+
+        if (!isMaskedAccount) {
+            if (!payload.account_number) {
+                toast.error("Account number is required");
+                return;
+            }
+
+            if (payload.account_number.length < 9 || payload.account_number.length > 18) {
+                toast.error("Account number must be 9 to 18 digits");
+                return;
+            }
+
+            if (payload.account_number !== payload.confirm_account) {
+                toast.error("Account numbers do not match");
+                return;
+            }
+        }
+
+        if (!payload.ifsc) {
+            toast.error("IFSC code is required");
+            return;
+        }
+
+        if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(payload.ifsc)) {
+            toast.error("Enter valid IFSC code");
+            return;
+        }
+
+        if (payload.upi_id && !/^[\w.\-]{2,256}@[a-zA-Z]{2,64}$/.test(payload.upi_id)) {
+            toast.error("Enter valid UPI ID");
+            return;
+        }
+
+        if (isMaskedAccount) {
+            delete payload.account_number;
+            delete payload.confirm_account;
+        } else {
+            delete payload.confirm_account;
+        }
 
         const fd = new FormData();
-        Object.entries(filtered).forEach(([k, v]) => fd.append(k, v));
+        Object.entries(payload).forEach(([key, value]) => {
+            fd.append(key, value);
+        });
+
         await onSave(fd);
     };
+
+    const accountMismatch =
+        !isMaskedAccount &&
+        form.confirm_account &&
+        form.account_number !== form.confirm_account;
 
     return (
         <form onSubmit={handleSubmit}>
             <Stack gap={4}>
                 <div className="ss-card ss-fade ss-fade-1">
                     <SectionHead icon="🏦" title="Bank Account Details" />
+
                     <div className="ss-card-body">
-                        <div className="ss-warn mb-3">🔒 Bank details are encrypted and used only for payouts. Never share these with anyone.</div>
+                        <div className="ss-warn mb-3">
+                            🔒 Bank details are encrypted and used only for payouts. Never share these with anyone.
+                        </div>
+
                         <Row className="g-3">
                             <Col md={6}>
                                 <Field label="Bank Name">
-                                    <input className="ss-input" value={form.bank_name} onChange={set("bank_name")} placeholder="State Bank of India" />
+                                    <input
+                                        className="ss-input"
+                                        value={form.bank_name}
+                                        onChange={handleChange("bank_name")}
+                                        placeholder="State Bank of India"
+                                        disabled={saving}
+                                    />
                                 </Field>
                             </Col>
+
                             <Col md={6}>
                                 <Field label="Account Holder Name">
-                                    <input className="ss-input" value={form.account_holder} onChange={set("account_holder")} placeholder="As per passbook" />
+                                    <input
+                                        className="ss-input"
+                                        value={form.account_holder}
+                                        onChange={handleChange("account_holder")}
+                                        placeholder="As per passbook"
+                                        disabled={saving}
+                                    />
                                 </Field>
                             </Col>
+
                             <Col md={6}>
                                 <Field label="Account Number">
-                                    <input className="ss-input" type="password" value={form.account_number} onChange={set("account_number")} placeholder="Enter account number" />
+                                    <input
+                                        className="ss-input"
+                                        type="text"
+                                        inputMode="numeric"
+                                        value={form.account_number}
+                                        onChange={handleChange("account_number")}
+                                        placeholder="Enter account number"
+                                        disabled={saving}
+                                    />
                                 </Field>
                             </Col>
+
                             <Col md={6}>
                                 <Field label="Confirm Account Number">
-                                    <input className="ss-input" type="password" value={form.confirm_account} onChange={set("confirm_account")} placeholder="Re-enter account number" />
-                                    {form.confirm_account && form.account_number !== form.confirm_account && (
+                                    <input
+                                        className="ss-input"
+                                        type="text"
+                                        inputMode="numeric"
+                                        value={form.confirm_account}
+                                        onChange={handleChange("confirm_account")}
+                                        placeholder={isMaskedAccount ? "Leave blank if unchanged" : "Re-enter account number"}
+                                        disabled={saving || isMaskedAccount}
+                                    />
+
+                                    {accountMismatch && (
                                         <p className="ss-error">Account numbers do not match</p>
                                     )}
                                 </Field>
                             </Col>
+
                             <Col md={6}>
                                 <Field label="IFSC Code">
                                     <input
-                                        className={`ss-input ${form.ifsc && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(form.ifsc) ? 'is-invalid' : ''}`}
-                                        value={form.ifsc}
-                                        onChange={set("ifsc")}
+                                        className={`ss-input ${form.ifsc && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(form.ifsc)
+                                                ? "is-invalid"
+                                                : ""
+                                            }`}
+                                        value={form.ifsc.toUpperCase()}
+                                        onChange={handleChange("ifsc")}
                                         placeholder="SBIN0001234"
-                                        style={{ textTransform: "uppercase" }}
+                                        maxLength={11}
+                                        disabled={saving}
                                     />
                                 </Field>
                             </Col>
+
                             <Col md={6}>
                                 <Field label="Account Type">
-                                    <select className="ss-select" value={form.account_type} onChange={set("account_type")}>
+                                    <select
+                                        className="ss-select"
+                                        value={form.account_type}
+                                        onChange={handleChange("account_type")}
+                                        disabled={saving}
+                                    >
                                         <option value="savings">Savings</option>
                                         <option value="current">Current</option>
                                     </select>
@@ -658,11 +856,18 @@ function PaymentsTab({ seller, onSave, saving }) {
 
                 <div className="ss-card ss-fade ss-fade-2">
                     <SectionHead icon="📲" title="UPI Details" />
+
                     <div className="ss-card-body">
                         <Row className="g-3">
                             <Col md={6}>
-                                <Field label="UPI ID" hint="e.g. yourname@upi or +91xxxxxxxxxx@paytm">
-                                    <input className="ss-input" value={form.upi_id} onChange={set("upi_id")} placeholder="yourname@okaxis" />
+                                <Field label="UPI ID" hint="e.g. yourname@upi">
+                                    <input
+                                        className="ss-input"
+                                        value={form.upi_id}
+                                        onChange={handleChange("upi_id")}
+                                        placeholder="yourname@okaxis"
+                                        disabled={saving}
+                                    />
                                 </Field>
                             </Col>
                         </Row>

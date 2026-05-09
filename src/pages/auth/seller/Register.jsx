@@ -14,6 +14,8 @@ import { useForm } from "react-hook-form";
 import authApi from "../../../api/authApi";
 import toast from "react-hot-toast";
 import GlobalLoader from "../../../components/GlobalLoader";
+import ROUTE from "../../../helper/Route";
+import { useNavigate } from "react-router-dom";
 
 // ── Font + Style Injection ──────────────────────────────────────────────────
 const injectStyle = () => {
@@ -101,10 +103,10 @@ const passwordStrength = (pwd) => {
 
 // ── Step field names (used for per-step trigger) ─────────────────────────────
 const STEP_FIELDS = {
-  1: ["name", "email", "password", "phone"],
-  2: ["business_name", "business_type", "category", "experience", "description"],
-  3: ["country", "state", "city", "pincode", "full_address"],
-  4: ["account_number", "ifsc_code", "account_holder_name", "upi_id", "pan_number", "aadhaar_number"],
+  1: ["name", "email", "password", "phone", "gender", "dob"],
+  2: ["business_name", "business_type", "category", "experience", "store_description", "website", "bio"],
+  3: ["country", "state", "city", "pincode", "address_line_1"],
+  4: ["account_number", "ifsc", "account_holder", "upi_id", "pan", "gstin", "bank_name", "account_type"],
 };
 
 // ── Step Indicator ───────────────────────────────────────────────────────────
@@ -152,40 +154,48 @@ export default function SellerRegister() {
   const [apiError, setApiError] = useState(null);
   const [submittedData, setSubmittedData] = useState(null);
 
+  const navigate = useNavigate();
+
   // ── useForm with all required fields ──────────────────────────────────────
   const {
     register,
     trigger,
     watch,
     getValues,
-    handleSubmit,                   // ✅ properly destructured
+    handleSubmit,
     formState: { errors },
   } = useForm({
-    defaultValues: {                // ✅ fixed: was "formResetData"
+    defaultValues: {
       // Step 1
       name: "",
       email: "",
       password: "",
       phone: "",
+      gender: "",
+      dob: "",
       // Step 2
       business_name: "",
       business_type: "",
       category: "",
       experience: "",
-      description: "",
+      store_description: "",
+      website: "",
+      bio: "",
       // Step 3
       country: "India",
       state: "",
       city: "",
       pincode: "",
-      full_address: "",
+      address_line_1: "",
       // Step 4
       account_number: "",
-      ifsc_code: "",
-      account_holder_name: "",
+      ifsc: "",
+      account_holder: "",
       upi_id: "",
-      pan_number: "",
-      aadhaar_number: "",
+      pan: "",
+      gstin: "",
+      bank_name: "",
+      account_type: "Savings",
     },
     mode: "onTouched",
   });
@@ -213,15 +223,16 @@ export default function SellerRegister() {
     setLoading(true);
     try {
       const res = await authApi?.signupSeller(payload)
-      
+
       if (res.success) {
         toast.success(res.message || "Your Account successfully Created");
         localStorage.setItem('token', res.token)
+        navigate('/auth/login');
       }
     } catch (err) {
       console.error("Registration error:", err);
       toast.error(err.message || "Something went wrong!!");
-    } finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -255,7 +266,7 @@ export default function SellerRegister() {
   // ── MAIN LAYOUT ───────────────────────────────────────────────────────────
   return (
     <Container fluid className="p-0" style={{ minHeight: "100vh", background: "#f1f4ff" }}>
-       {loading && <GlobalLoader />}
+      {loading && <GlobalLoader />}
       {/* ✅ handleSubmit properly wired to onSubmit */}
       <Form className="g-0 d-flex" style={{ minHeight: "100vh" }} onSubmit={handleSubmit(onSubmit)}>
 
@@ -423,15 +434,14 @@ export default function SellerRegister() {
                   )}
 
                   {/* Phone */}
-                  <Form.Group className="mb-4">
+                  <Form.Group className="mb-3">
                     <SrLabel>Phone Number *</SrLabel>
                     <InputGroup>
-                      <InputGroup.Text style={{ border: "2px solid #e8eaf6", borderRight: "none", borderRadius: "12px 0 0 12px", background: "#f8f9ff", fontSize: "0.85rem" }}>🇮🇳 +91</InputGroup.Text>
+                      <InputGroup.Text style={{ border: "2px solid #e8eaf6", borderRight: "none", borderRadius: "12px 0 0 12px", background: "#f8f9ff" }}>📞</InputGroup.Text>
                       <Form.Control
-                        type="tel"
                         className={`sr-input ${errors.phone ? "is-invalid" : ""}`}
                         style={{ borderRadius: "0 12px 12px 0", borderLeft: "none" }}
-                        placeholder="xxxxxxxxxx"
+                        placeholder="9876543210"
                         maxLength={10}
                         {...register("phone", {
                           required: "Phone number is required",
@@ -441,6 +451,36 @@ export default function SellerRegister() {
                     </InputGroup>
                     <ErrMsg error={errors.phone} />
                   </Form.Group>
+
+                  <Row className="g-3 mb-4">
+                    {/* Gender */}
+                    <Col sm={6}>
+                      <Form.Group>
+                        <SrLabel>Gender</SrLabel>
+                        <Form.Select
+                          className={`sr-input ${errors.gender ? "is-invalid" : ""}`}
+                          {...register("gender")}
+                        >
+                          <option value="">Select gender...</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+
+                    {/* DOB */}
+                    <Col sm={6}>
+                      <Form.Group>
+                        <SrLabel>Date of Birth</SrLabel>
+                        <Form.Control
+                          type="date"
+                          className={`sr-input ${errors.dob ? "is-invalid" : ""}`}
+                          {...register("dob")}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
 
                   <Alert variant="warning" className="rounded-4 border-0 py-2 px-3 mb-4" style={{ background: "#fff8e6" }}>
                     <span className="fw-bold" style={{ fontSize: "0.85rem", color: "#92400e" }}>
@@ -527,23 +567,49 @@ export default function SellerRegister() {
                     <ErrMsg error={errors.experience} />
                   </Form.Group>
 
+                  {/* Website */}
+                  <Form.Group className="mb-3">
+                    <SrLabel>Website (Optional)</SrLabel>
+                    <InputGroup>
+                      <InputGroup.Text style={{ border: "2px solid #e8eaf6", borderRight: "none", borderRadius: "12px 0 0 12px", background: "#f8f9ff" }}>🌐</InputGroup.Text>
+                      <Form.Control
+                        className={`sr-input ${errors.website ? "is-invalid" : ""}`}
+                        style={{ borderRadius: "0 12px 12px 0", borderLeft: "none" }}
+                        placeholder="https://example.com"
+                        {...register("website")}
+                      />
+                    </InputGroup>
+                  </Form.Group>
+
+                  {/* Bio */}
+                  <Form.Group className="mb-3">
+                    <SrLabel>Bio (Optional)</SrLabel>
+                    <Form.Control
+                      as="textarea"
+                      rows={2}
+                      className={`sr-input ${errors.bio ? "is-invalid" : ""}`}
+                      placeholder="A short bio about yourself as a seller"
+                      {...register("bio")}
+                    />
+                  </Form.Group>
+
                   {/* Description */}
                   <Form.Group className="mb-4">
-                    <SrLabel>Business Description *</SrLabel>
+                    <SrLabel>Store Description *</SrLabel>
                     <Form.Control
                       as="textarea"
                       rows={4}
-                      className={`sr-input ${errors.description ? "is-invalid" : ""}`}
+                      className={`sr-input ${errors.store_description ? "is-invalid" : ""}`}
                       placeholder="Describe your business, products you sell, your strengths..."
                       maxLength={500}
-                      {...register("description", {
+                      {...register("store_description", {
                         required: "Description is required",
                         maxLength: { value: 500, message: "Max 500 characters" },
                       })}
                     />
-                    <ErrMsg error={errors.description} />
+                    <ErrMsg error={errors.store_description} />
                     <div className="text-end text-muted mt-1" style={{ fontSize: "0.75rem" }}>
-                      {(watch("description") || "").length} / 500
+                      {(watch("store_description") || "").length} / 500
                     </div>
                   </Form.Group>
                 </>
@@ -643,11 +709,11 @@ export default function SellerRegister() {
                     <Form.Control
                       as="textarea"
                       rows={3}
-                      className={`sr-input ${errors.full_address ? "is-invalid" : ""}`}
+                      className={`sr-input ${errors.address_line_1 ? "is-invalid" : ""}`}
                       placeholder="Shop No., Building, Street, Area..."
-                      {...register("full_address", { required: "Full address is required" })}
+                      {...register("address_line_1", { required: "Full address is required" })}
                     />
-                    <ErrMsg error={errors.full_address} />
+                    <ErrMsg error={errors.address_line_1} />
                   </Form.Group>
                 </>
               )}
@@ -696,52 +762,87 @@ export default function SellerRegister() {
                         <InputGroup>
                           <InputGroup.Text style={{ border: "2px solid #e8eaf6", borderRight: "none", borderRadius: "12px 0 0 12px", background: "#f8f9ff" }}>🔖</InputGroup.Text>
                           <Form.Control
-                            className={`sr-input ${errors.ifsc_code ? "is-invalid" : ""}`}
+                            className={`sr-input ${errors.ifsc ? "is-invalid" : ""}`}
                             style={{ borderRadius: "0 12px 12px 0", borderLeft: "none", textTransform: "uppercase" }}
                             placeholder="SBIN0001234"
                             maxLength={11}
-                            {...register("ifsc_code", {
+                            {...register("ifsc", {
                               required: "IFSC code is required",
                               pattern: { value: /^[A-Za-z]{4}0[A-Za-z0-9]{6}$/, message: "Enter valid IFSC code" },
                             })}
                           />
                         </InputGroup>
-                        <ErrMsg error={errors.ifsc_code} />
+                        <ErrMsg error={errors.ifsc} />
                       </Form.Group>
                     </Col>
                   </Row>
 
-                  {/* Account Holder Name */}
-                  <Form.Group className="mb-3">
-                    <SrLabel>Account Holder Name *</SrLabel>
-                    <InputGroup>
-                      <InputGroup.Text style={{ border: "2px solid #e8eaf6", borderRight: "none", borderRadius: "12px 0 0 12px", background: "#f8f9ff" }}>👤</InputGroup.Text>
-                      <Form.Control
-                        className={`sr-input ${errors.account_holder_name ? "is-invalid" : ""}`}
-                        style={{ borderRadius: "0 12px 12px 0", borderLeft: "none" }}
-                        placeholder="As per bank records"
-                        {...register("account_holder_name", { required: "Account holder name is required" })}
-                      />
-                    </InputGroup>
-                    <ErrMsg error={errors.account_holder_name} />
-                  </Form.Group>
+                  <Row className="g-3 mb-3">
+                    {/* Account Holder Name */}
+                    <Col sm={6}>
+                      <Form.Group>
+                        <SrLabel>Account Holder Name *</SrLabel>
+                        <InputGroup>
+                          <InputGroup.Text style={{ border: "2px solid #e8eaf6", borderRight: "none", borderRadius: "12px 0 0 12px", background: "#f8f9ff" }}>👤</InputGroup.Text>
+                          <Form.Control
+                            className={`sr-input ${errors.account_holder ? "is-invalid" : ""}`}
+                            style={{ borderRadius: "0 12px 12px 0", borderLeft: "none" }}
+                            placeholder="As per bank records"
+                            {...register("account_holder", { required: "Account holder name is required" })}
+                          />
+                        </InputGroup>
+                        <ErrMsg error={errors.account_holder} />
+                      </Form.Group>
+                    </Col>
 
-                  {/* UPI ID */}
-                  <Form.Group className="mb-3">
-                    <SrLabel>UPI ID (Optional)</SrLabel>
-                    <InputGroup>
-                      <InputGroup.Text style={{ border: "2px solid #e8eaf6", borderRight: "none", borderRadius: "12px 0 0 12px", background: "#f8f9ff" }}>📲</InputGroup.Text>
-                      <Form.Control
-                        className={`sr-input ${errors.upi_id ? "is-invalid" : ""}`}
-                        style={{ borderRadius: "0 12px 12px 0", borderLeft: "none" }}
-                        placeholder="rahul@upi"
-                        {...register("upi_id", {
-                          pattern: { value: /^[\w.\-_]{3,}@[a-zA-Z]{3,}$/, message: "Enter valid UPI ID" },
-                        })}
-                      />
-                    </InputGroup>
-                    <ErrMsg error={errors.upi_id} />
-                  </Form.Group>
+                    {/* Bank Name */}
+                    <Col sm={6}>
+                      <Form.Group>
+                        <SrLabel>Bank Name</SrLabel>
+                        <Form.Control
+                          className={`sr-input ${errors.bank_name ? "is-invalid" : ""}`}
+                          placeholder="e.g. HDFC Bank"
+                          {...register("bank_name")}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
+                  <Row className="g-3 mb-3">
+                    {/* Account Type */}
+                    <Col sm={6}>
+                      <Form.Group>
+                        <SrLabel>Account Type</SrLabel>
+                        <Form.Select
+                          className={`sr-input ${errors.account_type ? "is-invalid" : ""}`}
+                          {...register("account_type")}
+                        >
+                          <option value="Savings">Savings</option>
+                          <option value="Current">Current</option>
+                          <option value="Business">Business</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+
+                    {/* UPI ID */}
+                    <Col sm={6}>
+                      <Form.Group>
+                        <SrLabel>UPI ID (Optional)</SrLabel>
+                        <InputGroup>
+                          <InputGroup.Text style={{ border: "2px solid #e8eaf6", borderRight: "none", borderRadius: "12px 0 0 12px", background: "#f8f9ff" }}>📲</InputGroup.Text>
+                          <Form.Control
+                            className={`sr-input ${errors.upi_id ? "is-invalid" : ""}`}
+                            style={{ borderRadius: "0 12px 12px 0", borderLeft: "none" }}
+                            placeholder="rahul@upi"
+                            {...register("upi_id", {
+                              pattern: { value: /^[\w.\-_]{3,}@[a-zA-Z]{3,}$/, message: "Enter valid UPI ID" },
+                            })}
+                          />
+                        </InputGroup>
+                        <ErrMsg error={errors.upi_id} />
+                      </Form.Group>
+                    </Col>
+                  </Row>
 
                   <Row className="g-3 mb-4">
                     {/* PAN */}
@@ -751,38 +852,33 @@ export default function SellerRegister() {
                         <InputGroup>
                           <InputGroup.Text style={{ border: "2px solid #e8eaf6", borderRight: "none", borderRadius: "12px 0 0 12px", background: "#f8f9ff" }}>🪪</InputGroup.Text>
                           <Form.Control
-                            className={`sr-input ${errors.pan_number ? "is-invalid" : ""}`}
+                            className={`sr-input ${errors.pan ? "is-invalid" : ""}`}
                             style={{ borderRadius: "0 12px 12px 0", borderLeft: "none", textTransform: "uppercase" }}
                             placeholder="ABCDE1234F"
                             maxLength={10}
-                            {...register("pan_number", {
+                            {...register("pan", {
                               required: "PAN number is required",
                               pattern: { value: /^[A-Za-z]{5}[0-9]{4}[A-Za-z]{1}$/, message: "Enter valid PAN number" },
                             })}
                           />
                         </InputGroup>
-                        <ErrMsg error={errors.pan_number} />
+                        <ErrMsg error={errors.pan} />
                       </Form.Group>
                     </Col>
 
-                    {/* Aadhaar */}
+                    {/* GSTIN */}
                     <Col sm={6}>
                       <Form.Group>
-                        <SrLabel>Aadhaar Number *</SrLabel>
-                        <InputGroup>
-                          <InputGroup.Text style={{ border: "2px solid #e8eaf6", borderRight: "none", borderRadius: "12px 0 0 12px", background: "#f8f9ff" }}>🆔</InputGroup.Text>
-                          <Form.Control
-                            className={`sr-input sr-sensitive ${errors.aadhaar_number ? "is-invalid" : ""}`}
-                            style={{ borderRadius: "0 12px 12px 0", borderLeft: "none" }}
-                            placeholder="1234 5678 9012"
-                            maxLength={12}
-                            {...register("aadhaar_number", {
-                              required: "Aadhaar number is required",
-                              pattern: { value: /^\d{12}$/, message: "Enter valid 12-digit Aadhaar" },
-                            })}
-                          />
-                        </InputGroup>
-                        <ErrMsg error={errors.aadhaar_number} />
+                        <SrLabel>GSTIN (Optional)</SrLabel>
+                        <Form.Control
+                          className={`sr-input ${errors.gstin ? "is-invalid" : ""}`}
+                          placeholder="22AAAAA0000A1Z5"
+                          maxLength={15}
+                          {...register("gstin", {
+                            pattern: { value: /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, message: "Enter valid GSTIN" },
+                          })}
+                        />
+                        <ErrMsg error={errors.gstin} />
                       </Form.Group>
                     </Col>
                   </Row>

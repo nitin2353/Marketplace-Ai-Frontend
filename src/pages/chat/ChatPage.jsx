@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import chatApi from '../../api/chat.api';
 import JWTService from '../../config/jwt.config';
-import Toolbar from '../../components/Toolbar';
 import toast from 'react-hot-toast';
 import { IoSend, IoAttach, IoChatbubblesOutline, IoTrashOutline, IoClose, IoDocumentTextOutline, IoDownloadOutline } from 'react-icons/io5';
 import './Chat.css';
-import { Col, Row } from 'react-bootstrap';
 
 const ChatPage = () => {
     const { conversationId } = useParams();
@@ -24,26 +22,80 @@ const ChatPage = () => {
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
 
+    //Ai integration from here
+    const [aiWarning, setAiWarning] = useState(null);
+    const [pendingMessageData, setPendingMessageData] = useState(null);
+
+
+    const moderateMessageWithAI = async (message) => {
+        const res = await chatApi.moderateMessage({
+            message,
+            conversationId,
+        });
+
+        return res?.data || res;
+    };
+
+    const sendFinalMessage = async ({ message, file, aiConfirmed = false }) => {
+        const formData = new FormData();
+
+        if (message?.trim()) {
+            formData.append("message", message.trim());
+        }
+
+        if (file) {
+            formData.append("attachment", file);
+        }
+
+        formData.append("aiConfirmed", aiConfirmed ? "true" : "false");
+
+        const res = await chatApi.sendMessage(conversationId, formData);
+
+        if (res.status) {
+            setMessages((prev) => [
+                ...prev,
+                { ...res.data, sender_name: user.name },
+            ]);
+
+            setNewMessage("");
+            removeSelectedFile();
+
+            setConversations((prev) =>
+                prev.map((c) =>
+                    c.id === conversationId
+                        ? {
+                            ...c,
+                            last_message: message || "Sent an attachment",
+                            updated_at: new Date().toISOString(),
+                        }
+                        : c
+                )
+            );
+        }
+    };
+
+
+
+
     useEffect(() => {
-        fetchConversations();
-        const interval = setInterval(fetchConversations, 10000);
-        return () => clearInterval(interval);
+        fetchConversations()
     }, []);
 
     useEffect(() => {
-        let interval;
-        if (conversationId) {
-            fetchMessages(conversationId);
-            const active = conversations.find(c => c.id === conversationId);
-            if (active) setActiveConversation(active);
+        if (!conversationId) return;
+        fetchMessages(conversationId, true);
 
-            // Polling for new messages
-            interval = setInterval(() => {
-                fetchMessages(conversationId, true); // true for silent fetch
-            }, 5000);
+    }, [conversationId]);
+
+
+    useEffect(() => {
+        if (conversationId && conversations.length > 0) {
+            const active = conversations.find((c) => c.id === conversationId);
+            if (active) setActiveConversation(active);
         }
-        return () => clearInterval(interval);
     }, [conversationId, conversations]);
+
+
 
     useEffect(() => {
         scrollToBottom();
@@ -118,28 +170,111 @@ const ChatPage = () => {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
+    const maskSensitiveNumbers = (text = "") => {
+        if (!text) return text;
+
+        // Phone / WhatsApp / numeric patterns
+        const phoneRegex =
+            /(?:\+?\d{1,4}[\s\-().]*)?(?:\d[\s\-().]*){6,15}\d/g;
+
+        return text.replace(phoneRegex, (match) => {
+            // sirf digits count karo
+            const digitsOnly = match.replace(/\D/g, "");
+
+            // agar 7+ digits hain tabhi hide karo
+            if (digitsOnly.length >= 7) {
+                return "••••••••••";
+            }
+
+            return match;
+        });
+    };
+
+
+    // const sendFinalMessage = async (message, file) => {
+    //     const formData = new FormData();
+
+    //     if (message?.trim()) {
+    //         formData.append("message", message.trim());
+    //     }
+
+    //     if (file) {
+    //         formData.append("attachment", file);
+    //     }
+
+    //     const res = await chatApi.sendMessage(conversationId, formData);
+
+    //     if (res.status) {
+    //         setMessages((prev) => [
+    //             ...prev,
+    //             { ...res.data, sender_name: user.name },
+    //         ]);
+
+    //         setNewMessage("");
+    //         removeSelectedFile();
+
+    //         setConversations((prev) =>
+    //             prev.map((c) =>
+    //                 c.id === conversationId
+    //                     ? {
+    //                         ...c,
+    //                         last_message: message || "Sent an attachment",
+    //                         updated_at: new Date().toISOString(),
+    //                     }
+    //                     : c
+    //             )
+    //         );
+    //     }
+    // };
+
+
     const handleSendMessage = async (e) => {
         e.preventDefault();
+
         if ((!newMessage.trim() && !selectedFile) || !conversationId) return;
 
         setSending(true);
-        try {
-            const formData = new FormData();
-            if (newMessage.trim()) formData.append('message', newMessage);
-            if (selectedFile) formData.append('attachment', selectedFile);
 
-            const res = await chatApi.sendMessage(conversationId, formData);
-            if (res.status) {
-                setMessages([...messages, { ...res.data, sender_name: user.name }]);
-                setNewMessage("");
-                removeSelectedFile();
-                // Update last message in sidebar
-                setConversations(prev => prev.map(c =>
-                    c.id === conversationId ? { ...c, last_message: newMessage || "Sent an attachment", updated_at: new Date().toISOString() } : c
-                ));
+        try {
+            if (newMessage.trim()) {
+                const moderation = await moderateMessageWithAI(newMessage.trim());
+                console.log("AI Moderation Result:", moderation);
+                setAiWarning(true);
+                if (moderation?.blocked) {
+                    toast.error(
+                        moderation.message || "Contact details are not allowed in chat."
+                    );
+                    return;
+                }
+
+                if (moderation?.warning) {
+                    setAiWarning(moderation);
+                    setPendingMessageData({
+                        message: newMessage,
+                        file: selectedFile,
+                    });
+                    setSending(false);
+                    return;
+                }
             }
+
+            await sendFinalMessage({
+                message: newMessage,
+                file: selectedFile,
+                aiConfirmed: false,
+            });
         } catch (error) {
-            console.error("Error sending message:", error);
+            const moderation = error?.response?.data?.moderation;
+
+            if (error?.response?.status === 409 && moderation) {
+                setAiWarning(moderation);
+                setPendingMessageData({
+                    message: newMessage,
+                    file: selectedFile,
+                });
+                return;
+            }
+
             toast.error(error.response?.data?.message || "Failed to send message");
         } finally {
             setSending(false);
@@ -168,14 +303,74 @@ const ChatPage = () => {
 
     return (
         <div className="chat-page-wrapper" >
-            {/* <Toolbar isSearch={false} isSideBar={false} /> */}
+            {aiWarning?.warning && (
+                <div className="ai-warning-overlay">
+                    <div className="ai-warning-modal">
+                        <h5>
+                            {aiWarning?.data?.audience === "seller"
+                                ? "⚠️ Seller Warning"
+                                : "⚠️ Safety Warning"}
+                        </h5>
+
+                        <p>
+                            {aiWarning?.message ||
+                                "This message may contain contact details or outside-platform deal discussion."}
+                        </p>
+
+                        <small>
+                            The company will not be responsible for dealing outside the platform.
+                        </small>
+
+                        <div className="ai-warning-actions">
+                            <button
+                                type="button"
+                                className="ai-warning-cancel"
+                                onClick={() => {
+                                    setAiWarning(null);
+                                    setPendingMessageData(null);
+                                }}
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="button"
+                                className="ai-warning-continue"
+                                disabled={sending}
+                                onClick={async () => {
+                                    try {
+                                        setSending(true);
+
+                                        await sendFinalMessage({
+                                            message: pendingMessageData?.message,
+                                            file: pendingMessageData?.file,
+                                            aiConfirmed: true,
+                                        });
+
+                                        setAiWarning(null);
+                                        setPendingMessageData(null);
+                                    } catch (error) {
+                                        toast.error(
+                                            error.response?.data?.message || "Failed to send message"
+                                        );
+                                    } finally {
+                                        setSending(false);
+                                    }
+                                }}
+                            >
+                                I Understand, Send
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="chat-container" style={{ height: "100vh" }}>
                 {/* Sidebar */}
                 <div className={`chat-sidebar ${"d-flex"}`}>
                     <div className="chat-sidebar-header">
                         <button
-                            className="chat-back-btn"
-                            onClick={() => navigate('/')}
+                            className="chat-back-btn d-flex"
+                            onClick={() => navigate(-1)}
                         >
                             ←
                         </button>
@@ -213,12 +408,12 @@ const ChatPage = () => {
                                         </div>
 
                                         <div className="conversation-last-msg">
-                                            {conv.last_message || "Start a conversation"}
+                                            {maskSensitiveNumbers(conv.last_message) || "Start a conversation"}
                                         </div>
                                     </div>
 
                                     {conv.unread_count > 0 && (
-                                        <div className="unread-badge">{conv.unread_count}</div>
+                                        <div className="unread-badge text-light">{conv.unread_count}</div>
                                     )}
                                 </div>
                             ))
@@ -261,7 +456,6 @@ const ChatPage = () => {
                                     </div>
                                 </div>
                             )}
-
                             <div className="chat-messages">
                                 {messagesLoading ? (
                                     <div className="text-center py-4">Loading messages...</div>
@@ -302,7 +496,11 @@ const ChatPage = () => {
                                                     )}
                                                 </div>
                                             )}
-                                            {msg.message && <div className="message-text">{msg.message}</div>}
+                                            {msg.message && (
+                                                <div className="message-text">
+                                                    {maskSensitiveNumbers(msg.message)}
+                                                </div>
+                                            )}
                                             <span className="message-time">{formatTime(msg.created_at)}</span>
                                         </div>
                                     ))

@@ -1,20 +1,16 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { Row, Col, Stack } from "react-bootstrap";
-import { FMT, TIMELINE_STEPS } from "../../helper/GlobalHelper";
-import { STATUS_META } from "../../helper/GlobalHelper";
-import "./orderpage.css";    
-
+import { TIMELINE_STEPS, STATUS_META } from "../../helper/GlobalHelper";
+// import "./ordertimeline.css";
+import "./orderpage.css";
 
 function OrderTimeline({ currentStatus }) {
     const activeIdx = TIMELINE_STEPS.indexOf(currentStatus);
-    const isCancelled = currentStatus === "cancelled" || currentStatus === "payment_failed";
+    const isCancelled = ["cancelled", "payment_failed"].includes(currentStatus);
 
     if (isCancelled) {
         return (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 0" }}>
-                <span style={{ fontSize: 20 }}>❌</span>
-                <span style={{ fontSize: "0.84rem", fontWeight: 800, color: "#dc2626" }}>
+            <div className="d-flex align-items-center gap-2 p-3 rounded-3 bg-danger bg-opacity-10 border border-danger border-opacity-10">
+                <i className="fas fa-times-circle text-danger"></i>
+                <span className="small fw-bold text-danger">
                     Order {currentStatus === "payment_failed" ? "Payment Failed" : "Cancelled"}
                 </span>
             </div>
@@ -22,20 +18,22 @@ function OrderTimeline({ currentStatus }) {
     }
 
     return (
-        <div className="ord-timeline">
+        <div className="local-timeline py-3">
             {TIMELINE_STEPS.map((step, i) => {
                 const isDone = i < activeIdx;
                 const isActive = i === activeIdx;
-                const meta = STATUS_META[step];
+                const meta = STATUS_META[step] || { label: step, icon: "•" };
+
                 return (
-                    <div key={step} className="ord-tl-item">
-                        <div className={`ord-tl-dot ${isDone ? "done" : isActive ? "active" : ""}`} />
-                        <span className="ord-tl-label" style={{ color: isDone || isActive ? "#1a1a2e" : "#9ca3af" }}>
-                            {meta.icon} {meta.label}
-                        </span>
-                        {isActive && (
-                            <span className="ord-tl-time">In progress</span>
-                        )}
+                    <div key={step} className={`timeline-step ${isDone ? "done" : isActive ? "active" : ""}`}>
+                        <div className="step-marker">
+                            <div className="step-dot"></div>
+                            {i < TIMELINE_STEPS.length - 1 && <div className="step-line"></div>}
+                        </div>
+                        <div className="step-content">
+                            <span className="step-label">{meta.label}</span>
+                            {isActive && <span className="step-status">In Progress</span>}
+                        </div>
                     </div>
                 );
             })}

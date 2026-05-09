@@ -304,23 +304,93 @@ export default function SellerOrders() {
 
     // ── Filtered + paged ──
     const filtered = useMemo(() => {
-        return [...orders]
+        const list = Array.isArray(orders) ? orders : [];
+
+        return [...list]
             .filter((o) => {
-                if (statusFilter !== "all" && o.order_status !== statusFilter) return false;
-                if (paymentFilter !== "all" && o.payment_status !== paymentFilter) return false;
-                if (search.trim()) {
-                    const q = search.toLowerCase();
-                    const matchNum = String(o.order_number || "").toLowerCase().includes(q);
-                    const matchCust = String(
-                        o.user_snapshot?.full_name || o.address_snapshot?.name || ""
-                    ).toLowerCase().includes(q);
-                    if (!matchNum && !matchCust) return false;
+                const orderStatus = String(o?.order_status || "").toLowerCase();
+                const paymentStatus = String(o?.payment_status || "").toLowerCase();
+
+                if (
+                    statusFilter !== "all" &&
+                    orderStatus !== String(statusFilter).toLowerCase()
+                ) {
+                    return false;
                 }
+
+                if (
+                    paymentFilter !== "all" &&
+                    paymentStatus !== String(paymentFilter).toLowerCase()
+                ) {
+                    return false;
+                }
+
+                const q = search.trim().toLowerCase();
+
+                if (q) {
+                    const customerName =
+                        o?.user_snapshot?.full_name ||
+                        o?.address_snapshot?.name ||
+                        "";
+
+                    const customerMobile =
+                        o?.address_snapshot?.mobile ||
+                        o?.address_snapshot?.phone ||
+                        o?.user_snapshot?.mobile ||
+                        "";
+
+                    const sellerName =
+                        o?.seller_info?.business_name ||
+                        o?.seller_info?.name ||
+                        o?.items?.[0]?.seller_business_name ||
+                        o?.items?.[0]?.seller_name ||
+                        "";
+
+                    const productText = Array.isArray(o?.items)
+                        ? o.items
+                            .map((item) =>
+                                [
+                                    item?.product_title,
+                                    item?.product_brand,
+                                    item?.product_category,
+                                    item?.product_tag,
+                                    item?.product_id,
+                                ]
+                                    .filter(Boolean)
+                                    .join(" ")
+                            )
+                            .join(" ")
+                        : "";
+
+                    const searchableText = [
+                        o?.id,
+                        o?.order_number,
+                        o?.total_amount,
+                        o?.payment_method,
+                        o?.payment_status,
+                        o?.order_status,
+                        customerName,
+                        customerMobile,
+                        o?.user_snapshot?.email,
+                        o?.address_snapshot?.city,
+                        o?.address_snapshot?.state,
+                        o?.address_snapshot?.pincode,
+                        sellerName,
+                        productText,
+                    ]
+                        .filter(Boolean)
+                        .join(" ")
+                        .toLowerCase();
+
+                    if (!searchableText.includes(q)) return false;
+                }
+
                 return true;
             })
             .sort((a, b) => {
-                const da = new Date(a.created_time).getTime();
-                const db = new Date(b.created_time).getTime();
+                const da = new Date(a?.created_time || 0).getTime() || 0;
+                const db = new Date(b?.created_time || 0).getTime() || 0;
+
                 return dateSort === "desc" ? db - da : da - db;
             });
     }, [orders, statusFilter, paymentFilter, search, dateSort]);
@@ -397,7 +467,7 @@ export default function SellerOrders() {
             >
 
 
-                <div style={{backgroundColor:"#3549ff"}} className="so-topbar d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
+                <div style={{ backgroundColor: "#3549ff" }} className="so-topbar d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
                     <Stack direction="horizontal" gap={2} className="align-items-center">
                         <span className="so-topbar-title">🏪 Orders Management</span>
                     </Stack>

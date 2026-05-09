@@ -496,7 +496,7 @@ export default function SellerProductDetail() {
                                             <div className="spd-card-sub">Last 7 days</div>
                                             <div style={{ height: 200 }}>
                                                 <ResponsiveContainer width="100%" height="100%">
-                                                    <BarChart data={weeklyData} margin={{ top: 5, right: 8, left: -18, bottom: 0 }}>
+                                                    <BarChart data={weeklyData} margin={{ top: 5, right: 8, left: -18, bottom: 0 }} className="text-light">
                                                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f8" vertical={false} />
                                                         <XAxis dataKey="day" tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                                                         <YAxis tick={{ fontSize: 10, fontFamily: "Nunito", fontWeight: 700, fill: "#9ca3af" }} axisLine={false} tickLine={false} />

@@ -298,15 +298,16 @@ const Toolbar = ({
                         ☰
                     </button>
                     :
-                    <div className="fw-bold d-none d-sm-block" style={{
-                        fontFamily: "var(--font-heading)",
-                        fontSize: "1.4rem",
-                        cursor: 'pointer',
-                        color: "var(--primary)",
-                        whiteSpace: "nowrap"
-                    }} onClick={() => navigate('/')}>
-                        🛍️ ShopEase
-                    </div>
+                    <img src="../../src/assets/logo.png" width="8%" alt="" />
+                    // <div className="fw-bold d-none d-sm-block" style={{
+                    //     fontFamily: "var(--font-heading)",
+                    //     fontSize: "1.4rem",
+                    //     cursor: 'pointer',
+                    //     color: "var(--primary)",
+                    //     whiteSpace: "nowrap"
+                    // }} onClick={() => navigate('/')}>
+                    //     🛍️ ShopEase
+                    // </div>
             }
 
             {/* ── SEARCH BOX ── */}

@@ -100,8 +100,6 @@ export default function EditProductModal({ show, handleClose, product, setRefres
     const [isFreeDelivery, setIsFreeDelivery] = useState(false);
     const [taxInclusive, setTaxInclusive] = useState(false);
 
-    console.log(product)
-
     const { register, handleSubmit, watch, reset, formState: { errors } } = useForm({
         defaultValues: {
             title: "", description: "", brand: "", category: "",
@@ -287,10 +285,10 @@ export default function EditProductModal({ show, handleClose, product, setRefres
     return (
         <Modal show={show} onHide={handleReset} size="xl" centered scrollable className="ep-modal">
             <Modal.Header closeButton>
-                <Modal.Title className="d-flex align-items-center gap-2">
+                <Modal.Title className="d-flex align-items-center gap-2 text-light">
                     ✏️ Edit Product
                     {product?.title && (
-                        <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#9ca3af" }}>
+                        <span style={{ fontSize: "0.85rem", marginTop: "3px", fontWeight: 600, color: "#ffffffff" }}>
                             — {product.title.length > 40 ? product.title.slice(0, 40) + "…" : product.title}
                         </span>
                     )}
@@ -380,16 +378,16 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                 <div className="cp-info mb-3">ℹ️ Since your product has variants, <b>price & stock per variant</b> will be set below. Base price is the display price only.</div>
                             )}
                             <Row className="g-3">
-                                <Col sm={6} md={3}>
+                                <Col sm={6} md={4}>
                                     <PriceInput label={hasVariants ? "Base / Display Price (₹) *" : "Selling Price (₹) *"}
                                         placeholder="499"
                                         error={errors.base_price?.message}
                                         {...register("base_price", { required: "Base price required", min: { value: 1, message: "Must be > 0" } })} />
                                 </Col>
-                                <Col sm={6} md={3}>
+                                <Col sm={6} md={4}>
                                     <PriceInput label="MRP / Old Price (₹)" placeholder="999" {...register("old_price")} />
                                 </Col>
-                                <Col sm={6} md={3}>
+                                <Col sm={6} md={4}>
                                     <Field label="Discount">
                                         <div className="cp-input" style={{ display: "flex", alignItems: "center", background: "#f8f9ff", cursor: "default" }}>
                                             {discount !== null
@@ -398,7 +396,7 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                         </div>
                                     </Field>
                                 </Col>
-                                <Col sm={6} md={3}>
+                                <Col sm={6} md={4}>
                                     <Field label="Tax (%)">
                                         <InputGroup>
                                             <Form.Control className="cp-input cp-input-inner-right" type="number" min="0" max="100" placeholder="18" {...register("tax_percentage")} />
@@ -406,20 +404,15 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                         </InputGroup>
                                     </Field>
                                 </Col>
-                                <Col sm={6} md={3}>
+                                <Col sm={6} md={4}>
                                     <Field label="Stock Quantity *" error={errors.stock?.message}>
                                         <Form.Control className={`cp-input ${errors.stock ? "is-invalid" : ""}`} type="number" min="0" placeholder="100"
                                             {...register("stock", { required: "Stock required", min: { value: 0, message: "Cannot be negative" } })} />
                                     </Field>
                                 </Col>
-                                <Col sm={6} md={3}>
+                                <Col sm={6} md={4}>
                                     <Field label="Min Stock Alert">
                                         <Form.Control className="cp-input" type="number" min="0" placeholder="10" {...register("min_stock_alert")} />
-                                    </Field>
-                                </Col>
-                                <Col sm={6} md={3}>
-                                    <Field label="Tax Inclusive?">
-                                        <Toggle value={taxInclusive} onChange={setTaxInclusive} />
                                     </Field>
                                 </Col>
                             </Row>
@@ -561,7 +554,7 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                         </InputGroup>
                                     </Field>
                                 </Col>
-                                <Col sm={6} md={3}>
+                                <Col sm={6} md={5}>
                                     <Field label="Dimensions (L×W×H cm)">
                                         <Row className="g-1">
                                             <Col><Form.Control className="cp-input" type="number" min="0" placeholder="L" {...register("length")} /></Col>
@@ -578,12 +571,12 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                         </InputGroup>
                                     </Field>
                                 </Col>
-                                <Col sm={6} md={3}>
+                                <Col sm={6} md={6}>
                                     <Field label="COD Available?">
                                         <Toggle value={isCod} onChange={setIsCod} />
                                     </Field>
                                 </Col>
-                                <Col sm={6} md={3}>
+                                <Col sm={6} md={6}>
                                     <Field label="Free Delivery?">
                                         <Toggle value={isFreeDelivery} onChange={setIsFreeDelivery} />
                                     </Field>
@@ -596,16 +589,16 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                             <SectionTitle icon="🏷️">Tags & Options</SectionTitle>
 
                             <label className="cp-label mb-2">Product Tags</label>
-                            <div className="d-flex flex-wrap gap-2 mb-3">
-                                {PRESET_TAGS.map(t => (
-                                    <Badge key={t} bg={tags.includes(t) ? "warning" : "light"} text={tags.includes(t) ? "dark" : "secondary"}
-                                        className="rounded-3 px-3 py-2 fw-semibold"
-                                        style={{ cursor: "pointer", fontSize: "0.78rem", border: tags.includes(t) ? "2px solid #f7931e" : "2px solid #e8eaf6" }}
-                                        onClick={() => tags.includes(t) ? removeTag(t) : addTag(t)}>
-                                        {t}
-                                    </Badge>
-                                ))}
-                            </div>
+                                    <div className="d-flex flex-wrap gap-2 mb-3">
+                                        {PRESET_TAGS.map(t => (
+                                            <div key={t} text={tags.includes(t) ? "" : ""}
+                                                className="rounded-3 px-3 py-2"
+                                                style={{ backgroundColor: "#5068f0ff", cursor: "pointer", color: "white", fontSize: "0.78rem", border: tags.includes(t) ? "2px solid #0b2286ff" : "2px solid #e8eaf6" }}
+                                                onClick={() => tags.includes(t) ? removeTag(t) : addTag(t)}>
+                                                {t}
+                                            </div>
+                                        ))}
+                                    </div>
 
                             <div className="d-flex gap-2 mb-3" style={{ maxWidth: 380 }}>
                                 <Form.Control className="cp-input" placeholder="Custom tag…" value={tagInput}
@@ -627,18 +620,6 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                     <label className="cp-label mb-2">Is Product Customizable?</label>
                                     <Toggle value={isCustomizable} onChange={setIsCustomizable} />
                                 </Col>
-                                {isCustomizable && (<>
-                                    <Col sm={6}>
-                                        <Field label="Customization Type">
-                                            <Form.Control className="cp-input" placeholder="e.g. Text, Engraving, Upload" {...register("customization_type")} />
-                                        </Field>
-                                    </Col>
-                                    <Col xs={12}>
-                                        <Field label="Customization Fields (JSON)">
-                                            <Form.Control as="textarea" rows={3} className="cp-textarea" placeholder='e.g. [{"name":"Text","type":"input","maxLength":50}]' {...register("customization_fields")} />
-                                        </Field>
-                                    </Col>
-                                </>)}
                             </Row>
                         </div>
 

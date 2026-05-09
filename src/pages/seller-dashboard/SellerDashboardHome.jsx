@@ -318,6 +318,8 @@ export default function SellerDashboardHome() {
   // ── Activity ──
   const ACTIVITIES = recentActivity.map(item => ({
     icon: activityMeta[item.type]?.icon || "📌",
+    id: item.id,
+    type: activityMeta[item.type]?.type,
     bg: activityMeta[item.type]?.bg || "#f3f4f6",
     title: item.title,
     sub: item.sub,
@@ -638,9 +640,10 @@ export default function SellerDashboardHome() {
                         {"★".repeat(Math.round(avgRating))}{"☆".repeat(5 - Math.round(avgRating))}
                       </div>
                       <div style={{ fontSize: ".72rem", color: "var(--muted)", fontWeight: 700 }}>
-                        {products.reduce((s, p) => s + (p.reviews || 0), 0).toLocaleString()} total reviews
+                        {products.reduce((s, p) => s + (p.review_count || 0), 0).toLocaleString()} total reviews
                       </div>
                     </div>
+                    {console.log("ratingDist", ratingDist)}
                     {ratingDist.map(({ star, count, pct }) => (
                       <div key={star} className="sdh-rating-row">
                         <span className="sdh-rating-label">{star}★</span>
@@ -681,11 +684,11 @@ export default function SellerDashboardHome() {
                     <div className="sdh-card-title">🔔 Recent Activity</div>
                     <div className="sdh-card-sub">Latest events on your store</div>
                     {ACTIVITIES.slice(0, 5).map((a, i) => (
-                      <div key={i} className="sdh-activity-item" style={{ animationDelay: `${i * 0.05}s` }}>
+                      <div key={i} className="sdh-activity-item" style={{ animationDelay: `${i * 0.05}s`, backgroundColor: "" }} onClick={() => navigate(`/seller/${a.type}/${a.id}`)}>
                         <div className="sdh-activity-dot" style={{ background: a.bg }}>{a.icon}</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div className="sdh-activity-title">{a.title}</div>
-                          <div className="sdh-activity-sub">{a.sub}</div>
+                          <div className="sdh-activity-sub" style={{ color: "#196df3ff", cursor: 'pointer' }}>{a.sub}</div>
                         </div>
                         <div className="sdh-activity-time">{a.time}</div>
                       </div>

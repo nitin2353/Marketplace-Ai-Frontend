@@ -54,15 +54,15 @@ export default function Sidebar({ cart, sidebarOpen, navSection, wishlist, handl
                             alignItems: "center",
                             gap: "8px"
                         }}>
-                            <span style={{ fontSize: "1.8rem" }}>🛍️</span> ShopEase
+                            <img src="../../src/assets/logo.png" width="100%" alt="" />
                         </div>
                         <button onClick={() => setSidebar(false)} className="d-lg-none" style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "1.5rem", cursor: "pointer" }}>
                             <IoCloseOutline />
                         </button>
                     </div>
-                    <div style={{ color: "var(--text-muted)", fontSize: ".75rem", fontWeight: 600, marginTop: "4px", textTransform: "uppercase", letterSpacing: "1px" }}>
+                    {/* <div style={{ color: "var(--text-muted)", fontSize: ".75rem", fontWeight: 600, marginTop: "4px", textTransform: "uppercase", letterSpacing: "1px" }}>
                         Marketplace Portal
-                    </div>
+                    </div> */}
                 </div>
 
                 <div style={{ padding: "20px 0" }}>

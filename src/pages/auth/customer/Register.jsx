@@ -131,15 +131,6 @@ export default function Register() {
                         ))}
                     </Stack>
 
-                    {/* Category tags */}
-                    <div className="d-flex flex-wrap gap-2 mt-4">
-                        {["Electronics", "Fashion", "Home & Living", "Beauty", "Sports", "Grocery"].map(tag => (
-                            <Badge key={tag} bg="light" text="dark" className="rounded-pill px-3 py-2 fw-semibold" style={{ opacity: 0.85, fontSize: "0.78rem" }}>
-                                {tag}
-                            </Badge>
-                        ))}
-                    </div>
-
                     {/* Social proof */}
                     <div className="mt-4 text-white" style={{ opacity: 0.75, fontSize: "0.82rem" }}>
                         ⭐ Trusted by 2 Crore+ happy customers across India

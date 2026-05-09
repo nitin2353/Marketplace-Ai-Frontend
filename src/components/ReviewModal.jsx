@@ -187,9 +187,8 @@ export default function ReviewModal({ show, onHide, orderId, productId, sellerId
                         disabled={submitting}
                         style={{
                             borderRadius: 12,
-                            background: "linear-gradient(135deg, #ff6b35, #f7931e)",
                             border: "none",
-                            boxShadow: "0 4px 15px rgba(255, 107, 53, 0.3)",
+                            boxShadow: "0 4px 15px #90afffff",
                             fontSize: "1rem"
                         }}
                     >

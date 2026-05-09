@@ -184,7 +184,7 @@ export default function CreateProduct() {
     // ── Success screen ──
     if (submitted) {
         return (
-            <div className="cp-page d-flex align-items-center justify-content-center" style={{ minHeight: "100vh", background: "linear-gradient(145deg, #ff6b35 0%, #f7931e 55%, #ffcd3c 100%)" }}>
+            <div className="cp-page d-flex align-items-center justify-content-center" style={{ minHeight: "100vh", background: "linear-gradient(145deg, #3543ffff 0%, #1e83f7ff 55%, #339cffff 100%)" }}>
                 <div className="cp-card text-center p-5" style={{ maxWidth: 440 }}>
                     <div className="cp-success-ring mb-3">✅</div>
                     <h2 className="fw-bold mb-2" style={{ fontFamily: "Nunito", fontSize: "1.8rem", color: "#1a1a2e" }}>Product Listed!</h2>
@@ -308,19 +308,19 @@ export default function CreateProduct() {
                                     )}
 
                                     <Row className="g-3">
-                                        <Col sm={6} md={3}>
+                                        <Col sm={6} md={4}>
                                             <PriceInput label={hasVariants ? "Base / Display Price (₹) *" : "Selling Price (₹) *"}
                                                 placeholder="499"
                                                 error={errors.base_price?.message}
                                                 className={`cp-input cp-input-inner-left ${errors.base_price ? "is-invalid" : ""}`}
                                                 {...register("base_price", { required: "Base price required", min: { value: 1, message: "Must be > 0" } })} />
                                         </Col>
-                                        <Col sm={6} md={3}>
+                                        <Col sm={6} md={4}>
                                             <PriceInput label="MRP / Old Price (₹)" placeholder="999"
                                                 className="cp-input cp-input-inner-left"
                                                 {...register("old_price")} />
                                         </Col>
-                                        <Col sm={6} md={3}>
+                                        <Col sm={6} md={4}>
                                             <Field label="Discount">
                                                 <div className="cp-input" style={{ display: "flex", alignItems: "center", background: "#f8f9ff", cursor: "default" }}>
                                                     {discount !== null
@@ -329,7 +329,7 @@ export default function CreateProduct() {
                                                 </div>
                                             </Field>
                                         </Col>
-                                        <Col sm={6} md={3}>
+                                        <Col sm={6} md={4}>
                                             <Field label="Tax (%)" >
                                                 <InputGroup>
                                                     <Form.Control className="cp-input cp-input-inner-right" type="number" min="0" max="100" placeholder="18" {...register("tax_percentage")} />
@@ -337,20 +337,15 @@ export default function CreateProduct() {
                                                 </InputGroup>
                                             </Field>
                                         </Col>
-                                        <Col sm={6} md={3}>
+                                        <Col sm={6} md={4}>
                                             <Field label="Stock Quantity *" error={errors.stock?.message}>
                                                 <Form.Control className={`cp-input ${errors.stock ? "is-invalid" : ""}`} type="number" min="0" placeholder="100"
                                                     {...register("stock", { required: "Stock required", min: { value: 0, message: "Cannot be negative" } })} />
                                             </Field>
                                         </Col>
-                                        <Col sm={6} md={3}>
+                                        <Col sm={6} md={4}>
                                             <Field label="Min Stock Alert">
                                                 <Form.Control className="cp-input" type="number" min="0" placeholder="10" {...register("min_stock_alert")} />
-                                            </Field>
-                                        </Col>
-                                        <Col sm={6} md={3}>
-                                            <Field label="Tax Inclusive?">
-                                                <Toggle value={taxInclusive} onChange={setTaxInclusive} />
                                             </Field>
                                         </Col>
                                     </Row>
@@ -495,7 +490,7 @@ export default function CreateProduct() {
                                                 </InputGroup>
                                             </Field>
                                         </Col>
-                                        <Col sm={6} md={3}>
+                                        <Col sm={6} md={6}>
                                             <Field label="Dimensions (L×W×H cm)">
                                                 <Row className="g-1">
                                                     <Col><Form.Control className="cp-input" type="number" min="0" placeholder="L" {...register("length")} /></Col>
@@ -512,16 +507,18 @@ export default function CreateProduct() {
                                                 </InputGroup>
                                             </Field>
                                         </Col>
-                                        <Col sm={6} md={3}>
-                                            <Field label="COD Available?">
-                                                <Toggle value={isCod} onChange={setIsCod} />
-                                            </Field>
-                                        </Col>
-                                        <Col sm={6} md={3}>
-                                            <Field label="Free Delivery?">
-                                                <Toggle value={isFreeDelivery} onChange={setIsFreeDelivery} />
-                                            </Field>
-                                        </Col>
+                                        <Row className="g-3 mt-3">
+                                            <Col sm={6} md={6}>
+                                                <Field label="COD Available?">
+                                                    <Toggle value={isCod} onChange={setIsCod} />
+                                                </Field>
+                                            </Col>
+                                            <Col sm={6} md={6} >
+                                                <Field label="Free Delivery?">
+                                                    <Toggle value={isFreeDelivery} onChange={setIsFreeDelivery} />
+                                                </Field>
+                                            </Col>
+                                        </Row>
                                     </Row>
                                 </div>
 
@@ -534,9 +531,9 @@ export default function CreateProduct() {
                                     <label className="cp-label mb-2">Product Tags</label>
                                     <div className="d-flex flex-wrap gap-2 mb-3">
                                         {PRESET_TAGS.map(t => (
-                                            <div key={t}  text={tags.includes(t) ? "" : ""}
+                                            <div key={t} text={tags.includes(t) ? "" : ""}
                                                 className="rounded-3 px-3 py-2"
-                                                style={{backgroundColor:"#5068f0ff",cursor: "pointer", fontSize: "0.78rem", border: tags.includes(t) ? "2px solid #355aff" : "2px solid #e8eaf6" }}
+                                                style={{ backgroundColor: "#5068f0ff", cursor: "pointer", color: "white", fontSize: "0.78rem", border: tags.includes(t) ? "2px solid #0b2286ff" : "2px solid #e8eaf6" }}
                                                 onClick={() => tags.includes(t) ? removeTag(t) : addTag(t)}>
                                                 {t}
                                             </div>
@@ -563,18 +560,6 @@ export default function CreateProduct() {
                                             <label className="cp-label mb-2">Is Product Customizable?</label>
                                             <Toggle value={isCustomizable} onChange={setIsCustomizable} />
                                         </Col>
-                                        {isCustomizable && (<>
-                                            <Col sm={6}>
-                                                <Field label="Customization Type">
-                                                    <Form.Control className="cp-input" placeholder="e.g. Text, Engraving, Upload" {...register("customization_type")} />
-                                                </Field>
-                                            </Col>
-                                            <Col xs={12}>
-                                                <Field label="Customization Fields (JSON)">
-                                                    <Form.Control as="textarea" rows={3} className="cp-textarea" placeholder='e.g. [{"name":"Text","type":"input","maxLength":50}]' {...register("customization_fields")} />
-                                                </Field>
-                                            </Col>
-                                        </>)}
                                     </Row>
                                 </div>
 

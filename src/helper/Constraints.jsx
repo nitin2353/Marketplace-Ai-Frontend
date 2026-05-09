@@ -85,13 +85,13 @@ const PAYMENT_METHOD_META = {
 };
 
 export const activityMeta = {
-  new_order: { icon: "🛒", bg: "#f0fdf4" },
-  review_received: { icon: "⭐", bg: "#fefce8" },
-  low_stock: { icon: "⚠️", bg: "#fef2f2" },
-  return_request: { icon: "↩️", bg: "#f5f3ff" },
-  product_published: { icon: "📦", bg: "#eff6ff" },
-  payout_processed: { icon: "💰", bg: "#fff3ee" },
-  product_trending: { icon: "🚀", bg: "#fdf4ff" },
+  new_order: { icon: "🛒", bg: "#f0fdf4", type: 'orders' },
+  review_received: { icon: "⭐", bg: "#fefce8", type: 'review' },
+  low_stock: { icon: "⚠️", bg: "#fef2f2", type: 'product' },
+  return_request: { icon: "↩️", bg: "#f5f3ff", type: 'orders' },
+  product_published: { icon: "📦", bg: "#eff6ff", type: 'product' },
+  payout_processed: { icon: "💰", bg: "#fff3ee", type: 'payment' },
+  product_trending: { icon: "🚀", bg: "#fdf4ff", type: 'product' },
 };
 
 export const timeAgo = (dateString) => {

@@ -89,6 +89,7 @@ const InvoiceDownloadPage = () => {
                 document={<Invoice order={order} qrDataUrl={qrDataUrl} />}
                 fileName={`${order?.order_number || 'invoice'}.pdf`}
             >   
+                Click to Download Invoice
             </PDFDownloadLink>
         </div>
     );

@@ -32,10 +32,10 @@ const Spinner = () => (
 
 const ErrorBox = ({ message, onRetry }) => (
     <div style={styles.errorBox}>
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ff6b35" strokeWidth="1.5">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3549ffff" strokeWidth="1.5">
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="12" />
-            <circle cx="12" cy="16" r="0.5" fill="#ff6b35" />
+            <circle cx="12" cy="16" r="0.5" fill="#3549ffff" />
         </svg>
         <p style={styles.errorText}>{message}</p>
         {onRetry && (

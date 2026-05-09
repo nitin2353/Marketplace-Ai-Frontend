@@ -149,14 +149,16 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
                             </div>
                         ))}
                     </div>
-                    <Row className="mt-3 mb-3">
-                        <Col md={6} xs={6} sm={6}className="fw-bold">Shipping Label </Col>
-                        <Col md={6} xs={6} sm={6} className="d-flex justify-content-end">
-                            <span className={`so-status ${status || ""} badge`} style={{ cursor: "pointer", fontSize: "14px" }}>
-                                <DownloadLabelButton order={order} />
-                            </span>
-                        </Col>
-                    </Row>
+                    {
+                        order.order_status != "cancelled" && order.order_status != "delivered" && order.order_status != "shipped" &&
+                        <Row className="mt-3 mb-3">
+                            <Col md={6} xs={6} sm={6} className="fw-bold">Shipping Label </Col>
+                            <Col md={6} xs={6} sm={6} className="d-flex justify-content-end">
+                                <span className={`so-status ${status || ""} badge`} style={{ cursor: "pointer", fontSize: "14px" }}>
+                                    <DownloadLabelButton order={order} />
+                                </span>
+                            </Col>
+                        </Row>}
 
                     <div className="so-drawer-section">
                         <p className="so-drawer-section-title">👤 Customer</p>
@@ -316,7 +318,7 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
                                         style={{
                                             fontWeight: 900,
                                             fontSize: "0.9rem",
-                                            color: "#ff6b35",
+                                            color: "#3538ffff",
                                             flexShrink: 0,
                                             marginBottom: 0,
                                         }}
@@ -332,7 +334,7 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
                                 { label: "Subtotal", val: FMT(order.subtotal) },
                                 { label: "Delivery", val: FMT(order.delivery_charge) },
                                 {
-                                    label: "Discount",
+                                    label: `Discount (${order.discount_percentage}%)`,
                                     val: `-${FMT(order.discount_amount)}`,
                                     hide: !Number(order.discount_amount),
                                 },
@@ -373,7 +375,7 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
                                 }}
                             >
                                 <span>Total</span>
-                                <span style={{ color: "#ff6b35" }}>{FMT(order.total_amount)}</span>
+                                <span style={{ color: "#6135ffff" }}>{FMT(order.total_amount)}</span>
                             </div>
                         </div>
                     </div>

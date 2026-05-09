@@ -101,8 +101,7 @@ export default function Login() {
           lg={5}
           className="sl-hero d-none d-lg-flex flex-column justify-content-center align-items-center text-white p-5"
         >
-          <h1 className="fw-bold">🛍️ ShopEase</h1>
-          <p className="text-center">Welcome back 👋<br />Login to continue</p>
+          <img src="../../src/assets/logo.png" width="50%" alt="" />
         </Col>
 
         {/* RIGHT */}

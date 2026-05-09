@@ -65,7 +65,8 @@ export default function SellerSidebar({ stats = [] }) {
                             }}
                             onClick={() => handleNavigate("/")}
                         >
-                            <span style={{ fontSize: "1.8rem" }}>🛍️</span> ShopEase
+                            
+                            <img src="../../src/assets/logo.png" width="100%" alt="" />
                         </div>
                         <button
                             className="d-lg-none btn btn-light btn-sm rounded-circle"
@@ -75,9 +76,9 @@ export default function SellerSidebar({ stats = [] }) {
                             ×
                         </button>
                     </div>
-                    <div style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontWeight: 600, marginTop: "4px", textTransform: "uppercase", letterSpacing: "1px" }}>
+                    {/* <div style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontWeight: 600, marginTop: "4px", textTransform: "uppercase", letterSpacing: "1px" }}>
                         Seller Central
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Navigation */}

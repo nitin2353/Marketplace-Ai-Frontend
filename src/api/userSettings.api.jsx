@@ -1,9 +1,9 @@
-import API from "./axios";
+import apiConfig from '../config/axios-config';
 
 // GET USER PROFILE
 const getProfile = async (userId) => {
     try {
-        const response = await API.get(`/user/profile/${userId}`);
+        const response = await apiConfig.get(`/user/profile/${userId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching profile" };
@@ -13,7 +13,7 @@ const getProfile = async (userId) => {
 // UPDATE USER PROFILE (supports avatar)
 const updateProfile = async (userId, formData) => {
     try {
-        const response = await API.put(`/user/profile/${userId}`, formData, {
+        const response = await apiConfig.put(`/user/profile/${userId}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response.data;
@@ -25,7 +25,7 @@ const updateProfile = async (userId, formData) => {
 // UPDATE STORE INFO
 const updateStore = async (userId, data) => {
     try {
-        const response = await API.put(`/user/store/${userId}`, data);
+        const response = await apiConfig.put(`/user/store/${userId}`, data);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error updating store info" };
@@ -35,7 +35,7 @@ const updateStore = async (userId, data) => {
 // UPDATE PAYMENT INFO
 const updatePayment = async (userId, data) => {
     try {
-        const response = await API.put(`/user/payment/${userId}`, data);
+        const response = await apiConfig.put(`/user/payment/${userId}`, data);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error updating payment info" };
@@ -45,7 +45,7 @@ const updatePayment = async (userId, data) => {
 // GET NOTIFICATION PREFERENCES
 const getNotificationPrefs = async () => {
     try {
-        const response = await API.get(`/user/notification-preferences`);
+        const response = await apiConfig.get(`/user/notification-preferences`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching notification preferences" };
@@ -55,7 +55,7 @@ const getNotificationPrefs = async () => {
 // UPDATE NOTIFICATION PREFERENCES
 const updateNotificationPrefs = async (prefs) => {
     try {
-        const response = await API.put(`/user/notification-preferences`, prefs);
+        const response = await apiConfig.put(`/user/notification-preferences`, prefs);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error updating notification preferences" };

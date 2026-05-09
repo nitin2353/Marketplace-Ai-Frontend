@@ -42,9 +42,9 @@ export default function SellerProducts() {
         if (search?.trim()) {
             const q = search;
             list = list?.filter(p =>
-                p?.title.includes(q) ||
-                p?.brand.includes(q) ||
-                p?.tag.includes(q)
+                p?.title?.toString()?.toLowerCase()?.includes(q?.toLowerCase()) ||
+                p?.brand?.toString()?.toLowerCase()?.includes(q?.toLowerCase()) ||
+                p?.tag?.toString()?.toLowerCase()?.includes(q?.toLowerCase())
             );
         }
         if (activeFilter === "In Stock") list = list.filter(p => p.stock > 10);
