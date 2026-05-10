@@ -355,7 +355,7 @@
 }
 .sdh-cat-pill:last-child { border-bottom: none; }
 .sdh-cat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.sdh-cat-name { flex: 1; font-size: .78rem; font-weight: 700; color: var(--text-muted); }
+.sdh-cat-name { flex: 1; font-size: .78rem; font-weight: 800; color: rgb(74, 101, 253)}
 .sdh-cat-val  { font-size: .78rem; font-weight: 800; color: var(--text-main); }
 
 /* Top products */

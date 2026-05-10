@@ -46,6 +46,11 @@ const SIDEBAR_MENUS = [
     label: "Settings",
     id: "settings"
   },
+  {
+    icon: "🔄",
+    label: "Returns",
+    id: "returns"
+  },
 ];
 
 const SETTINGS_TABS = [
@@ -72,6 +77,12 @@ const SETTINGS_TABS = [
     label: "Addresses",
     id: "addresses",
     description: "Manage your delivery addresses"
+  },
+  {
+    icon: "🔄",
+    label: "Returns",
+    id: "returns",
+    description: "Manage your returns & replacements"
   },
 ];
 

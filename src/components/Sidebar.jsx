@@ -21,6 +21,11 @@ export default function Sidebar({ cart, sidebarOpen, navSection, wishlist, handl
         if (itemId === "settings") {
             navigate("/dashboard/settings");
         }
+
+        // Navigate to returns page
+        if (itemId === "returns") {
+            navigate("/dashboard/returns");
+        }
     };
 
     const handleCartBadgeClick = (e) => {

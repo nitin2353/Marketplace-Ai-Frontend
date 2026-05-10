@@ -13,6 +13,7 @@ import Security from "./Security.jsx";
 import StepAddress from "../../components/StepAddress.jsx";
 import addressApi from "../../api/address.api.jsx";
 import { useAuthWrapper } from "../../helper/AuthWrapper.jsx";
+import CustomerReturnsList from "../../components/returns/CustomerReturnsList.jsx";
 
 export default function SettingsPage() {
     const searchRef = useRef();
@@ -376,6 +377,18 @@ export default function SettingsPage() {
                                 onSelect={setSelectedAddr}
                                 onSaveAddress={saveAddress}
                             />
+                        )}
+
+                        {activeTab === "returns" && (
+                            <Card className="pd-settings-card">
+                                <Card.Header className="pd-settings-header">
+                                    <h5>My Returns & Replacements</h5>
+                                    <p className="text-muted">Track and manage your return requests</p>
+                                </Card.Header>
+                                <Card.Body>
+                                    <CustomerReturnsList />
+                                </Card.Body>
+                            </Card>
                         )}
                     </Col>
                 </Row>

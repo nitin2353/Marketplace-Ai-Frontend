@@ -11,6 +11,7 @@ import ConfirmModal from "../../components/ConfirmModal";
 import ReviewModal from "../../components/ReviewModal";
 import "./orderpage.css";
 import OrderTimeline from "./OrderTimeline";
+import ReturnRequestModal from "../../components/ReturnRequestModal";
 
 // ── Local Components to keep changes within this file ────────────────────────
 
@@ -42,6 +43,8 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                 items: Array.isArray(itemsResponse?.data) ? itemsResponse.data : (Array.isArray(itemsResponse) ? itemsResponse : []),
                 address_snapshot: addressResponse?.data || addressResponse || null
             });
+
+
         } catch (error) {
             console.error("Error fetching order details:", error);
         } finally {
@@ -75,12 +78,11 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                     </div>
                 </div>
             </div>
-
             {/* Preview Body */}
             <div className="card-body-premium flex-column flex-md-row">
                 <div className="product-previews mb-3 mb-md-0">
                     {items.slice(0, 3).map((item, idx) => {
-                        let src = item.product_image_url;
+                        let src = item?.product_image_url;
                         try {
                             if (src && (src.startsWith('[') || src.startsWith('{'))) {
                                 const parsed = JSON.parse(src);
@@ -88,7 +90,9 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                             } else if (src && src.includes(',')) {
                                 src = src.split(',')[0].replace(/[{}"\\]/g, "");
                             }
-                        } catch (e) { console.error("Image parse error", e); }
+                        } catch (e) {
+                            console.error("Image parse error", e);
+                        }
 
                         return (
                             <div key={idx} className="preview-img-wrapper shadow-sm">
@@ -159,27 +163,37 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                                                             {item.is_reviewed ? "★ Reviewed" : "★ Review"}
                                                         </RBButton>
                                                         {/* Return Button if allowed */}
-                                                        {(item.is_return || item.return_allowed) && (
-                                                            <RBButton
-                                                                size="sm"
-                                                                variant="outline-primary"
-                                                                className="action-btn-small"
-                                                                onClick={() => onReturn(order, item)}
-                                                            >
-                                                                <i className="fas fa-undo me-1"></i> Return
-                                                            </RBButton>
-                                                        )}
-                                                        {/* Replacement Button if allowed */}
-                                                        {(item.is_replacement || item.replacement_allowed) && (
-                                                            <RBButton
-                                                                size="sm"
-                                                                variant="outline-info"
-                                                                className="action-btn-small text-info"
-                                                                onClick={() => onReplace(order, item)}
-                                                            >
-                                                                <i className="fas fa-sync me-1"></i> Replace
-                                                            </RBButton>
-                                                        )}
+                                                        {(() => {
+                                                            const deliveredDate = new Date(order.modified_time || order.created_time);
+                                                            const now = new Date();
+                                                            const diffDays = Math.ceil(Math.abs(now - deliveredDate) / (1000 * 60 * 60 * 24));
+                                                            const isWithinWindow = diffDays <= (item.return_replace_duration || 0);
+
+                                                            return (
+                                                                <>
+                                                                    {(item.is_return || item.return_allowed) && isWithinWindow && (
+                                                                        <RBButton
+                                                                            size="sm"
+                                                                            variant="outline-primary"
+                                                                            className="action-btn-small"
+                                                                            onClick={() => onReturn(order, item)}
+                                                                        >
+                                                                            <i className="fas fa-undo me-1"></i> Return
+                                                                        </RBButton>
+                                                                    )}
+                                                                    {(item.is_replace || item.is_replacement || item.replacement_allowed) && isWithinWindow && (
+                                                                        <RBButton
+                                                                            size="sm"
+                                                                            variant="outline-info"
+                                                                            className="action-btn-small text-info"
+                                                                            onClick={() => onReplace(order, item)}
+                                                                        >
+                                                                            <i className="fas fa-sync me-1"></i> Replace
+                                                                        </RBButton>
+                                                                    )}
+                                                                </>
+                                                            );
+                                                        })()}
                                                     </>
                                                 )}
                                             </div>
@@ -495,7 +509,7 @@ export default function OrdersPage() {
                                     cancelling={cancelling}
                                     onCancel={handleCancel}
                                     onReturn={(ord, itm) => handleReturnReplacement('return', ord, itm)}
-                                    onReplace={(ord, itm) => handleReturnReplacement('replace', ord, itm)}
+                                    onReplace={(ord, itm) => handleReturnReplacement('replacement', ord, itm)}
                                 />
                             ))}
                         </Stack>
@@ -532,53 +546,19 @@ export default function OrdersPage() {
                 )}
             </Container>
 
-            {/* Request Reason Modal */}
-            <Modal show={showRequestModal} onHide={() => setShowRequestModal(false)} centered className="request-modal">
-                <Modal.Header closeButton className="border-0">
-                    <Modal.Title className="fw-black text-primary uppercase h5">
-                        Request {requestData?.type === 'return' ? 'Return' : 'Replacement'}
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <div className="request-item-preview d-flex gap-3 mb-4 p-3 rounded-4 bg-light">
-                        <img src={requestData?.item?.product_image_url} className="rounded-3 shadow-sm" style={{ width: 60, height: 60, objectFit: 'cover' }} alt="item" />
-                        <div>
-                            <div className="fw-bold text-dark small">{requestData?.item?.product_title}</div>
-                            <div className="text-muted tiny">Order ID: {requestData?.order?.order_number}</div>
-                        </div>
-                    </div>
-                    <Form.Group className="mb-3">
-                        <Form.Label className="small fw-bold text-dark mb-2">Reason for {requestData?.type}</Form.Label>
-                        <Form.Select
-                            className="premium-select"
-                            value={requestData?.reason}
-                            onChange={(e) => setRequestData(prev => ({ ...prev, reason: e.target.value }))}
-                        >
-                            <option value="">Select a reason...</option>
-                            <option value="Damaged product">Damaged product</option>
-                            <option value="Wrong item received">Wrong item received</option>
-                            <option value="Quality not as expected">Quality not as expected</option>
-                            <option value="Size/Fit issue">Size/Fit issue</option>
-                            <option value="Changed my mind">Changed my mind</option>
-                        </Form.Select>
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label className="small fw-bold text-dark mb-2">Additional Comments (Optional)</Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            rows={3}
-                            placeholder="Tell us more about the issue..."
-                            className="premium-textarea"
-                        />
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer className="border-0 pb-4 px-4">
-                    <RBButton variant="light" className="px-4 fw-bold" onClick={() => setShowRequestModal(false)}>Cancel</RBButton>
-                    <RBButton variant="primary" className="px-4 fw-bold shadow-sm" onClick={submitRequest} disabled={requestLoading}>
-                        {requestLoading ? "Submitting..." : "Submit Request"}
-                    </RBButton>
-                </Modal.Footer>
-            </Modal>
+            {/* Use the comprehensive Return/Replacement Modal */}
+            <ReturnRequestModal
+                key={`${requestData?.order?.id}-${requestData?.item?.id}-${requestData?.type}`}
+                show={showRequestModal}
+                onHide={() => setShowRequestModal(false)}
+                orderId={requestData?.order?.id}
+                item={requestData?.item}
+                requestType={requestData?.type}
+                onSuccess={() => {
+                    setShowRequestModal(false);
+                    fetchOrders();
+                }}
+            />
         </div>
     );
 }

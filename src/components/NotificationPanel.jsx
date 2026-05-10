@@ -3,6 +3,7 @@ import { Overlay, Popover } from "react-bootstrap";
 import toast from "react-hot-toast";
 import notificationApi from "../api/notification.api";
 import JWTService from "../config/jwt.config";
+import { useNavigate } from "react-router-dom";
 
 // notification type meta
 const getNotificationMeta = (type) => {
@@ -174,6 +175,8 @@ export default function NotificationPanel({
     const [loading, setLoading] = useState(true);
     const [workingId, setWorkingId] = useState(null);
 
+    const navigate = useNavigate();
+
     const unread = useMemo(() => notifs.filter((n) => n.unread).length, [notifs]);
 
     const userData = JWTService.decodeTokenDetails();
@@ -197,6 +200,8 @@ export default function NotificationPanel({
                     bg: meta.bg,
                     color: meta.color,
                     unread: !n.is_read,
+                    ref_id: n.ref_id,
+                    ref_type: n.ref_type,
                     type: n.type,
                 };
             });
@@ -214,14 +219,17 @@ export default function NotificationPanel({
         fetchNotifications();
     }, [fetchNotifications]);
 
-    const markRead = async (id) => {
+    const markRead = async (id, ref_id, ref_type) => {
         try {
             setWorkingId(id);
+
+
             await notificationApi.markAsRead(id);
 
             setNotifs((prev) =>
                 prev.map((n) => (n.id === id ? { ...n, unread: false } : n))
             );
+            navigate(`/seller/${ref_type}/${ref_id}`);
         } catch (error) {
             toast.error(error?.message || "Failed to mark notification as read");
         } finally {
@@ -324,7 +332,7 @@ export default function NotificationPanel({
                         <NotifItem
                             key={n.id}
                             notif={n}
-                            onRead={markRead}
+                            onRead={() => markRead(n.id, n.ref_id, n.ref_type)}
                             onDismiss={dismiss}
                             working={workingId === n.id}
                         />

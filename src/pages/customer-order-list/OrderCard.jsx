@@ -6,6 +6,8 @@ import { STATUS_META, PAYMENT_METHOD_LABELS, FMT_DATE } from "../../helper/Globa
 import orderApi from "../../api/order.api";
 import OrderTimeline from "./OrderTimeline";
 import ReviewModal from "../../components/ReviewModal";
+import ReturnRequestModal from "../../components/ReturnRequestModal";
+import { getCustomerReturnRequests } from "../../api/return.api";
 import "./orderpage.css";
 
 
@@ -15,6 +17,9 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
     const [loadingDetails, setLoadingDetails] = useState(false);
     const [currentReviewItem, setCurrentReviewItem] = useState(null);
     const [orderDetails, setOrderDetails] = useState(null);
+    const [returnRequests, setReturnRequests] = useState([]);
+    const [showReturnModal, setShowReturnModal] = useState(false);
+    const [selectedReturnItem, setSelectedReturnItem] = useState(null);
 
     const status = order?.order_status || order?.status || 'placed';
     const payment = order?.payment_method || order?.payment || 'cod';
@@ -49,6 +54,16 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
         setExpanded(newExpanded);
         if (newExpanded) {
             fetchOrderDetails();
+            fetchReturnRequests();
+        }
+    };
+
+    const fetchReturnRequests = async () => {
+        try {
+            const response = await getCustomerReturnRequests();
+            setReturnRequests(response.data || []);
+        } catch (error) {
+            console.error("Error fetching return requests:", error);
         }
     };
 
@@ -251,28 +266,71 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
 
                                                 {/* Item specific actions */}
                                                 {(status?.toLowerCase() === "delivered" || status?.toLowerCase() === "completed") && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            if (!item.is_reviewed) {
-                                                                setCurrentReviewItem(item);
-                                                                setShowReview(true);
+                                                    <div className="d-flex gap-2 ms-auto align-items-center">
+                                                        {/* Return/Replace Buttons */}
+                                                        {(() => {
+                                                            const existingRequest = returnRequests.find(rr => rr.order_item_id === item.id && rr.status !== 'cancelled');
+                                                            if (existingRequest) {
+                                                                return (
+                                                                    <span className="badge rounded-pill" style={{ background: "#e8eaf6", color: "#1a1a2e", padding: "6px 12px", fontSize: "0.7rem", fontWeight: 700 }}>
+                                                                        {existingRequest.request_type === 'return' ? 'Return' : 'Replacement'} {existingRequest.status}
+                                                                    </span>
+                                                                );
                                                             }
-                                                        }}
-                                                        disabled={item.is_reviewed}
-                                                        style={{
-                                                            fontSize: "0.72rem",
-                                                            padding: "5px 10px",
-                                                            borderRadius: 20,
-                                                            border: "none",
-                                                            background: item.is_reviewed ? "#f3f4f6" : "linear-gradient(135deg, #ff6b35, #f7931e)",
-                                                            color: item.is_reviewed ? "#9ca3af" : "#fff",
-                                                            fontWeight: 800,
-                                                            marginLeft: "auto"
-                                                        }}
-                                                    >
-                                                        {item.is_reviewed ? "★ Reviewed" : "★ Review"}
-                                                    </button>
+
+                                                            // Check eligibility duration
+                                                            const deliveredDate = new Date(order.modified_time || order.created_time);
+                                                            const now = new Date();
+                                                            const diffDays = Math.ceil(Math.abs(now - deliveredDate) / (1000 * 60 * 60 * 24));
+                                                            const isEligible = diffDays <= (item.return_replace_duration || 0);
+
+                                                            if (isEligible && (item.is_return || item.is_replace)) {
+                                                                return (
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setSelectedReturnItem(item);
+                                                                            setShowReturnModal(true);
+                                                                        }}
+                                                                        style={{
+                                                                            fontSize: "0.72rem",
+                                                                            padding: "5px 10px",
+                                                                            borderRadius: 20,
+                                                                            border: "1px solid #1a1a2e",
+                                                                            background: "transparent",
+                                                                            color: "#1a1a2e",
+                                                                            fontWeight: 800
+                                                                        }}
+                                                                    >
+                                                                        Return/Replace
+                                                                    </button>
+                                                                );
+                                                            }
+                                                            return null;
+                                                        })()}
+
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                if (!item.is_reviewed) {
+                                                                    setCurrentReviewItem(item);
+                                                                    setShowReview(true);
+                                                                }
+                                                            }}
+                                                            disabled={item.is_reviewed}
+                                                            style={{
+                                                                fontSize: "0.72rem",
+                                                                padding: "5px 10px",
+                                                                borderRadius: 20,
+                                                                border: "none",
+                                                                background: item.is_reviewed ? "#f3f4f6" : "linear-gradient(135deg, #ff6b35, #f7931e)",
+                                                                color: item.is_reviewed ? "#9ca3af" : "#fff",
+                                                                fontWeight: 800
+                                                            }}
+                                                        >
+                                                            {item.is_reviewed ? "★ Reviewed" : "★ Review"}
+                                                        </button>
+                                                    </div>
                                                 )}
                                             </div>
                                         );
@@ -353,6 +411,19 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
                     productId={currentReviewItem.product_id}
                     sellerId={currentReviewItem.seller_id}
                     onSuccess={() => handleReviewSuccess(currentReviewItem.product_id)}
+                />
+            )}
+
+            {selectedReturnItem && (
+                <ReturnRequestModal
+                    show={showReturnModal}
+                    onHide={() => {
+                        setShowReturnModal(false);
+                        setSelectedReturnItem(null);
+                    }}
+                    item={selectedReturnItem}
+                    orderId={order.id}
+                    onSuccess={fetchReturnRequests}
                 />
             )}
         </div>

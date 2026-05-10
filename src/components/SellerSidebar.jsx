@@ -8,6 +8,7 @@ const NAV_ITEMS = [
     { icon: "➕", label: "Add Product", path: "/seller/product/create" },
     { icon: "🛒", label: "Orders", path: "/seller/orders" },
     { icon: "💬", label: "Customization Chat", path: "/chat" },
+    { icon: "🔄", label: "Returns", path: "/seller/returns" },
     { icon: "⭐", label: "Reviews", path: "/seller/reviews" },
     { icon: "⚙️", label: "Settings", path: "/seller/settings" },
 ];
@@ -114,54 +115,6 @@ export default function SellerSidebar({ stats = [] }) {
                             );
                         })}
                     </Stack>
-                </div>
-
-                {/* Bottom Stats */}
-                <div style={{ padding: "20px", background: "var(--bg-hover)", borderTop: "1px solid var(--border-light)" }}>
-                    {stats.length > 0 && (
-                        <Stack gap={3} className="mb-3">
-                            {stats.map(({ icon, label, val }) => (
-                                <div
-                                    key={label}
-                                    className="d-flex align-items-center gap-3"
-                                >
-                                    <div style={{
-                                        width: "40px",
-                                        height: "40px",
-                                        borderRadius: "10px",
-                                        background: "white",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        fontSize: "1.2rem",
-                                        boxShadow: "var(--shadow-sm)"
-                                    }}>
-                                        {icon}
-                                    </div>
-                                    <div>
-                                        <div style={{ fontSize: "1rem", fontWeight: 800, color: "var(--text-main)", lineHeight: 1.2 }}>
-                                            {val}
-                                        </div>
-                                        <div style={{ fontSize: "0.7rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>
-                                            {label}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </Stack>
-                    )}
-
-                    <div style={{
-                        background: "rgba(37, 99, 235, 0.1)",
-                        padding: "10px",
-                        borderRadius: "8px",
-                        fontSize: "0.75rem",
-                        color: "var(--primary)",
-                        fontWeight: 600,
-                        textAlign: "center"
-                    }}>
-                        ⭐ Top Rated Seller Hub
-                    </div>
                 </div>
             </div>
         </>

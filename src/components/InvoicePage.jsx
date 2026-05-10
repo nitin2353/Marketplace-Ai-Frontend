@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
 import Invoice, { invoiceNo } from './Invoice'; // apna path adjust karo
 import orderApi from '../api/order.api'
+import styles from '../style/InvoicePage';
 
 // ─── QR helper (qrcode.react ya koi bhi library) ───────────────────────────
 // Agar aapke paas qrcode library nahi hai to:  npm install qrcode
@@ -79,7 +80,7 @@ const InvoicePage = () => {
             // Small delay so PDF renderer mounts cleanly
             setTimeout(() => setPdfReady(true), 100);
         } catch (err) {
-            setError(err?.message || 'Order load karne mein dikkat aayi.');
+            setError(err?.message || 'Error loading order');
         } finally {
             setLoading(false);
         }
@@ -97,7 +98,7 @@ const InvoicePage = () => {
                 <TopBar fileName={null} order={null} />
                 <div style={styles.center}>
                     <Spinner />
-                    <p style={styles.loadingText}>Invoice load ho rahi hai…</p>
+                    <p style={styles.loadingText}>Loading...</p>
                 </div>
             </div>
         );
@@ -126,11 +127,11 @@ const InvoicePage = () => {
                 ) : (
                     <div style={styles.center}>
                         <Spinner />
-                        <p style={styles.loadingText}>PDF render ho rahi hai…</p>
+                        <p style={styles.loadingText}>PDF Generating...</p>
                     </div>
                 )}
             </div>
-        </div>
+        </div>      
     );
 };
 
@@ -189,141 +190,6 @@ const PrintIcon = () => (
     </svg>
 );
 
-// ─── Styles (inline, no extra deps) ─────────────────────────────────────────
-const styles = {
-    page: {
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100vh',
-        backgroundColor: '#1a1a1a',
-        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-    },
-    topBar: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: '#111111',
-        padding: '10px 24px',
-        borderBottom: '1px solid #2a2a2a',
-        flexShrink: 0,
-        zIndex: 10,
-    },
-    topLeft: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-    },
-    logo: {
-        color: '#ffffff',
-        fontSize: 15,
-        fontWeight: 700,
-        letterSpacing: '2px',
-    },
-    topSub: {
-        color: '#666',
-        fontSize: 12,
-        letterSpacing: '1px',
-        textTransform: 'uppercase',
-    },
-    topActions: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 10,
-    },
-    downloadBtn: {
-        display: 'flex',
-        alignItems: 'center',
-        backgroundColor: '#ff6b35',
-        color: '#ffffff',
-        border: 'none',
-        borderRadius: 6,
-        padding: '8px 16px',
-        fontSize: 13,
-        fontWeight: 600,
-        cursor: 'pointer',
-        textDecoration: 'none',
-        letterSpacing: '0.3px',
-        transition: 'background 0.2s',
-    },
-    printBtn: {
-        display: 'flex',
-        alignItems: 'center',
-        backgroundColor: 'transparent',
-        color: '#aaaaaa',
-        border: '1px solid #333',
-        borderRadius: 6,
-        padding: '7px 14px',
-        fontSize: 13,
-        fontWeight: 500,
-        cursor: 'pointer',
-        letterSpacing: '0.3px',
-    },
-    viewerWrap: {
-        flex: 1,
-        display: 'flex',
-        overflow: 'hidden',
-    },
-    viewer: {
-        width: '100%',
-        height: '100%',
-        border: 'none',
-    },
-    center: {
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 16,
-    },
-    spinnerWrap: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    spinner: {
-        width: 40,
-        height: 40,
-        border: '3px solid #2a2a2a',
-        borderTop: '3px solid #ff6b35',
-        borderRadius: '50%',
-        animation: 'spin 0.8s linear infinite',
-    },
-    loadingText: {
-        color: '#666',
-        fontSize: 14,
-        letterSpacing: '0.5px',
-    },
-    errorBox: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 14,
-        padding: '40px 32px',
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        border: '1px solid #2a2a2a',
-        maxWidth: 360,
-        textAlign: 'center',
-    },
-    errorText: {
-        color: '#aaa',
-        fontSize: 14,
-        lineHeight: 1.6,
-        margin: 0,
-    },
-    retryBtn: {
-        backgroundColor: '#ff6b35',
-        color: '#fff',
-        border: 'none',
-        borderRadius: 6,
-        padding: '9px 22px',
-        fontSize: 13,
-        fontWeight: 600,
-        cursor: 'pointer',
-        letterSpacing: '0.3px',
-    },
-};
 
 // CSS animation inject (spinner ke liye)
 if (typeof document !== 'undefined') {

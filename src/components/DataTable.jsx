@@ -146,7 +146,6 @@ const DataTable = ({
 
     return (
         <Container fluid className="mt-3 mb-4 p-3 rounded-4" style={{ background: "var(--card)" }}>
-            {/* Toolbar: Search + Rows per page */}
             {
                 isHeader &&
                 <Row className="mb-3 align-items-center g-2">

@@ -600,9 +600,29 @@ export default function ProductDetail() {
                   <div className="py-4" style={{ color: "var(--text-muted)", lineHeight: 1.8, fontSize: "0.95rem" }}>
                     {activeTab === "desc" && product.description}
                     {activeTab === "policy" && (
-                      <div>
-                        <p><strong>Delivery:</strong> Free shipping on orders over ₹499. Standard delivery takes 3-5 business days.</p>
-                        <p><strong>Returns:</strong> {product.is_return ? `Easy returns within ${product.return_replace_duration} days.` : "This item is non-returnable."}</p>
+                      <div className="fu">
+                        <p className="mb-3"><strong>Delivery:</strong> Free shipping on orders over ₹499. Standard delivery takes 3-5 business days.</p>
+                        <div className="p-3 bg-light rounded-3 border">
+                          <h6 className="fw-bold mb-2">Return & Replacement Policy</h6>
+                          {product.is_return || product.is_replace ? (
+                            <>
+                              <p className="mb-1 small">
+                                {product.is_return && product.is_replace 
+                                  ? `This item is eligible for return or replacement within ${product.return_replace_duration} days of delivery.`
+                                  : product.is_return 
+                                    ? `This item is eligible for return and refund within ${product.return_replace_duration} days of delivery.`
+                                    : `This item is eligible for replacement within ${product.return_replace_duration} days of delivery.`}
+                              </p>
+                              {product.return_replace_instructions && (
+                                <p className="mb-0 mt-2 extra-small text-muted">
+                                  <strong>Note:</strong> {product.return_replace_instructions}
+                                </p>
+                              )}
+                            </>
+                          ) : (
+                            <p className="mb-0 small text-danger">This item is non-returnable and non-replaceable.</p>
+                          )}
+                        </div>
                       </div>
                     )}
                     {activeTab === "info" && (
@@ -620,7 +640,7 @@ export default function ProductDetail() {
                   {[
                     { icon: "🚚", title: "Free Delivery", sub: "On orders over ₹499" },
                     { icon: "🔒", title: "Secure Checkout", sub: "100% safe payment" },
-                    { icon: "✅", title: "Quality Guarantee", sub: "7-day easy returns" },
+                    { icon: "✅", title: "Guarantee", sub: product.is_return || product.is_replace ? `${product.return_replace_duration}-day easy returns` : "Quality Assured" },
                     { icon: "🎧", title: "24/7 Support", sub: "Get help anytime" },
                   ].map(({ icon, title, sub }) => (
                     <div key={title} className="col-6 col-sm-6 col-md-3">

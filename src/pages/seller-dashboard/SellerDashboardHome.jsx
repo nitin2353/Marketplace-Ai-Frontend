@@ -70,6 +70,7 @@ export default function SellerDashboardHome() {
   const [chartLoading, setChartLoading] = useState(true);
   const [period, setPeriod] = useState("monthly");
 
+
   // ── Real chart data state ──
   const [monthlyChartData, setMonthlyChartData] = useState(
     MONTHS.map(m => ({ month: m, revenue: 0, orders: 0, returns: 0 }))
@@ -253,15 +254,34 @@ export default function SellerDashboardHome() {
   // ── Category Breakdown ──
   const categoryData = useMemo(() => {
     const map = {};
-    products.forEach(p => {
-      const cat = p.category || "Other";
-      map[cat] = (map[cat] || 0) + p.base_price * p.sold;
+
+    products.forEach((p) => {
+      const category = p?.category || "Other";
+
+      if (!map[category]) {
+        map[category] = {
+          name: category,
+          value: 0,
+          ids: [],
+        };
+      }
+
+      map[category].value +=
+        Number(p?.base_price || 0) * Number(p?.sold || 0);
+
+      if (p?.id) {
+        map[category].ids.push(p.id);
+      }
     });
-    return Object.entries(map)
-      .map(([name, value]) => ({ name, value }))
+
+    console.log("map", map);
+
+    return Object.values(map)
       .sort((a, b) => b.value - a.value)
       .slice(0, 5);
   }, [products]);
+
+  console.log("map", categoryData)
 
   // ── Stock Health ──
   const stockData = [
@@ -325,6 +345,14 @@ export default function SellerDashboardHome() {
     sub: item.sub,
     time: timeAgo(item.created_time),
   }));
+
+
+  const handleCategoryClick = (type) => {
+    navigate("/seller/products", {
+      state: { category: type },
+    });
+  };
+
 
   // ════════════════════════════════════════════════════════
   return (
@@ -502,7 +530,7 @@ export default function SellerDashboardHome() {
                   <div className="sdh-card">
                     <div className="sdh-card-title">🥧 Revenue by Category</div>
                     <div className="sdh-card-sub">Top {categoryData.length} categories</div>
-
+                    {console.log("categoryData", categoryData)}
                     {categoryData.length > 0 ? (
                       <>
                         <div className="sdh-chart-wrap" style={{ height: 180 }}>
@@ -510,6 +538,8 @@ export default function SellerDashboardHome() {
                             <PieChart>
                               <Pie
                                 data={categoryData} cx="50%" cy="50%"
+                                onClick={(ele) => handleCategoryClick(ele.name)}
+                                style={{cursor:'pointer'}}
                                 innerRadius={48} outerRadius={80}
                                 paddingAngle={3} dataKey="value"
                                 labelLine={false} label={PieLabel}
@@ -527,7 +557,7 @@ export default function SellerDashboardHome() {
                         </div>
                         <div className="mt-2">
                           {categoryData.map((c, i) => (
-                            <div key={c.name} className="sdh-cat-pill">
+                            <div key={c.name} className="sdh-cat-pill" style={{ cursor: 'pointer' }} onClick={() => handleCategoryClick(c.name)}>
                               <span className="sdh-cat-dot" style={{ background: PIE_COLORS[i] }} />
                               <span className="sdh-cat-name">{c.name}</span>
                               <span className="sdh-cat-val">{fmtL(c.value)}</span>

@@ -7,7 +7,7 @@ const ROUTE = {
   PRODUCT_DETAIL_PAGE: "product/:id",
   SELLER_PRODUCT_DETAIL_PAGE: "seller/product/:id",
   CREATE_PRODUCT: "/seller/product/create",
-  SELLER_REVIEWS: "/seller/reviews",
+  SELLER_REVIEWS: "/seller/reviews/:id?",
   SELLER_PRODUCTS: "seller/products",
   SELLER_DASHBOARD: "seller/dashboard",
   SELLER_ORDER: "/seller/orders/:id",
@@ -24,7 +24,9 @@ const ROUTE = {
   CHAT: "product/:id/customization",
   CHAT_CONVERSATION: "/chat/:conversationId",
   CHAT_LIST: "/chat",
-  SELLER_SETTING: "/seller/settings"
+  SELLER_SETTING: "/seller/settings",
+  CUSTOMER_RETURNS: "/dashboard/returns",
+  SELLER_RETURNS: "/seller/returns/:id?"
 
 };
 

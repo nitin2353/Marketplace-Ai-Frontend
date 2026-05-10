@@ -38,6 +38,8 @@ import SellerOrders from "./pages/seller-orders/SellerOrders";
 import InvoicePage from "./components/InvoicePage.jsx";
 import SellerReviews from "./pages/SellerReviews/SellerReviews";
 import SellerSettings from "./pages/seller-settings/Seller.jsx";
+import CustomerReturns from "./pages/returns/CustomerReturns.jsx";
+import SellerReturns from "./pages/returns/SellerReturns.jsx";
 
 
 const App = () => {
@@ -73,6 +75,8 @@ const App = () => {
           <Route path={ROUTE.CHAT_CONVERSATION} element={<ProtectedRoute moduleName="chat"><CustomizationChatPage /></ProtectedRoute>} />
           <Route path={ROUTE.CUSTOMER_REQUIREMENTS_LISTING} element={<ProtectedRoute moduleName="curstomer_requirements_list"><RequirementListing /></ProtectedRoute>} />
           <Route path={ROUTE.SELLER_SETTING} element={<ProtectedRoute moduleName="seller_setting"><SellerSettings /></ProtectedRoute>} />
+          <Route path={ROUTE.CUSTOMER_RETURNS} element={<ProtectedRoute moduleName="returns"><CustomerReturns /></ProtectedRoute>} />
+          <Route path={ROUTE.SELLER_RETURNS} element={<ProtectedRoute moduleName="returns"><SellerReturns /></ProtectedRoute>} />
           <Route element={<ProtectedRoute />}>
           </Route>
           <Route path="*" element={<NotFound />} />

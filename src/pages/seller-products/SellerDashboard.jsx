@@ -8,7 +8,7 @@ import Badge from "react-bootstrap/Badge";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import Modal from "react-bootstrap/Modal";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import SellerSidebar from "../../components/SellerSidebar";
 import EditProductModal from "../product/EditProductModal";
 import GlobalLoader from "../../components/GlobalLoader";
@@ -23,9 +23,11 @@ const FILTERS = ["All", "In Stock", "Low Stock", "Out of Stock", "Customizable",
 
 export default function SellerProducts() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [products, setProducts] = useState([]);
     const [search, setSearch] = useState("");
     const [activeFilter, setActiveFilter] = useState("All");
+    const [selectedCategory, setSelectedCategory] = useState("All Categories");
     const [viewMode, setViewMode] = useState("grid");
     const [sortBy, setSortBy] = useState("newest");
     const [deleteModal, setDeleteModal] = useState(null);
@@ -34,8 +36,29 @@ export default function SellerProducts() {
     const [loading, setLoading] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedProductData, setSelectedProductData] = useState({})
-    // ── Filtered + Sorted ──
+    const categories = useMemo(() => {
+        const cats = products.map(p => p.category).filter(Boolean);
+        return ["All Categories", ...new Set(cats)];
+    }, [products]);
 
+
+    useEffect(() => {
+        const categoryFromState = location?.state?.category;
+        if (
+            categoryFromState &&
+            products.length > 0 &&
+            categories.includes(categoryFromState)
+        ) {
+            setSelectedCategory(categoryFromState);
+        }
+    }, [location, products, categories]);
+
+
+    useEffect(() => {
+        if (location?.state?.category) {
+            window.history.replaceState({}, document.title);
+        }
+    }, []);
 
     const filtered = useMemo(() => {
         let list = [...products];
@@ -44,9 +67,15 @@ export default function SellerProducts() {
             list = list?.filter(p =>
                 p?.title?.toString()?.toLowerCase()?.includes(q?.toLowerCase()) ||
                 p?.brand?.toString()?.toLowerCase()?.includes(q?.toLowerCase()) ||
+                p?.category?.toString()?.toLowerCase()?.includes(q?.toLowerCase()) ||
                 p?.tag?.toString()?.toLowerCase()?.includes(q?.toLowerCase())
             );
         }
+
+        if (selectedCategory !== "All Categories") {
+            list = list.filter(p => p.category === selectedCategory);
+        }
+
         if (activeFilter === "In Stock") list = list.filter(p => p.stock > 10);
         else if (activeFilter === "Low Stock") list = list.filter(p => p.stock > 0 && p.stock <= 10);
         else if (activeFilter === "Out of Stock") list = list.filter(p => p.stock === 0);
@@ -61,7 +90,7 @@ export default function SellerProducts() {
         else if (sortBy === "top_rated") list.sort((a, b) => b.rating - a.rating);
         else if (sortBy === "best_selling") list.sort((a, b) => b.sold - a.sold);
         return list;
-    }, [products, search, activeFilter, sortBy]);
+    }, [products, search, activeFilter, sortBy, selectedCategory]);
 
 
     const totalRevenue = products.reduce((s, p) => s + p.base_price * p.sold, 0);
@@ -127,7 +156,6 @@ export default function SellerProducts() {
             setLoading(false)
         }
     }
-
 
 
 
@@ -209,11 +237,21 @@ export default function SellerProducts() {
                                 <Form.Control
                                     className="eco-input"
                                     style={{ borderRadius: "0 12px 12px 0", borderLeft: "none" }}
-                                    placeholder="Search by title, brand, tag..."
+                                    placeholder="Search by title, brand, category, tag..."
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
                                 />
                             </InputGroup>
+                            <Form.Select
+                                className="eco-input"
+                                style={{ maxWidth: 190, padding: "10px 14px", cursor: "pointer" }}
+                                value={selectedCategory}
+                                onChange={e => setSelectedCategory(e.target.value)}
+                            >
+                                {categories.map(cat => (
+                                    <option key={cat} value={cat}>{cat === "All Categories" ? "📁 All Categories" : `📁 ${cat}`}</option>
+                                ))}
+                            </Form.Select>
                             <Form.Select
                                 className="eco-input"
                                 style={{ maxWidth: 190, padding: "10px 14px", cursor: "pointer" }}
@@ -284,6 +322,7 @@ export default function SellerProducts() {
                                         <Card.Body className="p-3">
                                             <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
                                                 <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.04em" }}>{product.brand}</span>
+                                                {product.category && <Badge className="eco-badge-tag" style={{ background: "#f1f4ff", color: "#5068f0" }}>{product.category}</Badge>}
                                                 {product.tag.map((t, idx) => {
                                                     return idx < 1 ? <Badge key={t} className="eco-badge-tag">{t.trim()}</Badge> : null;
                                                 })}
