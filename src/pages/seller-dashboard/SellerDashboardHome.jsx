@@ -360,16 +360,13 @@ export default function SellerDashboardHome() {
       {loading && <GlobalLoader />}
 
       <Container fluid className="p-0">
-        <SellerNavbar pageTitle="Dashboard" />
         <Row className="g-0" style={{ minHeight: "100vh" }}>
-
           {/* ── SIDEBAR ── */}
-          <Col lg={3} xl={2}>
-            <SellerSidebar stats={sidebarStats} />
-          </Col>
+          <SellerSidebar stats={sidebarStats} />
 
           {/* ── MAIN ── */}
-          <Col lg={9} xl={10} style={{ overflowY: "auto" }}>
+          <Col xs={12} className="pd-main" style={{ overflowY: "auto" }}>
+            <SellerNavbar pageTitle="Dashboard" />
             <div className="p-3 p-md-4">
 
               {/* ── KPI CARDS ── */}

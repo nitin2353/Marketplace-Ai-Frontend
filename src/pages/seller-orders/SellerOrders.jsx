@@ -25,8 +25,6 @@ const fmtDate = (d) =>
         : "—";
 
 const PER_PAGE = 15;
-const SIDEBAR_W = 280;
-const BREAKPOINT = 992; // lg breakpoint
 
 const ORDER_STATUSES = [
     { value: "placed", label: "Placed", icon: "📋" },
@@ -127,10 +125,10 @@ export default function SellerOrders() {
     const { id } = useParams();
     const { user } = useAuthWrapper();
 
+    const { isOpen, setIsOpen } = useAuthWrapper();
+
     // ── Responsive state ──
     const winW = useWindowWidth();
-    const isDesktop = winW >= BREAKPOINT;
-    const { open: sidebarOpen, toggle: toggleSidebar, close: closeSidebar } = useSidebarState(isDesktop);
 
     // ── Data state ──
     const [orders, setOrders] = useState([]);
@@ -428,43 +426,22 @@ export default function SellerOrders() {
         setPaymentFilter("all"); setDateSort("desc"); setPage(1);
     };
 
-    const mainMarginLeft = isDesktop ? (sidebarOpen ? SIDEBAR_W : 0) : 0;
-
     return (
         <>
+            <SellerSidebar />
 
-            <SellerSidebar
-                isOpen={sidebarOpen}
-                onClose={closeSidebar}
-            />
-
-            {!isDesktop && sidebarOpen && (
-                <div
-                    onClick={closeSidebar}
-                    style={{
-                        position: "fixed",
-                        inset: 0,
-                        backgroundColor: "rgba(0,0,0,0.45)",
-                        zIndex: 1040,   // just below sidebar (1050) but above content
-                        backdropFilter: "blur(2px)",
-                        transition: "opacity 0.25s ease",
-                    }}
-                />
-            )}
-            <SellerNavbar />
-
-            <div
+            <div className="pd-main"
                 style={{
                     display: "flex",
                     flexDirection: "column",
                     minHeight: "100vh",
                     background: "#f1f4ff",
-                    marginLeft: mainMarginLeft,
-                    transition: "margin-left 0.3s ease",
                     // prevent horizontal scroll when sidebar overlays on mobile
                     overflow: "hidden",
                 }}
             >
+                <SellerNavbar />
+
 
 
                 <div style={{ backgroundColor: "#3549ff" }} className="so-topbar d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">

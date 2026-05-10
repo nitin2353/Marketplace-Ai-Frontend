@@ -45,10 +45,24 @@
     top: 0;
     left: 0;
     bottom: 0;
-    z-index: 200;
-    transition: transform .3s ease;
+    height: 100vh;
+    z-index: 1050;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
 }
+
+@media (max-width: 991px) {
+    .pd-sidebar {
+        z-index: 1070; /* On mobile, it's an overlay */
+    }
+}
+
+
+
+.pd-sidebar.collapsed {
+    transform: translateX(-100%);
+}
+
 
 .pd-sidebar-logo {
     background: var(--primary-gradient);
@@ -147,7 +161,19 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    width: 100%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+@media (min-width: 992px) {
+    .pd-sidebar:not(.collapsed) ~ .pd-main,
+    .pd-sidebar:not(.collapsed) + .pd-main {
+        margin-left: var(--sidebar-w) !important;
+        width: calc(100% - var(--sidebar-w)) !important;
+    }
+}
+
+
 
 /* ── Topbar ── */
 .pd-topbar {
@@ -432,7 +458,7 @@
     margin-bottom: 6px;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    /* -webkit-line-clamp: 2; */
     -webkit-box-orient: vertical;
 }
 
@@ -542,7 +568,7 @@
 
 .pd-range {
     flex: 1;
-    -webkit-appearance: none;
+    /* -webkit-appearance: none;    */
     height: 5px;
     border-radius: 8px;
     background: linear-gradient(to right, var(--p) 0%, var(--p) var(--rv, 50%), var(--border) var(--rv, 50%), var(--border) 100%);
@@ -679,8 +705,19 @@
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, .4);
-    z-index: 190;
+    z-index: 1065; /* Higher than navbar (1060) */
+    transition: opacity 0.3s ease;
+    pointer-events: none;
 }
+
+@media (max-width: 991px) {
+    .pd-overlay.show {
+        display: block;
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
 
 /* ── Modal ── */
 .pd-modal-overlay {
@@ -897,12 +934,11 @@
 @media(max-width:991px) {
     .pd-main {
         margin-left: 0 !important;
-        width: 100vw !important;
+        width: 100% !important;
     }
 
-    .pd-list-img {
-        width: 90px;
-        height: 80px;
+    .pd-sidebar:not(.collapsed) ~ .pd-main {
+        margin-left: 0 !important;
     }
 }
 

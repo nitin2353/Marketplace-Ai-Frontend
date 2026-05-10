@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [globalCartLength, setGlobalCartLength] = useState(0)
   const [refresh, setRefresh] = useState(false)
   const [coupon, setCoupon] = useState("");
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(window.innerWidth >= 992)
 
 
   return (

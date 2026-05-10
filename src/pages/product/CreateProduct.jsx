@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import "./CreateProduct.css";
 import SellerSidebar from "../../components/SellerSidebar";
 import SellerNavbar from "../../components/SellerNavbar";
+import "../../style/Dashboard.css"
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const PRESET_TAGS = ["New Arrival", "Trending", "Best Seller", "Limited Edition", "Eco Friendly", "Premium", "Sale"];
@@ -200,19 +201,19 @@ export default function CreateProduct() {
     }
 
     return (
-        <div className="cp-page">
-            <SellerNavbar pageTitle="Add Product" />
-            <div style={{ display: "flex" }}>
+        <Container fluid className="sr-page p-0">
+            <Row className="g-0 ">
                 <SellerSidebar />
-                <div style={{ flex: 1, marginLeft: window.innerWidth >= 992 ? SIDEBAR_W : 0, padding: "28px 24px 48px", minWidth: 0 }}>
+                <div className="pd-main" style={{ minWidth: 0 }}>
+                    <SellerNavbar pageTitle="Add Product" />
 
                     {/* Page header */}
-                    <div className="mb-4">
+                    <div className="mb-4" style={{ padding: "24px 20px 0px" }}>
                         <h2 className="fw-bold mb-1" style={{ fontFamily: "Nunito", fontSize: "1.7rem", color: "#1a1a2e" }}>List a New Product</h2>
                         <p style={{ fontSize: "0.86rem", color: "#9ca3af", marginBottom: 0 }}>Fill all details carefully — complete listings sell 3× faster!</p>
                     </div>
 
-                    <Form onSubmit={handleSubmit(onSubmit)}>
+                    <Form onSubmit={handleSubmit(onSubmit)} style={{ padding: "24px 20px 48px" }}>
                         <Stack gap={4}>
 
                             {/* ══════════════════════════════════════════════════
@@ -627,7 +628,7 @@ export default function CreateProduct() {
                         </Stack>
                     </Form>
                 </div>
-            </div>
-        </div>
+            </Row>
+        </Container>
     );
 }

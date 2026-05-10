@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Row, Col, Stack } from "react-bootstrap";
+import { Row, Col, Stack, Container } from "react-bootstrap";
 import toast from "react-hot-toast";
 import reviewApi from "../../api/review.api";       // apna path adjust karo
 import JWTService from "../../config/jwt.config";    // apna path adjust karo
 import SellerSidebar from "../../components/SellerSidebar";
 import SellerNavbar from "../../components/SellerNavbar";
 import "./SellerReviews.css";
+import "../../style/Dashboard.css"
 import { useNavigate } from "react-router-dom";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -164,7 +165,7 @@ function ReviewCard({ review, onReply, onReplyDelete, onDelete, submittingId, cl
                             <img src={productImg} alt="" className="sr-product-img" style={{ width: 32, height: 32, borderRadius: 6, objectFit: "cover" }}
                                 onError={e => { e.target.style.display = "none"; }} />
                         )}
-                        <span className="sr-badge sr-badge-product"  onClick={() => navigate(`/seller/product/${review?.product_id}`)}>{review.product_title}</span>
+                        <span className="sr-badge sr-badge-product" onClick={() => navigate(`/seller/product/${review?.product_id}`)}>{review.product_title}</span>
                     </div>
                 )}
 
@@ -375,167 +376,165 @@ export default function SellerReviews() {
     const unreplied = reviews.filter(r => !r.seller_reply).length;
 
     return (
-        <div className="sr-page">
-            <SellerNavbar pageTitle="Reviews" />
-
-            <div style={{ display: "flex" }}>
+        <Container fluid className="sr-page p-0">
+            <Row className="g-0">
                 <SellerSidebar />
+                <div className="pd-main" style={{minWidth: 0 }}>
+                    <SellerNavbar pageTitle="Reviews" />
 
-                <div style={{ flex: 1, marginLeft: winW >= 992 ? SIDEBAR_W : 0, minWidth: 0 }}>
+                        {/* Blue topbar */}
+                        <div className="sr-topbar">
+                            <span className="sr-topbar-title">⭐ Reviews Management</span>
+                            <div className="d-flex align-items-center gap-2 flex-wrap">
+                                {unreplied > 0 && (
+                                    <span style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, color: "#fff" }}>
+                                        {unreplied} awaiting reply
+                                    </span>
+                                )}
+                                <button className="sr-btn-ghost" style={{ borderColor: "rgba(255,255,255,0.35)", color: "#fff", fontSize: "0.78rem" }} onClick={fetchData}>
+                                    🔄 Refresh
+                                </button>
+                            </div>
+                        </div>
 
-                    {/* Blue topbar */}
-                    <div className="sr-topbar">
-                        <span className="sr-topbar-title">⭐ Reviews Management</span>
-                        <div className="d-flex align-items-center gap-2 flex-wrap">
-                            {unreplied > 0 && (
-                                <span style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 20, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 800, color: "#fff" }}>
-                                    {unreplied} awaiting reply
-                                </span>
+                        <div style={{ padding: "24px 20px 48px" }}>
+
+                            {/* Summary */}
+                            {!loading && summary && (
+                                <div className="mb-4">
+                                    <SummaryPanel summary={summary} totalReviews={reviews.length} />
+                                </div>
                             )}
-                            <button className="sr-btn-ghost" style={{ borderColor: "rgba(255,255,255,0.35)", color: "#fff", fontSize: "0.78rem" }} onClick={fetchData}>
-                                🔄 Refresh
-                            </button>
-                        </div>
-                    </div>
 
-                    <div style={{ padding: "24px 20px 48px" }}>
+                            {/* Loading skeletons for summary */}
+                            {loading && (
+                                <div className="sr-summary mb-4" style={{ minHeight: 120 }}>
+                                    <div className="sr-skel" style={{ height: 14, width: "20%", marginBottom: 12 }} />
+                                    <div className="sr-skel" style={{ height: 10, width: "50%" }} />
+                                </div>
+                            )}
 
-                        {/* Summary */}
-                        {!loading && summary && (
-                            <div className="mb-4">
-                                <SummaryPanel summary={summary} totalReviews={reviews.length} />
-                            </div>
-                        )}
+                            {/* Error */}
+                            {error && (
+                                <div style={{ background: "#fef2f2", border: "1.5px solid #fca5a5", borderRadius: 12, padding: "14px 18px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
+                                    <span>⚠️</span>
+                                    <span style={{ fontWeight: 800, color: "#dc2626", fontSize: "0.88rem" }}>{error}</span>
+                                    <button onClick={fetchData} style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--primary)", fontWeight: 800, cursor: "pointer", fontSize: "0.82rem" }}>Retry</button>
+                                </div>
+                            )}
 
-                        {/* Loading skeletons for summary */}
-                        {loading && (
-                            <div className="sr-summary mb-4" style={{ minHeight: 120 }}>
-                                <div className="sr-skel" style={{ height: 14, width: "20%", marginBottom: 12 }} />
-                                <div className="sr-skel" style={{ height: 10, width: "50%" }} />
-                            </div>
-                        )}
+                            {/* Main table card */}
+                            <div className="sr-card sr-fade sr-fade-2">
 
-                        {/* Error */}
-                        {error && (
-                            <div style={{ background: "#fef2f2", border: "1.5px solid #fca5a5", borderRadius: 12, padding: "14px 18px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
-                                <span>⚠️</span>
-                                <span style={{ fontWeight: 800, color: "#dc2626", fontSize: "0.88rem" }}>{error}</span>
-                                <button onClick={fetchData} style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--primary)", fontWeight: 800, cursor: "pointer", fontSize: "0.82rem" }}>Retry</button>
-                            </div>
-                        )}
+                                {/* Toolbar */}
+                                <div className="sr-toolbar">
+                                    {/* Search */}
+                                    <div className="sr-search-wrap">
+                                        <span className="sr-search-icon">🔍</span>
+                                        <input className="sr-search" placeholder="Search by customer, product or review text…"
+                                            value={searchInput} onChange={e => setSearchInput(e.target.value)} />
+                                    </div>
 
-                        {/* Main table card */}
-                        <div className="sr-card sr-fade sr-fade-2">
+                                    {/* Rating filter */}
+                                    <select className="sr-select" value={ratingFilter} onChange={e => setRatingFilter(e.target.value)}>
+                                        <option value="all">All Ratings</option>
+                                        {[5, 4, 3, 2, 1].map(r => <option key={r} value={String(r)}>{r} ★</option>)}
+                                    </select>
 
-                            {/* Toolbar */}
-                            <div className="sr-toolbar">
-                                {/* Search */}
-                                <div className="sr-search-wrap">
-                                    <span className="sr-search-icon">🔍</span>
-                                    <input className="sr-search" placeholder="Search by customer, product or review text…"
-                                        value={searchInput} onChange={e => setSearchInput(e.target.value)} />
+                                    {/* Reply filter */}
+                                    <select className="sr-select" value={replyFilter} onChange={e => setReplyFilter(e.target.value)}>
+                                        <option value="all">All Reviews</option>
+                                        <option value="unreplied">Needs Reply</option>
+                                        <option value="replied">Replied</option>
+                                    </select>
+
+                                    {/* Sort */}
+                                    <select className="sr-select" value={sortBy} onChange={e => setSortBy(e.target.value)}>
+                                        <option value="newest">Newest First</option>
+                                        <option value="oldest">Oldest First</option>
+                                        <option value="rating_high">Highest Rating</option>
+                                        <option value="rating_low">Lowest Rating</option>
+                                    </select>
+
+                                    <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#9ca3af", whiteSpace: "nowrap" }}>
+                                        {filtered.length} of {reviews.length}
+                                    </span>
                                 </div>
 
-                                {/* Rating filter */}
-                                <select className="sr-select" value={ratingFilter} onChange={e => setRatingFilter(e.target.value)}>
-                                    <option value="all">All Ratings</option>
-                                    {[5, 4, 3, 2, 1].map(r => <option key={r} value={String(r)}>{r} ★</option>)}
-                                </select>
-
-                                {/* Reply filter */}
-                                <select className="sr-select" value={replyFilter} onChange={e => setReplyFilter(e.target.value)}>
-                                    <option value="all">All Reviews</option>
-                                    <option value="unreplied">Needs Reply</option>
-                                    <option value="replied">Replied</option>
-                                </select>
-
-                                {/* Sort */}
-                                <select className="sr-select" value={sortBy} onChange={e => setSortBy(e.target.value)}>
-                                    <option value="newest">Newest First</option>
-                                    <option value="oldest">Oldest First</option>
-                                    <option value="rating_high">Highest Rating</option>
-                                    <option value="rating_low">Lowest Rating</option>
-                                </select>
-
-                                <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#9ca3af", whiteSpace: "nowrap" }}>
-                                    {filtered.length} of {reviews.length}
-                                </span>
-                            </div>
-
-                            {/* Filter tabs */}
-                            <div className="d-flex gap-2 px-4 py-3 flex-wrap" style={{ borderBottom: "1.5px solid #f1f4ff" }}>
-                                {[
-                                    { key: "all", label: "All" },
-                                    { key: "unreplied", label: `Unreplied (${unreplied})` },
-                                    { key: "replied", label: "Replied" },
-                                ].map(t => (
-                                    <button key={t.key} className={`sr-tab ${replyFilter === t.key ? "active" : ""}`}
-                                        onClick={() => setReplyFilter(t.key)}>{t.label}</button>
-                                ))}
-                                <div className="ms-auto d-flex gap-2 flex-wrap">
-                                    {[5, 4, 3].map(s => (
-                                        <button key={s} className={`sr-tab ${ratingFilter === String(s) ? "active" : ""}`}
-                                            onClick={() => setRatingFilter(ratingFilter === String(s) ? "all" : String(s))}>
-                                            {s} ★
-                                        </button>
+                                {/* Filter tabs */}
+                                <div className="d-flex gap-2 px-4 py-3 flex-wrap" style={{ borderBottom: "1.5px solid #f1f4ff" }}>
+                                    {[
+                                        { key: "all", label: "All" },
+                                        { key: "unreplied", label: `Unreplied (${unreplied})` },
+                                        { key: "replied", label: "Replied" },
+                                    ].map(t => (
+                                        <button key={t.key} className={`sr-tab ${replyFilter === t.key ? "active" : ""}`}
+                                            onClick={() => setReplyFilter(t.key)}>{t.label}</button>
                                     ))}
+                                    <div className="ms-auto d-flex gap-2 flex-wrap">
+                                        {[5, 4, 3].map(s => (
+                                            <button key={s} className={`sr-tab ${ratingFilter === String(s) ? "active" : ""}`}
+                                                onClick={() => setRatingFilter(ratingFilter === String(s) ? "all" : String(s))}>
+                                                {s} ★
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Review list */}
+                                <div>
+                                    {loading
+                                        ? Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
+                                        : paged.length === 0
+                                            ? (
+                                                <div className="sr-empty">
+                                                    <div style={{ fontSize: "2.8rem", marginBottom: 10 }}>⭐</div>
+                                                    <p style={{ fontWeight: 800, fontSize: "1rem", color: "#374151", marginBottom: 6 }}>No reviews found</p>
+                                                    <p style={{ fontSize: "0.84rem" }}>Try changing filters or check back later.</p>
+                                                    <button className="sr-btn-ghost" onClick={() => { setSearch(""); setSearchInput(""); setRatingFilter("all"); setReplyFilter("all"); }}>
+                                                        Clear filters
+                                                    </button>
+                                                </div>
+                                            )
+                                            : paged.map((review, i) => (
+                                                <ReviewCard
+                                                    key={review.id}
+                                                    review={review}
+                                                    idx={i}
+                                                    onReply={handleReply}
+                                                    onReplyDelete={handleClearReply}
+                                                    onDelete={handleDelete}
+                                                    submittingId={submittingId}
+                                                    clearingId={clearingId}
+                                                    deletingId={deletingId}
+                                                />
+                                            ))
+                                    }
                                 </div>
                             </div>
 
-                            {/* Review list */}
-                            <div>
-                                {loading
-                                    ? Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
-                                    : paged.length === 0
-                                        ? (
-                                            <div className="sr-empty">
-                                                <div style={{ fontSize: "2.8rem", marginBottom: 10 }}>⭐</div>
-                                                <p style={{ fontWeight: 800, fontSize: "1rem", color: "#374151", marginBottom: 6 }}>No reviews found</p>
-                                                <p style={{ fontSize: "0.84rem" }}>Try changing filters or check back later.</p>
-                                                <button className="sr-btn-ghost" onClick={() => { setSearch(""); setSearchInput(""); setRatingFilter("all"); setReplyFilter("all"); }}>
-                                                    Clear filters
-                                                </button>
-                                            </div>
-                                        )
-                                        : paged.map((review, i) => (
-                                            <ReviewCard
-                                                key={review.id}
-                                                review={review}
-                                                idx={i}
-                                                onReply={handleReply}
-                                                onReplyDelete={handleClearReply}
-                                                onDelete={handleDelete}
-                                                submittingId={submittingId}
-                                                clearingId={clearingId}
-                                                deletingId={deletingId}
-                                            />
-                                        ))
-                                }
-                            </div>
+                            {/* Pagination */}
+                            {!loading && totalPages > 1 && (
+                                <div className="d-flex justify-content-center align-items-center gap-2 mt-4 flex-wrap">
+                                    <button className="sr-pg-btn" disabled={page === 1} onClick={() => setPage(p => p - 1)}>‹ Prev</button>
+                                    {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                                        const p = totalPages <= 7 ? i + 1
+                                            : page <= 4 ? i + 1
+                                                : page >= totalPages - 3 ? totalPages - 6 + i
+                                                    : page - 3 + i;
+                                        return (
+                                            <button key={p} className={`sr-pg-btn ${page === p ? "active" : ""}`} onClick={() => setPage(p)}>{p}</button>
+                                        );
+                                    })}
+                                    <button className="sr-pg-btn" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>Next ›</button>
+                                    <span style={{ fontSize: "0.76rem", color: "#9ca3af", fontWeight: 700 }}>
+                                        Page {page} of {totalPages} · {filtered.length} reviews
+                                    </span>
+                                </div>
+                            )}
                         </div>
-
-                        {/* Pagination */}
-                        {!loading && totalPages > 1 && (
-                            <div className="d-flex justify-content-center align-items-center gap-2 mt-4 flex-wrap">
-                                <button className="sr-pg-btn" disabled={page === 1} onClick={() => setPage(p => p - 1)}>‹ Prev</button>
-                                {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-                                    const p = totalPages <= 7 ? i + 1
-                                        : page <= 4 ? i + 1
-                                            : page >= totalPages - 3 ? totalPages - 6 + i
-                                                : page - 3 + i;
-                                    return (
-                                        <button key={p} className={`sr-pg-btn ${page === p ? "active" : ""}`} onClick={() => setPage(p)}>{p}</button>
-                                    );
-                                })}
-                                <button className="sr-pg-btn" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>Next ›</button>
-                                <span style={{ fontSize: "0.76rem", color: "#9ca3af", fontWeight: 700 }}>
-                                    Page {page} of {totalPages} · {filtered.length} reviews
-                                </span>
-                            </div>
-                        )}
                     </div>
-                </div>
-            </div>
-        </div>
+            </Row>
+        </Container>
     );
 }

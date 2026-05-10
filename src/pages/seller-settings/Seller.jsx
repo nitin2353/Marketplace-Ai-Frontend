@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Row, Col, Stack, InputGroup, Form } from "react-bootstrap";
+import { Row, Col, Stack, InputGroup, Form, Container } from "react-bootstrap";
 import toast from "react-hot-toast";
 import JWTService from "../../config/jwt.config";       // apna path
 import SellerSidebar from "../../components/SellerSidebar";
@@ -8,10 +8,8 @@ import authApi from "../../api/authApi";
 import userSettingsApi from "../../api/userSettings.api";
 import { API_BASE_URL } from "../../helper/Constraints";
 import "../Seller-settings/Sellersettings.css";
+import "../../style/Dashboard.css"
 
-
-// ── Constants ─────────────────────────────────────────────────────────────────
-const SIDEBAR_W = 280;
 const IMG_BASE = API_BASE_URL.replace("/api/v1", "/uploads/profiles/");
 
 const NAV_ITEMS = [
@@ -280,7 +278,7 @@ function StoreTab({ seller, onSave, saving }) {
                                     <input
                                         className={`ss-input ${form.pan.toUpperCase() && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(form.pan.toUpperCase()) ? 'is-invalid' : ''}`}
                                         value={form.pan.toUpperCase()}
-                                        onChange={set("pan")}   
+                                        onChange={set("pan")}
                                         placeholder="ABCDE1234F"
                                         maxLength={10}
                                         style={{ textTransform: "uppercase" }}
@@ -825,8 +823,8 @@ function PaymentsTab({ seller, onSave, saving }) {
                                 <Field label="IFSC Code">
                                     <input
                                         className={`ss-input ${form.ifsc && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(form.ifsc)
-                                                ? "is-invalid"
-                                                : ""
+                                            ? "is-invalid"
+                                            : ""
                                             }`}
                                         value={form.ifsc.toUpperCase()}
                                         onChange={handleChange("ifsc")}
@@ -979,56 +977,40 @@ export default function SellerSettings() {
         : "Seller";
 
     return (
-        <div className="ss-page">
-            <SellerNavbar pageTitle="Settings" />
-
-            <div style={{ display: "flex" }}>
+        <Container fluid className="sr-page p-0">
+            <div className="d-flex">
                 <SellerSidebar />
 
-                <div style={{
-                    flex: 1,
-                    marginLeft: isMobile ? 0 : SIDEBAR_W,
-                    minWidth: 0,
-                    transition: "margin-left 0.3s ease"
-                }}>
+                <div className="pd-main flex-grow-1" style={{ minWidth: 0 }}>
+                    <SellerNavbar pageTitle="Settings" />
 
-                    {/* Orange topbar */}
                     <div className="ss-topbar">
                         <span className="ss-topbar-title">⚙️ Account Settings</span>
-                        {seller && (
-                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                <div className="ss-avatar" style={{ width: 32, height: 32, fontSize: "0.75rem", flexShrink: 0 }}>
-                                    {seller.avatar ? <img src={seller.avatar.startsWith('http') ? seller.avatar : `${IMG_BASE}${seller.avatar}`} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%' }} /> : initials(displayName)}
-                                </div>
-                                <span style={{ color: "#fff", fontWeight: 700, fontSize: "0.85rem" }}>{displayName}</span>
-                            </div>
-                        )}
                     </div>
 
                     <div style={{ padding: "24px 20px 48px" }}>
                         <Row className="g-4">
-
-                            {/* Left nav */}
-                            <Col lg={3} xl={2}>
+                            <Col xs={12} lg={3} xl={2}>
                                 <nav className="ss-nav">
-                                    {NAV_ITEMS.map((item, i) => (
+                                    {NAV_ITEMS.map((item) => (
                                         <button
                                             key={item.key}
-                                            className={`ss-nav-item ${activeTab === item.key ? "active" : ""}`}
+                                            type="button"
+                                            className={`ss-nav-item ${activeTab === item.key ? "active" : ""
+                                                }`}
                                             onClick={() => setActiveTab(item.key)}
                                         >
                                             <span className="ss-nav-icon">{item.icon}</span>
-                                            {item.label}
+                                            <span>{item.label}</span>
                                         </button>
                                     ))}
                                 </nav>
                             </Col>
 
-                            {/* Content */}
-                            <Col lg={9} xl={10}>
+                            <Col xs={12} lg={9} xl={10}>
                                 {loading ? (
                                     <Stack gap={3}>
-                                        {[1, 2, 3].map(i => (
+                                        {[1, 2, 3].map((i) => (
                                             <div key={i} className="ss-card" style={{ padding: 24 }}>
                                                 <div className="ss-skel" style={{ height: 12, width: "25%", marginBottom: 16 }} />
                                                 <div className="ss-skel" style={{ height: 10, width: "60%", marginBottom: 10 }} />
@@ -1051,6 +1033,6 @@ export default function SellerSettings() {
                     </div>
                 </div>
             </div>
-        </div>
+        </Container>
     );
 }

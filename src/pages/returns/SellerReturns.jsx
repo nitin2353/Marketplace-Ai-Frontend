@@ -6,7 +6,6 @@ import SellerNavbar from "../../components/SellerNavbar";
 import SellerSidebar from "../../components/SellerSidebar";
 import { useNavigate, useParams } from "react-router-dom";
 
-const SIDEBAR_W = 280;
 
 const SellerReturns = () => {
     const [requests, setRequests] = useState([]);
@@ -101,12 +100,12 @@ const SellerReturns = () => {
 
 
     return (
-        <>
-            <SellerNavbar pageTitle="Return & Replacement Requests"/>
-
-            <Container fluid className="py-4">
+        <Container fluid className="p-0">
+            <Row className="g-0">
                 <SellerSidebar />
-                <div style={{ flex: 1, marginLeft: window.innerWidth >= 992 ? SIDEBAR_W : 0, padding: "28px 24px 48px", minWidth: 0 }}>
+                <div className="pd-main" style={{ minWidth: 0 }}>
+                    <SellerNavbar pageTitle="Return & Replacement Requests"/>
+                    <div style={{ padding: "28px 24px 48px" }}>
 
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <div className="d-flex gap-2">
@@ -316,10 +315,11 @@ const SellerReturns = () => {
                             </Modal.Footer>
                         </Form>
                     )}
-                </Modal>
+                        </Modal>
+                    </div>
                 </div>
-            </Container>
-        </>
+            </Row>
+        </Container>
     );
 };
 

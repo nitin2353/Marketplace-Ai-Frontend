@@ -180,16 +180,15 @@ export default function SellerProducts() {
     return (
 
         <Container fluid className="p-0" style={{ minHeight: "100vh", background: "#f1f4ff" }}>
-            <SellerNavbar />
             {loading && <GlobalLoader />}
             <Row className="g-0" style={{ minHeight: "100vh" }}>
 
-                <Col lg={3} xl={2}>
-                    <SellerSidebar stats={sidebarStats} />
-                </Col>
+                <SellerSidebar stats={sidebarStats} />
 
                 {/* ── MAIN CONTENT ── */}
-                <Col lg={9} xl={10} className="p-3 p-md-4" style={{ overflowY: "auto" }}>
+                <Col xs={12} className="pd-main p-0" style={{ overflowY: "auto" }}>
+                    <SellerNavbar />
+                    <div className="p-3 p-md-4">
 
                     {/* Mobile header */}
                     <div className="d-lg-none mb-3 d-flex align-items-center justify-content-between">
@@ -360,7 +359,8 @@ export default function SellerProducts() {
                         </Row>
                     )}
                     <div style={{ height: 40 }} />
-                </Col>
+                </div>
+            </Col>
             </Row>
 
             <EditProductModal show={showEditModal} product={selectedProductData} setRefresh={setRefresh} refresh={refresh} handleClose={() => setShowEditModal(false)} />

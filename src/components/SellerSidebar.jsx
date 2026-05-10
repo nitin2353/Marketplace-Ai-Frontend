@@ -37,12 +37,6 @@ export default function SellerSidebar({ stats = [] }) {
             <div
                 className={`pd-sidebar ${!isOpen ? "collapsed" : ""}`}
                 style={{
-                    height: "100vh",
-                    width: "280px",
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    // zIndex: 1050,
                     background: "var(--bg-surface)",
                     borderRight: "1px solid var(--border-light)",
                     boxShadow: "var(--shadow-lg)",

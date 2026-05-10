@@ -94,8 +94,7 @@ export default function SellerNavbar({
             style={{
                 position: "sticky",
                 top: 0,
-                // zIndex: 1030,
-                width: "100%",
+                zIndex: 1040,
                 background: "var(--bg-surface)",
                 borderBottom: "1px solid var(--border-light)",
                 boxShadow: "var(--shadow-sm)",
@@ -104,6 +103,7 @@ export default function SellerNavbar({
                 alignItems: "center",
                 paddingInline: "24px",
                 gap: "16px",
+                transition: "all 0.3s ease",
             }}
         >
             <button
