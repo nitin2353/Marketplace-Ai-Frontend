@@ -1,4 +1,4 @@
-# 🧵 UV Capital Frontend (React + Vite)
+# 🧵 Ai Marketplace (React + Vite)
 
 **Unified Vision Capital is an Investment Banking firm based in Noida. We work with companies to raise funds, manage/advise transactions, and connect them with the right investors.**
 
