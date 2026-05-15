@@ -36,8 +36,52 @@ const getPaymentByOrderId = async (orderId) => {
     }
 };
 
+// Get seller payment summary
+const getSellerSummary = async () => {
+    try {
+        const response = await apiConfig.get("/payment/seller/summary");
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: "Failed to fetch payment summary" };
+    }
+};
+
+// Get seller transactions
+const getSellerTransactions = async (params) => {
+    try {
+        const response = await apiConfig.get("/payment/seller/transactions", { params });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: "Failed to fetch transactions" };
+    }
+};
+
+// Get seller chart data
+const getSellerChartData = async () => {
+    try {
+        const response = await apiConfig.get("/payment/seller/chart-data");
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: "Failed to fetch chart data" };
+    }
+};
+
+// Get specific transaction detail
+const getSellerTransactionById = async (id) => {
+    try {
+        const response = await apiConfig.get(`/payment/seller/${id}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: "Failed to fetch transaction detail" };
+    }
+};
+
 export default {
     createRazorpayOrder,
     verifyAndCreateOrder,
-    getPaymentByOrderId
+    getPaymentByOrderId,
+    getSellerSummary,
+    getSellerTransactions,
+    getSellerChartData,
+    getSellerTransactionById
 };

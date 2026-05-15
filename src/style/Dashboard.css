@@ -992,3 +992,96 @@
     margin-top: -12px !important;
     background: red !important;
 }
+
+/* ── CUSTOMER RESPONSIVE FIXES ── */
+
+@media (max-width: 576px) {
+    /* Navbar First Row: Logo/Menu left, Icons right */
+    .pd-topbar {
+        flex-wrap: wrap;
+        padding: 8px 12px !important;
+        gap: 8px !important;
+    }
+
+    /* Menu/Logo button */
+    .pd-topbar > button, 
+    .pd-topbar > img {
+        order: 1;
+        margin-right: auto;
+    }
+
+    /* Right Icons */
+    .pd-topbar > .ms-auto {
+        order: 2;
+        margin-left: 0 !important;
+        gap: 8px !important;
+    }
+
+    /* Search Box Second Line */
+    .pd-topbar > div:nth-child(2) {
+        order: 3;
+        flex: 1 1 100% !important;
+        max-width: 100% !important;
+        margin-top: 4px;
+    }
+
+    .pd-topbar .toolbar-icon-wrapper div {
+        font-size: 1.2rem !important;
+        padding: 4px !important;
+    }
+
+    .profile-trigger {
+        width: 32px !important;
+        height: 32px !important;
+        margin-left: 4px !important;
+    }
+
+    /* Category scroll without overflow */
+    .product-scroll-container {
+        padding-bottom: 20px !important;
+    }
+
+    /* Product cards clamping */
+    .pd-card-title {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 2.8em;
+    }
+
+    /* Mobile: 2 cards per row */
+    .pd-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+}
+
+/* Tablet: 3 cards per row */
+@media (min-width: 577px) and (max-width: 991px) {
+    .pd-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 16px !important;
+    }
+}
+
+/* Ensure images keep aspect ratio */
+.pd-card-img, .pd-hero-img, .pd-thumb, .cart-img, .ord-product-img, .item-img {
+    aspect-ratio: 1/1;
+    object-fit: contain !important;
+    background: #f8fafc;
+}
+
+/* No horizontal page scroll */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Buttons should not overflow */
+button {
+    max-width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}

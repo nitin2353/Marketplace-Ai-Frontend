@@ -23,11 +23,13 @@ const SortIcon = ({ columnKey, sortConfig }) => {
 
 const DataTable = ({
     tableData = [],
+    columns = null, // Custom columns support
     getStatusColor,
     title = "Recent Orders",
     isSearch = true,
     isHeader = true,
-    isPagination = true
+    isPagination = true,
+    searchPlaceholder = "Search by Order ID, Buyer, Status…"
 }) => {
     const navigate = useNavigate();
 
@@ -157,7 +159,7 @@ const DataTable = ({
                                 <InputGroup.Text>🔍</InputGroup.Text>
                                 <Form.Control
                                     type="search"
-                                    placeholder="Search by Order ID, Buyer, Status…"
+                                    placeholder={searchPlaceholder}
                                     value={search}
                                     size="lg"
                                     onChange={handleSearch}
@@ -192,7 +194,7 @@ const DataTable = ({
                         <Table striped hover size="sm" className="mb-2 align-middle">
                             <thead>
                                 <tr>
-                                    {TABLE_HEADERS.map(({ label, key }) => (
+                                    {(columns || TABLE_HEADERS).map(({ label, key }) => (
                                         <th
                                             key={key}
                                             onClick={() => handleSort(key)}
@@ -208,12 +210,24 @@ const DataTable = ({
                             </thead>
 
                             <tbody>
-                                {paginated.map((order, idx) => {
-                                    const id = getValue(order, "id");
-                                    const buyer = getValue(order, "buyer");
-                                    const qty = getValue(order, "qty");
-                                    const amount = getValue(order, "amount");
-                                    const date = getValue(order, "date");
+                                {paginated.map((row, idx) => {
+                                    if (columns) {
+                                        return (
+                                            <tr key={row.id || idx}>
+                                                {columns.map((col) => (
+                                                    <td key={col.key} style={{ fontSize: ".78rem" }}>
+                                                        {col.render ? col.render(row[col.key], row) : row[col.key]}
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        );
+                                    }
+
+                                    const id = getValue(row, "id");
+                                    const buyer = getValue(row, "buyer");
+                                    const qty = getValue(row, "qty");
+                                    const amount = getValue(row, "amount");
+                                    const date = getValue(row, "date");
 
                                     return (
                                         <tr key={id ?? idx}>
@@ -236,10 +250,10 @@ const DataTable = ({
 
                                             <td>
                                                 <Badge
-                                                    bg={getStatusColor?.(order.status) ?? "secondary"}
+                                                    bg={getStatusColor?.(row.status) ?? "secondary"}
                                                     style={{ fontSize: ".65rem", letterSpacing: ".04em" }}
                                                 >
-                                                    {order.status}
+                                                    {row.status}
                                                 </Badge>
                                             </td>
 

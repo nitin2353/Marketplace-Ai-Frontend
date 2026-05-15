@@ -363,4 +363,29 @@ export default StyleSheet.create({
         color: "#111827",
         fontWeight: "bold",
     },
+
+    discountBox: {
+    marginTop: 6,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    backgroundColor: "#fef2f2",
+    border: "1 solid #fecaca",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+},
+
+discountLabel: {
+    fontSize: 7,
+    color: "#991b1b",
+    fontWeight: "bold",
+    letterSpacing: 0.5,
+},
+
+discountValue: {
+    fontSize: 8,
+    color: "#dc2626",
+    fontWeight: "bold",
+},
 });

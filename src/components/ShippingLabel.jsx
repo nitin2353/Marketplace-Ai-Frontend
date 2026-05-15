@@ -71,7 +71,7 @@ const getSellerData = (order = {}, item = {}) => {
 };
 
 const getDiscountShare = (order = {}, amount = 0) => {
-    const subtotal = toNumber(order?.subtotal);
+    const subtotal = toNumber(order?.total_amount);
     const discount = toNumber(order?.discount_amount);
 
     if (!subtotal || !discount) return 0;
@@ -80,7 +80,7 @@ const getDiscountShare = (order = {}, amount = 0) => {
 };
 
 const getDeliveryShare = (order = {}, amount = 0) => {
-    const subtotal = toNumber(order?.subtotal);
+    const subtotal = toNumber(order?.total_amount);
     const delivery = toNumber(order?.delivery_charge);
 
     if (!subtotal || !delivery) return 0;
@@ -296,7 +296,7 @@ const ShippingParcelLabel = ({ order = {}, shipment = {} }) => {
 
                     <View style={isCOD ? s.codAmountBox : s.prepaidAmountBox}>
                         <Text style={s.amountLabel}>{codInfoText}</Text>
-
+                        {console.log(order.total_amount, shipment?.parcel_gross_amount)}
                         <Text style={isCOD ? s.codAmountText : s.prepaidAmountText}>
                             {isCOD ? `Rs. ${money(codCollectAmount)}` : "PREPAID"}
                         </Text>

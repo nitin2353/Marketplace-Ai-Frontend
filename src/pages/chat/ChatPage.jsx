@@ -366,7 +366,7 @@ const ChatPage = () => {
             )}
             <div className="chat-container" style={{ height: "100vh" }}>
                 {/* Sidebar */}
-                <div className={`chat-sidebar ${"d-flex"}`}>
+                <div className={`chat-sidebar ${conversationId ? 'd-none d-md-flex' : 'd-flex'}`}>
                     <div className="chat-sidebar-header">
                         <button
                             className="chat-back-btn d-flex"

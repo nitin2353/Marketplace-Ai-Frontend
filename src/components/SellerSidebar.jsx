@@ -9,6 +9,7 @@ const NAV_ITEMS = [
     { icon: "🛒", label: "Orders", path: "/seller/orders" },
     { icon: "💬", label: "Customization Chat", path: "/chat" },
     { icon: "🔄", label: "Returns", path: "/seller/returns" },
+    { icon: "💰", label: "Payments", path: "/seller/payments" },
     { icon: "⭐", label: "Reviews", path: "/seller/reviews" },
     { icon: "⚙️", label: "Settings", path: "/seller/settings" },
 ];

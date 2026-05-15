@@ -972,10 +972,6 @@ export default function SellerSettings() {
         } finally { setSaving(false); }
     }, [sellerId, fetchSeller, activeTab]);
 
-    const displayName = seller
-        ? `${seller.first_name || ""} ${seller.last_name || ""}`.trim() || seller.business_name || "Seller"
-        : "Seller";
-
     return (
         <Container fluid className="sr-page p-0">
             <div className="d-flex">

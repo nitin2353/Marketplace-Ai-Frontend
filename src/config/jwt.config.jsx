@@ -14,6 +14,10 @@ const JWTService = {
     return localStorage.getItem(STORAGE_KEY);
   },
 
+  isTokenAvailable() {
+    return localStorage.getItem(STORAGE_KEY) !== null && this.isTokenValid();
+  },
+
   decodeTokenDetails() {
     const token = this.getTokenDetails();
     if (!token) return null;
