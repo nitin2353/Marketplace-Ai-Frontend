@@ -26,7 +26,9 @@ const ROUTE = {
   CHAT_LIST: "/chat",
   SELLER_SETTING: "/seller/settings",
   CUSTOMER_RETURNS: "/dashboard/returns",
-  SELLER_RETURNS: "/seller/returns/:id?"
+  SELLER_RETURNS: "/seller/returns/:id?",
+  SELLER_PAYMENTS: "/seller/payments"
+
 
 };
 

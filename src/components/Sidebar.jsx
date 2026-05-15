@@ -39,14 +39,12 @@ export default function Sidebar({ cart, sidebarOpen, navSection, wishlist, handl
 
     return (
         <>
-            <div className="pd-sidebar" style={{
-                transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
+            <div className={`pd-sidebar ${sidebarOpen ? "" : "collapsed"}`} style={{
                 background: "var(--bg-surface)",
                 borderRight: "1px solid var(--border-light)",
                 boxShadow: "var(--shadow-lg)"
             }}>
                 <div className="pd-sidebar-logo" style={{
-                    background: "white",
                     padding: "24px 20px",
                     borderBottom: "1px solid var(--border-light)"
                 }}>
@@ -59,18 +57,15 @@ export default function Sidebar({ cart, sidebarOpen, navSection, wishlist, handl
                             alignItems: "center",
                             gap: "8px"
                         }}>
-                            <img src="../../src/assets/logo.png" width="100%" alt="" />
+                            <img src="/src/assets/logo.png" style={{ maxWidth: "180px", height: "auto" }} alt="Marketplace" />
                         </div>
                         <button onClick={() => setSidebar(false)} className="d-lg-none" style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "1.5rem", cursor: "pointer" }}>
                             <IoCloseOutline />
                         </button>
                     </div>
-                    {/* <div style={{ color: "var(--text-muted)", fontSize: ".75rem", fontWeight: 600, marginTop: "4px", textTransform: "uppercase", letterSpacing: "1px" }}>
-                        Marketplace Portal
-                    </div> */}
                 </div>
 
-                <div style={{ padding: "20px 0" }}>
+                <div style={{ padding: "20px 0", flex: 1 }}>
                     <div className="pd-sidebar-section" style={{ color: "var(--text-light)", padding: "0 20px 10px" }}>MENU</div>
                     {SIDEBAR_MENUS.map(item => (
                         <button
@@ -93,7 +88,7 @@ export default function Sidebar({ cart, sidebarOpen, navSection, wishlist, handl
                                 borderLeft: navSection === item.id ? "4px solid var(--primary)" : "4px solid transparent"
                             }}
                         >
-                            <span className="icon" style={{ fontSize: "1.2rem", opacity: navSection === item.id ? 1 : 0.7, marginTop: "-15px" }}>{item.icon}</span>
+                            <span className="icon" style={{ fontSize: "1.2rem", opacity: navSection === item.id ? 1 : 0.7 }}>{item.icon}</span>
                             {item.label}
                             {item.id === "wishlist" && wishlist.length > 0 && <span className="nav-badge" style={{ background: "var(--primary)", color: "white", borderRadius: "20px", padding: "2px 8px", fontSize: "0.7rem", marginLeft: "auto" }}>{wishlist.length}</span>}
                             {item.id === "orders" && cart.length > 0 && (
@@ -122,19 +117,16 @@ export default function Sidebar({ cart, sidebarOpen, navSection, wishlist, handl
                         className="pd-nav-item logout-btn"
                         style={{
                             color: "var(--primary)",
-                            width: "107%",
+                            width: "100%",
                             display: "flex",
                             alignItems: "center",
                             gap: "12px",
                             padding: "12px",
-                            border: "1px solid #e2e4feff",
-                            borderLeft: "4px solid #5463e6ff",
-                            borderRight: "4px solid #5463e6ff",
-                            background: "#f5f6ffff",
+                            border: "1px solid #e2e4fe",
+                            background: "#f5f6ff",
                             borderRadius: "var(--radius-md)",
                             fontWeight: 600,
-                            cursor: "pointer",
-                            marginLeft: "-5px"
+                            cursor: "pointer"
                         }}
                         onClick={handleLogout}
                     >
@@ -145,9 +137,10 @@ export default function Sidebar({ cart, sidebarOpen, navSection, wishlist, handl
             </div>
 
             {/* Mobile overlay */}
-            {sidebarOpen && window.innerWidth < 992 && (
-                <div className="pd-overlay show" onClick={() => setSidebar(false)} style={{ display: "block" }} />
-            )}
+            <div 
+                className={`pd-overlay ${sidebarOpen ? "show" : ""}`} 
+                onClick={() => setSidebar(false)} 
+            />
         </>
     );
 }
