@@ -8,9 +8,9 @@ import { useAuthWrapper } from "../../helper/AuthWrapper";
 import JWTService from "../../config/jwt.config";
 import { FMT, FMT_DATE, TABS, STATUS_META, PAYMENT_METHOD_LABELS, TIMELINE_STEPS } from "../../helper/GlobalHelper";
 import ConfirmModal from "../../components/ConfirmModal";
-import ReviewModal from "../../components/ReviewModal";
+import ReviewModal from "../../components/ReviewModal.jsx";
 import "./orderpage.css";
-import OrderTimeline from "./OrderTimeline";
+import OrderTimeline from "./OrderTimeline.jsx";
 import ReturnRequestModal from "../../components/ReturnRequestModal";
 
 // ── Local Components to keep changes within this file ────────────────────────
