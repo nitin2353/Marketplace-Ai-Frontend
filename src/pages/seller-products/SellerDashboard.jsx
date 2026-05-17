@@ -16,7 +16,7 @@ import productApi from "../../api/product.api";
 import { requestFormReset } from "react-dom";
 import toast from "react-hot-toast";
 import "./SellerDashboard.css";
-import SellerNavbar from "/src/components/SellerNavbar.jsx";
+// import SellerNavbar from "/src/components/SellerNavbar.jsx";
 
 
 const FILTERS = ["All", "In Stock", "Low Stock", "Out of Stock", "Customizable", "Returnable"];
@@ -187,7 +187,7 @@ const SellerProducts = () => {
 
                 {/* ── MAIN CONTENT ── */}
                 <Col xs={12} className="pd-main p-0" style={{ overflowY: "auto" }}>
-                    <SellerNavbar />
+                    {/* <SellerNavbar /> */}
                     <div className="p-3 p-md-4">
 
                         {/* Mobile header */}
