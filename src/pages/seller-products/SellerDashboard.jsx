@@ -16,7 +16,7 @@ import productApi from "../../api/product.api";
 import { requestFormReset } from "react-dom";
 import toast from "react-hot-toast";
 import "./SellerDashboard.css";
-import SellerNavbar from "../../components/SellerNavbar";
+import SellerNavbar from "/src/components/SellerNavbar.jsx";
 
 
 const FILTERS = ["All", "In Stock", "Low Stock", "Out of Stock", "Customizable", "Returnable"];
