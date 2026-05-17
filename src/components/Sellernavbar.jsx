@@ -7,12 +7,12 @@ import NotificationPanel from "./NotificationPanel";
 import notificationApi from "../api/notification.api";
 import toast from "react-hot-toast";
 
-export default function SellerNavbar({
+const SellerNavbar = ({
     sellerName = "",
     notifCount = 1,
     pageTitle = "",
     notifications = [],
-}) {
+}) => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
     const { isOpen, setIsOpen } = useAuthWrapper();
@@ -247,3 +247,5 @@ export default function SellerNavbar({
         </nav>
     );
 }
+
+export default SellerNavbar;
