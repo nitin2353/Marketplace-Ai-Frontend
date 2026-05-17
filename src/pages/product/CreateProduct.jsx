@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import productApi from "../../api/product.api";
 import toast from "react-hot-toast";
 import "./CreateProduct.css";
-import SellerSidebar from "../../components/SellerSidebar";
+import SellerSidebar from "../../components/SellerSidebar.jsx";
 import SellerNavbar from "../../components/SellerNavbar.jsx";
 import "../../style/Dashboard.css"
 
