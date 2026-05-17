@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import SellerSidebar from "../../components/SellerSidebar";
 import GlobalLoader from "../../components/GlobalLoader";
 import productApi from "../../api/product.api";
-import SellerNavbar from "../../components/SellerNavbar";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
 import DataTable from "../../components/DataTable";
 import reportApi from "../../api/reportApi";
 import orderApi from "../../api/order.api";

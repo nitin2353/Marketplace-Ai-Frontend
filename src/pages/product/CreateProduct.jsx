@@ -6,7 +6,7 @@ import productApi from "../../api/product.api";
 import toast from "react-hot-toast";
 import "./CreateProduct.css";
 import SellerSidebar from "../../components/SellerSidebar";
-import SellerNavbar from "../../components/SellerNavbar";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
 import "../../style/Dashboard.css"
 
 // ── Constants ─────────────────────────────────────────────────────────────────

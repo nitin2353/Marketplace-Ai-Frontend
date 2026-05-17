@@ -3,8 +3,8 @@ import { Row, Col, Stack, Container } from "react-bootstrap";
 import toast from "react-hot-toast";
 import reviewApi from "../../api/review.api";       // apna path adjust karo
 import JWTService from "../../config/jwt.config";    // apna path adjust karo
-import SellerSidebar from "../../components/SellerSidebar";
-import SellerNavbar from "../../components/SellerNavbar";
+import SellerSidebar from "../../components/SellerSidebar.jsx";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
 import "./SellerReviews.css";
 import "../../style/Dashboard.css"
 import { useNavigate } from "react-router-dom";

@@ -10,8 +10,8 @@ import { FMT } from "../../helper/GlobalHelper";
 import OrderDrawer from "../../components/OrderDrawer";
 import { PAYMENT_METHOD_META } from "../../helper/Constraints";
 import PayBadge from "../../components/PayBadge";
-import SellerSidebar from "../../components/SellerSidebar";
-import SellerNavbar from "../../components/SellerNavbar";
+import SellerSidebar from "../../components/SellerSidebar.jsx";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
 
 const fmt = FMT;
 

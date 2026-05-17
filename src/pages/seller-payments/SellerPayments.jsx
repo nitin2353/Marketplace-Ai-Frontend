@@ -5,8 +5,8 @@ import {
     PieChart, Pie, Cell, Legend, BarChart, Bar
 } from "recharts";
 import { FaDownload, FaFilter, FaEye, FaArrowUp, FaArrowDown, FaWallet, FaCheckCircle, FaClock, FaUndo } from "react-icons/fa";
-import SellerSidebar from "../../components/SellerSidebar";
-import SellerNavbar from "../../components/SellerNavbar";
+import SellerSidebar from "../../components/SellerSidebar.jsx";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
 import DataTable from "../../components/DataTable";
 import paymentApi from "../../api/payment.api";
 import GlobalLoader from "../../components/GlobalLoader";
