@@ -3,6 +3,7 @@ import { Modal, Row, Col, Form, Button, InputGroup, Badge, Stack } from "react-b
 import { useForm } from "react-hook-form";
 import productApi from "../../api/product.api";
 import toast from "react-hot-toast";
+import { formResetData } from "../../helper/FormDefaults";
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const PRESET_TAGS = ["New Arrival", "Trending", "Best Seller", "Limited Edition", "Eco Friendly", "Premium", "Sale"];
@@ -125,32 +126,7 @@ export default function EditProductModal({ show, handleClose, product, setRefres
     useEffect(() => {
         if (!product || !show) return;
 
-        reset({
-            title: product.title || "",
-            description: product.description || "",
-            brand: product.brand || "",
-            category: product.category || "",
-            base_price: product.base_price || "",
-            old_price: product.old_price || "",
-            stock: product.stock || "",
-            weight: product.weight || "",
-            length: product.length || "",
-            width: product.width || "",
-            height: product.height || "",
-            delivery_days: product.delivery_days || "",
-            tax_percentage: product.tax_percentage || "",
-            min_stock_alert: product.min_stock_alert || "",
-            return_replace_duration: product.return_replace_duration || "",
-            return_replace_instructions: product.return_replace_instructions || "",
-            slug: product.slug || "",
-            meta_title: product.meta_title || "",
-            meta_description: product.meta_description || "",
-            customization_type: product.customization_type || "",
-            customization_fields: product.customization_fields || "",
-            sold: product.sold || "",
-            rating: product.rating || "",
-            reviews: product.reviews || "",
-        });
+        reset(formResetData.product(product));
 
         // Tags
         const tagList = Array.isArray(product.tag)
@@ -358,14 +334,22 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                         </InputGroup>
                                     </Field>
                                 </Col>
-                                <Col md={4}>
+                                <Col md={2}>
                                     <Field label="Meta Title (SEO)">
                                         <Form.Control className="cp-input" placeholder="SEO title" {...register("meta_title")} />
                                     </Field>
                                 </Col>
-                                <Col md={4}>
+                                <Col md={3}>
                                     <Field label="Meta Description (SEO)">
                                         <Form.Control className="cp-input" placeholder="SEO description" {...register("meta_description")} />
+                                    </Field>
+                                </Col>
+                                <Col md={3}>
+                                    <Field label="Status">
+                                        <Form.Select className="cp-select" {...register("status")}>
+                                            <option value="true" selected>Active</option>
+                                            <option value="false">Inactive</option>
+                                        </Form.Select>
                                     </Field>
                                 </Col>
                             </Row>

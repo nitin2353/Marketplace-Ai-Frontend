@@ -74,7 +74,7 @@ export default function SellerProductDetail() {
                 const { data } = await productApi.getProductById(id);
                 const raw = data?.data || data;
                 if (!raw) { toast.error("Product not found"); navigate("/seller/products"); return; }
-                {console.log('raw', raw)}
+                { console.log('raw', raw) }
                 setProduct({
                     ...raw,
                     base_price: Number(raw.base_price),
@@ -226,9 +226,6 @@ export default function SellerProductDetail() {
                                         </p>
                                     </div>
                                     <div className="spd-desktop-actions d-none d-lg-flex gap-2">
-                                        <button className="spd-action-btn ghost" onClick={() => navigate(`/product/${id}`)}>
-                                            👁️ View Live
-                                        </button>
                                         <button className="spd-action-btn primary" onClick={() => setShowEdit(true)}>
                                             ✏️ Edit Product
                                         </button>
@@ -316,7 +313,15 @@ export default function SellerProductDetail() {
                                             {/* Product Details card */}
                                             <Col xs={12}>
                                                 <div className="spd-card">
-                                                    <div className="spd-card-title">📋 Product Details</div>
+                                                    <span className="spd-card-title d-inline-flex  justify-content-between">
+                                                        📋 Product Details
+                                                    </span>
+                                                    <span className="text-danger d-inline-flex float-end fw-bold">
+                                                        {
+                                                            product.status === "false" ? "INACTIVE" : "ACTIVE"
+                                                            
+                                                        }
+                                                    </span>
                                                     <div className="spd-card-sub">Core listing information</div>
                                                     {[
                                                         { key: "Brand", val: product.brand || "—" },

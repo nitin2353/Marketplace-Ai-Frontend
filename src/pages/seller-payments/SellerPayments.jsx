@@ -68,6 +68,7 @@ const SellerPayments = () => {
     const handleViewDetail = async (id) => {
         try {
             const res = await paymentApi.getSellerTransactionById(id);
+            console.log("res.data", res.data)
             setSelectedTransaction(res.data);
             setShowDetailModal(true);
         } catch (err) {
@@ -486,7 +487,6 @@ const SellerPayments = () => {
                     </Col>
                 </Row>
             </Container>
-            {console.log(selectedTransaction)}
             {/* Detail Modal */}
             <Modal show={showDetailModal} onHide={() => setShowDetailModal(false)} centered size="lg">
                 <Modal.Header closeButton className="border-0">

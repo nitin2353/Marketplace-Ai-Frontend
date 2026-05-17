@@ -255,9 +255,11 @@ export default function ProductDetail() {
         seller_id: product.seller_id,
         product_id: product.id
       });
+
       if (response.status) navigate(`/chat/${response.data.id}`);
     } catch (error) {
       toast.error("Failed to start chat.");
+      navigate('/auth/login')
     }
   };
 
@@ -486,6 +488,10 @@ export default function ProductDetail() {
                     <div className="small">
                       <p className="mb-2"><strong>Free Delivery:</strong> On orders above ₹499.</p>
                       <p className="mb-2"><strong>Returns:</strong> {product.is_return ? `Easy returns within ${product.return_replace_duration} days.` : "Non-returnable."}</p>
+                      <p className="mb-2"><strong>Replacements:</strong> {product.is_replace ? `Easy replacements within ${product.return_replace_duration} days.` : "Non-replaceable."}</p>
+                      {product.return_replace_instructions && (
+                        <p className="mb-2"><strong>Policy Details:</strong> {product.return_replace_instructions}</p>
+                      )}
                       <p className="mb-0"><strong>Payments:</strong> Secure encrypted payments via Razorpay.</p>
                     </div>
                   )}

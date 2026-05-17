@@ -169,7 +169,7 @@ const ShippingParcelLabel = ({ order = {}, shipment = {} }) => {
             : "PAYMENT";
 
     return (
-        <View style={s.labelCard} wrap={false}>
+        <View style={s.labelCard} wrap={false} className="z-3">
             <View style={s.header}>
                 <View>
                     <Text style={s.brand}>SHOPEASE</Text>
@@ -236,8 +236,8 @@ const ShippingParcelLabel = ({ order = {}, shipment = {} }) => {
 
                     <View style={s.detailGrid}>
                         <View style={s.detailCell}>
-                            <Text style={s.detailKey}>PARCEL QTY</Text>
-                            <Text style={s.detailValue}>{shipment?.parcel_quantity || 0}</Text>
+                            <Text style={s.detailKey}>PARCEL NUMBER</Text>
+                            <Text style={s.detailValue}>{shipment.parcel_no || 1}</Text>
                         </View>
 
                         <View style={s.detailCell}>

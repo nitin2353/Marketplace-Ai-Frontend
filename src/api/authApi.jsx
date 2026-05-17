@@ -141,6 +141,34 @@ const deleteAccount = async () => {
   }
 };
 
+const sendResetOtp = async (data) => {
+  try {
+    const response = await apiConfig.post("/auth/send-reset-otp", data);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Error sending reset OTP" };
+  }
+};
+
+
+const verifyResetOtp = async (data) => {
+  try {
+    const response = await apiConfig.post("/auth/verify-reset-otp", data);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Error verifying reset OTP" };
+  }
+};
+
+const resetPassword = async (data) => {
+  try {
+    const response = await apiConfig.post("/auth/reset-password", data);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Error creating new password" };
+  } 
+};
+
 export default {
   signupCustomer,
   signupSeller,
@@ -154,5 +182,8 @@ export default {
   updatePassword,
   changePassword,
   deactivateAccount,
-  deleteAccount
+  deleteAccount,
+  sendResetOtp,
+  verifyResetOtp,
+  resetPassword
 };

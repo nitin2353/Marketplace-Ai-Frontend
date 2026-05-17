@@ -229,7 +229,7 @@ export default function NotificationPanel({
             setNotifs((prev) =>
                 prev.map((n) => (n.id === id ? { ...n, unread: false } : n))
             );
-            navigate(`/seller/${ref_type}/${ref_id}`);
+            // navigate(`/seller/${ref_type}/${ref_id}`);
         } catch (error) {
             toast.error(error?.message || "Failed to mark notification as read");
         } finally {

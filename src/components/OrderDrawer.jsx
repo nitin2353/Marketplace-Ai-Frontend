@@ -66,7 +66,7 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
 
 
     return (
-        <div className="so-drawer-overlay " onClick={onClose}>
+        <div className="so-drawer-overlay" onClick={onClose}>
 
             <div className="so-drawer" onClick={(e) => e.stopPropagation()}>
                 <div className="so-drawer-header">
@@ -101,7 +101,7 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
                         </button>
                     </Stack>
                 </div>
-
+                            
                 <div className="so-drawer-body">
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
                         {[

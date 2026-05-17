@@ -254,20 +254,34 @@ export default function CreateProduct() {
                                     <Row className="g-3">
                                         <Col md={5}>
                                             <Field label="Product Title *" error={errors.title?.message}>
-                                                <Form.Control className={`cp-input ${errors.title ? "is-invalid" : ""}`} placeholder="e.g. Premium Cotton T-Shirt"
-                                                    {...register("title", { required: "Title is required", minLength: { value: 5, message: "Min 5 characters" } })} />
+                                                <Form.Control
+                                                    className={`cp-input ${errors.title ? "is-invalid" : ""}`}
+                                                    placeholder="e.g. Premium Cotton T-Shirt"
+                                                    maxLength={120}
+                                                    {...register("title", {
+                                                        required: "Title is required",
+                                                        maxLength: {
+                                                            value: 120,
+                                                            message: "Max 120 characters",
+                                                        },
+                                                        minLength: {
+                                                            value: 10,
+                                                            message: "Min 10 characters",
+                                                        },
+                                                    })}
+                                                />
                                             </Field>
                                         </Col>
                                         <Col md={4}>
-                                            <Field label="Category *" error={errors.category?.message}>
+                                            <Field label="Category" error={errors.category?.message}>
                                                 <Form.Control className={`cp-input ${errors.category ? "is-invalid" : ""}`} placeholder="e.g. Fashion, Electronics"
-                                                    {...register("category", { required: "Category is required" })} />
+                                                    {...register("category")} />
                                             </Field>
                                         </Col>
                                         <Col md={3}>
-                                            <Field label="Brand *" error={errors.brand?.message}>
+                                            <Field label="Brand" error={errors.brand?.message}>
                                                 <Form.Control className={`cp-input ${errors.brand ? "is-invalid" : ""}`} placeholder="e.g. Nike"
-                                                    {...register("brand", { required: "Brand is required" })} />
+                                                    {...register("brand")} />
                                             </Field>
                                         </Col>
                                         <Col xs={12}>

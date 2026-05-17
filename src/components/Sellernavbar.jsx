@@ -94,7 +94,7 @@ export default function SellerNavbar({
             style={{
                 position: "sticky",
                 top: 0,
-                zIndex: 1040,
+                // zIndex: 1040,
                 background: "var(--bg-surface)",
                 borderBottom: "1px solid var(--border-light)",
                 boxShadow: "var(--shadow-sm)",
@@ -200,26 +200,6 @@ export default function SellerNavbar({
                         <NotificationPanel mode={"seller"} refreshNotify={refreshNotify} setRefreshNotify={setRefreshNotify}  />
                     </Popover>
                 </Overlay>
-
-                {/* ── Store button ── */}
-                <div
-                    onClick={() => navigate("/")}
-                    title="View Storefront"
-                    style={{
-                        width: 42,
-                        height: 42,
-                        borderRadius: "10px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        background: "var(--bg-hover)",
-                        fontSize: "1.3rem",
-                        cursor: "pointer",
-                        transition: "all 0.2s"
-                    }}
-                >
-                    🏪
-                </div>
 
                 {/* ── User pill ── */}
                 <div

@@ -45,6 +45,7 @@ export const formResetData = {
         length: product.length || "",
         width: product.width || "",
         height: product.height || "",
+        status: product.status || true,
         delivery_days: product.delivery_days || "",
         tax_percentage: product.tax_percentage || "",
         min_stock_alert: product.min_stock_alert || "",

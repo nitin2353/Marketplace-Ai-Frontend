@@ -46,11 +46,6 @@ const SIDEBAR_MENUS = [
     label: "Settings",
     id: "settings"
   },
-  {
-    icon: "🔄",
-    label: "Returns",
-    id: "returns"
-  },
 ];
 
 const SETTINGS_TABS = [
