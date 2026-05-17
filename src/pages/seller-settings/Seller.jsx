@@ -3,7 +3,7 @@ import { Row, Col, Stack, InputGroup, Form, Container } from "react-bootstrap";
 import toast from "react-hot-toast";
 import JWTService from "../../config/jwt.config";       // apna path
 import SellerSidebar from "../../components/SellerSidebar.jsx";
-import SellerNavbar from "/src/components/SellerNavbar.jsx";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
 import authApi from "../../api/authApi";
 import userSettingsApi from "../../api/userSettings.api";
 import { API_BASE_URL } from "../../helper/Constraints";

@@ -16,7 +16,7 @@ import reportApi from "../../api/reportApi";
 import DataTable from "../../components/DataTable";
 import orderApi from "../../api/order.api";
 import JWTService from "../../config/jwt.config";
-import SellerNavbar from "/src/components/SellerNavbar.jsx";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
 
 // ── Formatters ────────────────────────────────────────────────────────────────
 const fmt = (n) => `₹${Number(n).toLocaleString("en-IN")}`;

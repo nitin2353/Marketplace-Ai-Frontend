@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "../pages/seller-orders/SellerOrders.css";
-import OrderTimeline from "../pages/customer-order-list/OrderTimeline";
+import OrderTimeline from "../pages/customer-order-list/OrderTimeline.jsx";
 import { PAYMENT_METHOD_META } from "../helper/Constraints";
 import { Col, Row, Stack } from "react-bootstrap";
 import { FMT, FMT_DATE } from "../helper/GlobalHelper";

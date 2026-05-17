@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Table, Badge, Button, Modal, Form, Row, Col } from "react-bootstrap";
 import { getSellerReturnRequests, updateReturnStatus, getReturnRequestById } from "../../api/return.api";
 import { FMT, FMT_DATE } from "../../helper/GlobalHelper.jsx";
-import SellerNavbar from "/src/components/SellerNavbar.jsx";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
 import SellerSidebar from "../../components/SellerSidebar.jsx";
 import { useNavigate, useParams } from "react-router-dom";
 

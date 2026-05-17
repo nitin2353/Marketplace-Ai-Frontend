@@ -11,7 +11,7 @@ import OrderDrawer from "../../components/OrderDrawer";
 import { PAYMENT_METHOD_META } from "../../helper/Constraints";
 import PayBadge from "../../components/PayBadge";
 import SellerSidebar from "../../components/SellerSidebar.jsx";
-import SellerNavbar from "/src/components/SellerNavbar.jsx";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
 
 const fmt = FMT;
 

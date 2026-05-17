@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import "./CreateProduct.css";
 import SellerSidebar from "../../components/SellerSidebar.jsx";
 import "../../style/Dashboard.css"
-import SellerNavbar from "/src/components/SellerNavbar.jsx";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const PRESET_TAGS = ["New Arrival", "Trending", "Best Seller", "Limited Edition", "Eco Friendly", "Premium", "Sale"];
