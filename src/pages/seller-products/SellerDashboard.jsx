@@ -15,7 +15,7 @@ import GlobalLoader from "../../components/GlobalLoader";
 import productApi from "../../api/product.api";
 import { requestFormReset } from "react-dom";
 import toast from "react-hot-toast";
-import SellerNavbar from "../../components/SellerNavbar.jsx";
+import SellerNavbar from "../../../src/components/SellerNavbar.jsx";
 import "./SellerDashboard.css";
 
 
