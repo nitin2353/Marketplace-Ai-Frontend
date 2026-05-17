@@ -1,4 +1,4 @@
-import SellerSettings from './seller.jsx';
+import SellerSettings from './Seller.jsx';
 
 const index = () => {
   return (
