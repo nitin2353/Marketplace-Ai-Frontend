@@ -21,7 +21,7 @@ import "./SellerDashboard.css";
 
 const FILTERS = ["All", "In Stock", "Low Stock", "Out of Stock", "Customizable", "Returnable"];
 
-export default function SellerProducts() {
+const SellerProducts = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [products, setProducts] = useState([]);
@@ -399,3 +399,5 @@ export default function SellerProducts() {
         </Container>
     );
 }
+
+export default SellerProducts;
