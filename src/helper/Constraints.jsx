@@ -4,7 +4,8 @@ import { BiSolidBriefcase, BiSolidCategoryAlt, BiSolidDollarCircle, } from "reac
 import { FaProductHunt } from "react-icons/fa6";
 import { GrUpdate } from "react-icons/gr";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}:3000/api/v1`;
+const API_BASE_URL = `https://marketplace-ai-backend-lffk.onrender.com/api/v1`;
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}:3000/api/v1`;
 
 console.log("url", API_BASE_URL)
 
