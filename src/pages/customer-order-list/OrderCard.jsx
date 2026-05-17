@@ -4,7 +4,7 @@ import { Row, Col, Stack } from "react-bootstrap";
 import { FMT } from "../../helper/GlobalHelper";
 import { STATUS_META, PAYMENT_METHOD_LABELS, FMT_DATE } from "../../helper/GlobalHelper";
 import orderApi from "../../api/order.api";
-import OrderTimeline from "./OrderTimeline";
+import OrderTimeline from "src/pages/customer-order-list/OrderTimeline.jsx";
 import ReviewModal from "../../components/ReviewModal";
 import ReturnRequestModal from "../../components/ReturnRequestModal";
 import { getCustomerReturnRequests } from "../../api/return.api";
