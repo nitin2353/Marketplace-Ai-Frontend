@@ -7,7 +7,7 @@ import SellerNavbar from "../../components/SellerNavbar.jsx";
 import authApi from "../../api/authApi";
 import userSettingsApi from "../../api/userSettings.api";
 import { API_BASE_URL } from "../../helper/Constraints";
-import "../Seller-settings/Sellersettings.css";
+import "./Sellersettings.css";
 import "../../style/Dashboard.css"
 
 const IMG_BASE = API_BASE_URL.replace("/api/v1", "/uploads/profiles/");
