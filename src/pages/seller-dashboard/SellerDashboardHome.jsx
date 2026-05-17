@@ -80,6 +80,9 @@ export default function SellerDashboardHome() {
   );
 
   // ── Derived values ──
+  console.log("products", products);
+  console.log("products", products.reduce((s, p) => s + p.base_price * p.sold - p.discount, 0));
+  
   const totalRevenue = products.reduce((s, p) => s + p.base_price * p.sold, 0);
   const avgRating = products.length
     ? (products.reduce((s, p) => s + Number(p.rating), 0) / products.length).toFixed(1)
