@@ -1,7 +1,7 @@
-import API from "./axios";
+import apiConfig from '../config/axios-config';
 
 export const createRequirement = (data) => 
-    API.post("/requirement", data);
+    apiConfig.post("/requirement", data);
 
 export const getRequirements = () => 
-    API.get("/requirement");
+    apiConfig.get("/requirement");
