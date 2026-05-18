@@ -1,6 +1,6 @@
-import axios from "axios";
+import apiConfig from '../config/axios-config';
 
-const API = axios.create({
+const API = apiConfig.create({
     baseURL: import.meta.env.VITE_API_BASE_URL || "https://marketplace-ai-backend-lffk.onrender.com/api/v1"
 });
 
