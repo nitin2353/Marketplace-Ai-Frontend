@@ -1,9 +1,9 @@
-import API from "./axios";
+import apiConfig from '../config/axios-config';
 
 // CREATE ORDER
 const createOrder = async (data) => {
     try {
-        const response = await API.post("/order", data);
+        const response = await apiConfig.post("/order", data);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error creating order" };
@@ -12,7 +12,7 @@ const createOrder = async (data) => {
 
 const buyNow = async (data) => {
     try {
-        const response = await API.post("/order/buy-now", data);
+        const response = await apiConfig.post("/order/buy-now", data);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error processing buy now" };
@@ -21,7 +21,7 @@ const buyNow = async (data) => {
 
 const getCustomerOrders = async (userId) => {
     try {
-        const response = await API.get(`/order/customer/${userId}`);
+        const response = await apiConfig.get(`/order/customer/${userId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching customer orders" };
@@ -30,7 +30,7 @@ const getCustomerOrders = async (userId) => {
 
 const getCustomerOrderById = async (userId, orderId) => {
     try {
-        const response = await API.get(`/order/customer/${userId}/${orderId}`);
+        const response = await apiConfig.get(`/order/customer/${userId}/${orderId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching customer order" };
@@ -39,7 +39,7 @@ const getCustomerOrderById = async (userId, orderId) => {
 
 const getSellerOrders = async (sellerId) => {
     try {
-        const response = await API.get(`/order/seller/${sellerId}`);
+        const response = await apiConfig.get(`/order/seller/${sellerId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching seller orders" };
@@ -48,7 +48,7 @@ const getSellerOrders = async (sellerId) => {
 
 const getSellerOrderById = async (sellerId, orderId) => {
     try {
-        const response = await API.get(`/order/seller/${sellerId}/${orderId}`);
+        const response = await apiConfig.get(`/order/seller/${sellerId}/${orderId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching seller order" };
@@ -57,7 +57,7 @@ const getSellerOrderById = async (sellerId, orderId) => {
 
 const getOrderById = async (orderId) => {
     try {
-        const response = await API.get(`/order/${orderId}`);
+        const response = await apiConfig.get(`/order/${orderId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching order" };
@@ -67,7 +67,7 @@ const getOrderById = async (orderId) => {
 // GET ORDER ITEMS
 const getOrderItems = async (orderId) => {
     try {
-        const response = await API.get(`/order/${orderId}/items`);
+        const response = await apiConfig.get(`/order/${orderId}/items`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching order items" };
@@ -77,7 +77,7 @@ const getOrderItems = async (orderId) => {
 // GET ORDER ADDRESS SNAPSHOT
 const getOrderAddressSnapshot = async (orderId) => {
     try {
-        const response = await API.get(`/order/${orderId}/address-snapshot`);
+        const response = await apiConfig.get(`/order/${orderId}/address-snapshot`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching order address snapshot" };
@@ -87,7 +87,7 @@ const getOrderAddressSnapshot = async (orderId) => {
 // GET ORDER USER SNAPSHOT
 const getOrderUserSnapshot = async (orderId) => {
     try {
-        const response = await API.get(`/order/${orderId}/user-snapshot`);
+        const response = await apiConfig.get(`/order/${orderId}/user-snapshot`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching order user snapshot" };
@@ -97,7 +97,7 @@ const getOrderUserSnapshot = async (orderId) => {
 // UPDATE ORDER STATUS
 const updateOrderStatus = async (orderId, status) => {
     try {
-        const response = await API.patch(`/order/${orderId}/status`, { status });
+        const response = await apiConfig.patch(`/order/${orderId}/status`, { status });
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error updating order status" };
@@ -107,7 +107,7 @@ const updateOrderStatus = async (orderId, status) => {
 // UPDATE PAYMENT STATUS
 const updatePaymentStatus = async (orderId, paymentStatus) => {
     try {
-        const response = await API.patch(`/order/${orderId}/payment-status`, { paymentStatus });
+        const response = await apiConfig.patch(`/order/${orderId}/payment-status`, { paymentStatus });
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error updating payment status" };
@@ -117,7 +117,7 @@ const updatePaymentStatus = async (orderId, paymentStatus) => {
 // VERIFY ORDER PAYMENT
 const verifyOrderPayment = async (orderId, paymentData) => {
     try {
-        const response = await API.patch(`/order/${orderId}/verify-payment`, paymentData);
+        const response = await apiConfig.patch(`/order/${orderId}/verify-payment`, paymentData);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error verifying payment" };
@@ -127,7 +127,7 @@ const verifyOrderPayment = async (orderId, paymentData) => {
 // CANCEL ORDER
 const cancelOrder = async (orderId, cancelData) => {
     try {
-        const response = await API.patch(`/order/${orderId}/cancel`, cancelData);
+        const response = await apiConfig.patch(`/order/${orderId}/cancel`, cancelData);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error cancelling order" };
@@ -137,7 +137,7 @@ const cancelOrder = async (orderId, cancelData) => {
 // LEGACY FUNCTIONS (for backward compatibility)
 const getAllOrders = async () => {
     try {
-        const response = await API.get("/order");
+        const response = await apiConfig.get("/order");
         return response.data;
     } catch (error) {
         console.error("Error fetching all orders:", error);
@@ -147,7 +147,7 @@ const getAllOrders = async () => {
 
 const getUserOrders = async () => {
     try {
-        const response = await API.get("/order/user");
+        const response = await apiConfig.get("/order/user");
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching user orders" };
