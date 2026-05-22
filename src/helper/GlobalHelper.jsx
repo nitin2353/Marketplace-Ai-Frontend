@@ -115,6 +115,7 @@ const API_FIELDS_MAP = {
         is_return: row.is_return,
         is_replace: row.is_replace,
         return_replace_duration: row.return_replace_duration,
+        tax_percentage: Number(row.tax_percentage) || 0,
     }),
 
     wishlist: (raw) => ({

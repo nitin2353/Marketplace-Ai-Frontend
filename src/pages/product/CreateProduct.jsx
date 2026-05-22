@@ -145,6 +145,7 @@ export default function CreateProduct() {
 
         setLoading(true);
         try {
+            console.log(payload);
             const fd = new FormData();
 
             // Basic fields

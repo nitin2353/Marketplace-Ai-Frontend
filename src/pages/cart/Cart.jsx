@@ -115,12 +115,16 @@ export default function CartPage() {
         }
     };
 
+    console.log(items);
+
 
     const subtotal = items.reduce((s, i) => s + i.product_price * i.qty, 0);
     const saved = items.reduce((s, i) => s + Math.max(0, i.old_price - i.price) * i.qty, 0);
     const couponSave = Math.round(subtotal * discount / 100);
     const delivery = subtotal > 0 && subtotal >= 499 ? 0 : subtotal > 0 ? 49 : 0;
-    const total = subtotal - couponSave + delivery;
+    const tax = items.reduce((sum, item) => sum + (Number(item.product_price || item.price || 0) * Number(item.qty || 0) * Number(item.tax_percentage || 0)) / 100, 0);
+    console.log(tax);
+    const total = subtotal - couponSave + delivery + tax;
     const totalItems = items.reduce((s, i) => s + i.qty, 0);
 
     useEffect(() => {
@@ -153,7 +157,8 @@ export default function CartPage() {
                         </p>
                         <button
                             onClick={() => navigate("/")}
-                            style={{border: "none", borderRadius: 12,
+                            style={{
+                                border: "none", borderRadius: 12,
                                 background: "var(--primary-gradient)",
                                 color: "#fff", fontWeight: 800, padding: "12px 32px",
                                 fontFamily: "var(--font-main)", cursor: "pointer", fontSize: ".95rem"
@@ -319,7 +324,7 @@ export default function CartPage() {
                                                     {/* Remove button */}
                                                     <button
                                                         className="remove-btn"
-                                                        style={{color:'#262fdcff', background: '#efefffff', border: "1px solid #262fdcff"}}
+                                                        style={{ color: '#262fdcff', background: '#efefffff', border: "1px solid #262fdcff" }}
                                                         onClick={() => removeItem(item.id)}
                                                         disabled={removing === item.id}
                                                         title="Remove from cart"
@@ -442,6 +447,7 @@ export default function CartPage() {
                                     ...(saved > 0 ? [{ label: "You Save", val: `-${FMT(saved)}`, color: "#22c55e" }] : []),
                                     ...(couponSave > 0 ? [{ label: `Coupon (${discount}% off)`, val: `-${FMT(couponSave)}`, color: "#22c55e" }] : []),
                                     { label: "Delivery", val: delivery === 0 ? "FREE 🎉" : FMT(delivery), color: delivery === 0 ? "#22c55e" : "#374151" },
+                                    { label: "Tax", val: FMT(tax), color: "#374151" },
                                 ].map(({ label, val, color }) => (
                                     <div key={label} className="d-flex justify-content-between align-items-center mb-2">
                                         <span style={{ fontSize: ".85rem", color: "#6b7280", fontWeight: 700 }}>{label}</span>
@@ -470,7 +476,7 @@ export default function CartPage() {
                                     className="checkout-btn"
                                     disabled={items.length === 0}
                                     onClick={() => navigate("/dashboard/checkout", {
-                                        state: { items, subtotal, saved, couponSave, delivery, total, totalItems }
+                                        state: { items, subtotal, saved, couponSave, delivery, total, tax, totalItems }
                                     })}
                                 >
                                     Proceed to Checkout →

@@ -28,8 +28,10 @@ const calcTotals = (cart, discount) => {
     const saved = cart.reduce((s, i) => s + Math.max(0, Number(i.old_price || 0) - Number(i.price)) * i.qty, 0);
     const couponSave = (subtotal * discount / 100);
     const delivery = subtotal >= 499 ? 0 : 49;
-    const total = subtotal - couponSave + delivery;
-    return { subtotal, saved, couponSave, delivery, total };
+    const tax_amount = cart.reduce((s, i) => s + (Number(i.product_price) * i.qty) * (Number(i.tax_percentage || 0) / 100), 0);
+    console.log(tax_amount);
+    const total = subtotal - couponSave + delivery + tax_amount;
+    return { subtotal, saved, couponSave, delivery, tax_amount, total };
 };
 
 
@@ -80,7 +82,7 @@ export default function CheckoutPage() {
     const { coupon, setCoupon } = useAuthWrapper();
 
 
-    const { subtotal, saved, couponSave, delivery, total } = calcTotals(cart, discount);
+    const { subtotal, saved, couponSave, delivery, tax_amount, total } = calcTotals(cart, discount);
 
 
     const fetchCart = useCallback(async () => {
@@ -97,6 +99,7 @@ export default function CheckoutPage() {
                     product_price: i.price,
                     qty: i.quantity,
                     price: i.price, // For consistency
+                    tax_percentage: Number(i.tax_percentage) || 0,
                     total: i.total
                 })));
                 setIsBuyNow(true);
@@ -435,6 +438,7 @@ export default function CheckoutPage() {
                                             saved={saved}
                                             couponSave={couponSave}
                                             delivery={delivery}
+                                            tax_amount={tax_amount}
                                             total={total}
                                             placing={placing}
                                             onCouponChange={handleCouponChange}

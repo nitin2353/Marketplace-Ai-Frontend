@@ -13,7 +13,7 @@ const METHOD_LABELS = {
 export default function StepReview({
     cart, address, paymentMethod,
     coupon, discount, couponMsg,
-    subtotal, saved, couponSave, delivery, total,
+    subtotal, saved, couponSave, delivery, tax_amount, total,
     placing,
     onCouponChange, onCouponApply,
     onBack, onPlace,
@@ -130,6 +130,7 @@ export default function StepReview({
                     { label: "Subtotal", val: FMT(subtotal), cls: "val" },
                     ...(saved > 0 ? [{ label: "Discount", val: `-${FMT(saved)}`, cls: "save" }] : []),
                     ...(couponSave > 0 ? [{ label: `Coupon (${discount}%)`, val: `-${FMT(couponSave)}`, cls: "save" }] : []),
+                    { label: "Tax", val: FMT(tax_amount), cls: "val" },
                     { label: "Delivery", val: delivery === 0 ? "FREE 🎉" : FMT(delivery), cls: delivery === 0 ? "free" : "val" },
                 ].map(({ label, val, cls }) => (
                     <div key={label} className="co-summary-row">
