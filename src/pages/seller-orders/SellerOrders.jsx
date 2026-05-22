@@ -10,8 +10,8 @@ import { FMT } from "../../helper/GlobalHelper";
 import OrderDrawer from "../../components/OrderDrawer";
 import { PAYMENT_METHOD_META } from "../../helper/Constraints";
 import PayBadge from "../../components/PayBadge";
-import SellerSidebar from "../../components/SellerSidebar";
-import SellerNavbar from "../../components/SellerNavbar";
+import SellerSidebar from "../../components/SellerSidebar.jsx";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
 
 const fmt = FMT;
 
@@ -406,7 +406,9 @@ export default function SellerOrders() {
         for (const o of orders) {
             if (["placed", "confirmed", "processing", "shipped"].includes(o.order_status)) active++;
             if (o.order_status === "delivered") delivered++;
-            if (o.order_status !== "cancelled") revenue += Number(o.total_amount || 0);
+            if (o.order_status !== "cancelled" && o.order_status !== "payment_failed") {
+                revenue += Number(o.total_amount || 0);
+            }
         }
         return { total: orders.length, active, delivered, revenue: fmt(revenue) };
     }, [orders]);

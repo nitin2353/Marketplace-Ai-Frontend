@@ -155,6 +155,14 @@ export default function ProductDetail() {
   const displayPrice = activeVariant?.price ?? product?.price ?? 0;
   const displayStock = activeVariant?.stock ?? product?.stock ?? 0;
 
+  useEffect(() => {
+    if (displayStock > 0 && qty > displayStock) {
+      setQty(displayStock);
+    } else if (displayStock === 0 && qty !== 1) {
+      setQty(1);
+    }
+  }, [displayStock, qty]);
+
   const fetchWishlist = async () => {
     try {
       const { data } = await wishlistApi.getAllWishlistItems();
@@ -255,9 +263,11 @@ export default function ProductDetail() {
         seller_id: product.seller_id,
         product_id: product.id
       });
+
       if (response.status) navigate(`/chat/${response.data.id}`);
     } catch (error) {
       toast.error("Failed to start chat.");
+      navigate('/auth/login')
     }
   };
 
@@ -398,7 +408,7 @@ export default function ProductDetail() {
                   <span className="fw-bold ms-1">{reviewsSummary?.avg_rating || "0.0"}</span>
                 </div>
                 <span className="text-muted small fw-bold">{reviewsSummary?.total_reviews || 0} Reviews</span>
-                <span className="text-success small fw-bold">• {product.sold || 0}+ Sold</span>
+                <span className="text-success small fw-bold">• {product.sold || 0} Sold</span>
               </div>
 
               <div className="p-4 bg-light rounded-4 mb-4 border border-white shadow-sm">
@@ -442,9 +452,9 @@ export default function ProductDetail() {
               {/* Quantity */}
               <div className="d-flex align-items-center gap-4 mb-5">
                 <div className="d-flex align-items-center border rounded-pill p-1 bg-white shadow-sm">
-                  <button className="btn btn-sm btn-light rounded-circle shadow-none" style={{ width: 32, height: 32 }} onClick={() => setQty(q => Math.max(1, q - 1))}>-</button>
-                  <span className="px-3 fw-bold" style={{ minWidth: 40, textAlign: "center" }}>{qty}</span>
-                  <button className="btn btn-sm btn-light rounded-circle shadow-none" style={{ width: 32, height: 32 }} onClick={() => setQty(q => Math.min(displayStock, q + 1))}>+</button>
+                  <button className="btn btn-sm btn-light rounded-circle shadow-none" style={{ width: 32, height: 32 }} disabled={displayStock === 0 || qty <= 1} onClick={() => setQty(q => Math.max(1, q - 1))}>-</button>
+                  <span className="px-3 fw-bold" style={{ minWidth: 40, textAlign: "center" }}>{displayStock === 0 ? 0 : qty}</span>
+                  <button className="btn btn-sm btn-light rounded-circle shadow-none" style={{ width: 32, height: 32 }} disabled={displayStock === 0 || qty >= displayStock} onClick={() => setQty(q => Math.min(displayStock, q + 1))}>+</button>
                 </div>
                 <div className="d-flex flex-column">
                   <span className={`small fw-bold ${displayStock < 10 ? 'text-danger' : 'text-success'}`}>
@@ -486,6 +496,10 @@ export default function ProductDetail() {
                     <div className="small">
                       <p className="mb-2"><strong>Free Delivery:</strong> On orders above ₹499.</p>
                       <p className="mb-2"><strong>Returns:</strong> {product.is_return ? `Easy returns within ${product.return_replace_duration} days.` : "Non-returnable."}</p>
+                      <p className="mb-2"><strong>Replacements:</strong> {product.is_replace ? `Easy replacements within ${product.return_replace_duration} days.` : "Non-replaceable."}</p>
+                      {product.return_replace_instructions && (
+                        <p className="mb-2"><strong>Policy Details:</strong> {product.return_replace_instructions}</p>
+                      )}
                       <p className="mb-0"><strong>Payments:</strong> Secure encrypted payments via Razorpay.</p>
                     </div>
                   )}
@@ -648,7 +662,7 @@ export default function ProductDetail() {
       <div className="pd-sticky-actions">
         <div className="d-flex flex-column me-2">
           <span className="text-muted x-small fw-bold">Total Price</span>
-          <span className="fw-bold text-primary h5 mb-0">{FMT(displayPrice)}</span>
+          <span className="fw-bold text-primary h5 mb-0">{FMT(displayPrice * qty)}</span>
         </div>
         <div className="flex-fill d-flex gap-2">
           <Button variant="light" className="border flex-fill rounded-pill fw-bold shadow-sm" onClick={handleAddToCart} disabled={displayStock === 0}>

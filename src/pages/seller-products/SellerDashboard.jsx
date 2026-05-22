@@ -13,18 +13,23 @@ import SellerSidebar from "../../components/SellerSidebar";
 import EditProductModal from "../product/EditProductModal";
 import GlobalLoader from "../../components/GlobalLoader";
 import productApi from "../../api/product.api";
+import orderApi from "../../api/order.api";
+import JWTService from "../../config/jwt.config";
 import { requestFormReset } from "react-dom";
 import toast from "react-hot-toast";
-import SellerNavbar from "../../components/SellerNavbar.jsx";
 import "./SellerDashboard.css";
+// import SellerNavbar from "../../components/SellerNavbar.jsx";
 
+
+const fmtL = (n) => n >= 100000 ? `₹${(n / 100000).toFixed(1)}L` : n >= 1000 ? `₹${(n / 1000).toFixed(1)}K` : `₹${n}`;
 
 const FILTERS = ["All", "In Stock", "Low Stock", "Out of Stock", "Customizable", "Returnable"];
 
-export default function SellerProducts() {
+const SellerProducts = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [products, setProducts] = useState([]);
+    const [orders, setOrders] = useState([]);
     const [search, setSearch] = useState("");
     const [activeFilter, setActiveFilter] = useState("All");
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
@@ -60,8 +65,22 @@ export default function SellerProducts() {
         }
     }, []);
 
+    const processedProducts = useMemo(() => {
+        const actualSoldMap = {};
+        orders.forEach(order => {
+            if (order.order_status === "cancelled" || order.order_status === "payment_failed") return;
+            (order.items || []).forEach(item => {
+                actualSoldMap[item.product_id] = (actualSoldMap[item.product_id] || 0) + Number(item.quantity || 0);
+            });
+        });
+        return products.map(p => ({
+            ...p,
+            sold: actualSoldMap[p.id] || 0
+        }));
+    }, [products, orders]);
+
     const filtered = useMemo(() => {
-        let list = [...products];
+        let list = [...processedProducts];
         if (search?.trim()) {
             const q = search;
             list = list?.filter(p =>
@@ -90,25 +109,60 @@ export default function SellerProducts() {
         else if (sortBy === "top_rated") list.sort((a, b) => b.rating - a.rating);
         else if (sortBy === "best_selling") list.sort((a, b) => b.sold - a.sold);
         return list;
-    }, [products, search, activeFilter, sortBy, selectedCategory]);
+    }, [processedProducts, search, activeFilter, sortBy, selectedCategory]);
 
+    const totalRevenue = useMemo(() => {
+        return orders.reduce((sum, order) => {
+            if (order.order_status === "cancelled" || order.order_status === "payment_failed") return sum;
+            const sellerItemsTotal = (order.items || []).reduce((s, item) => s + Number(item.line_total || 0), 0);
+            return sum + sellerItemsTotal;
+        }, 0);
+    }, [orders]);
 
-    const totalRevenue = products.reduce((s, p) => s + p.base_price * p.sold, 0);
-    const avgRating = (products.reduce((s, p) => s + p.rating, 0) / products.length).toFixed(1);
-    const outOfStock = products.filter(p => p.stock === 0).length;
-    const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10).length;
+    const totalSold = useMemo(() => {
+        return orders.reduce((sum, order) => {
+            if (order.order_status === "cancelled" || order.order_status === "payment_failed") return sum;
+            const sellerItemsQty = (order.items || []).reduce((s, item) => s + Number(item.quantity || 0), 0);
+            return sum + sellerItemsQty;
+        }, 0);
+    }, [orders]);
 
-    const sidebarStats = [
-        { icon: "📦", label: "Total Products", val: products.length },
-        { icon: "💰", label: "Total Revenue", val: `₹${(totalRevenue / 100000).toFixed(1)}L` },
+    const avgRating = useMemo(() => {
+        return processedProducts.length
+            ? (processedProducts.reduce((s, p) => s + Number(p.rating || 0), 0) / processedProducts.length).toFixed(1)
+            : "0.0";
+    }, [processedProducts]);
+
+    const outOfStock = useMemo(() => processedProducts.filter(p => p.stock === 0).length, [processedProducts]);
+    const lowStock = useMemo(() => processedProducts.filter(p => p.stock > 0 && p.stock <= 10).length, [processedProducts]);
+
+    const sidebarStats = useMemo(() => [
+        { icon: "📦", label: "Total Products", val: processedProducts.length },
+        { icon: "💰", label: "Total Revenue", val: fmtL(totalRevenue) },
         { icon: "⭐", label: "Avg Rating", val: avgRating },
-    ];
+    ], [processedProducts, totalRevenue, avgRating]);
 
+
+    const fetchOrders = async () => {
+        try {
+            const userData = JWTService.decodeTokenDetails?.() || {};
+            const sellerId = userData?.id || userData?.user_id;
+            if (sellerId) {
+                const res = await orderApi.getSellerOrders(sellerId);
+                setOrders(res.data || []);
+            }
+        } catch (err) {
+            console.error("Failed to load orders in products dashboard:", err);
+        }
+    };
 
     useEffect(() => {
         (
             async () => {
-                await fetchAllProducts()
+                await Promise.all([
+                    fetchAllProducts(),
+                    fetchOrders()
+                ]);
             }
         )()
     }, [refresh])
@@ -132,6 +186,7 @@ export default function SellerProducts() {
                     base_price: Number(p.base_price),
                     old_price: p.old_price ? Number(p.old_price) : null,
                     rating: Number(p.rating),
+                    stock: Number(p.stock || 0),
 
                     tag: typeof p.tag === "string"
                         ? p.tag.split(",").map(t => t.trim())
@@ -187,180 +242,191 @@ export default function SellerProducts() {
 
                 {/* ── MAIN CONTENT ── */}
                 <Col xs={12} className="pd-main p-0" style={{ overflowY: "auto" }}>
-                    <SellerNavbar />
+                    {/* <SellerNavbar /> */}
                     <div className="p-3 p-md-4">
 
-                    {/* Mobile header */}
-                    <div className="d-lg-none mb-3 d-flex align-items-center justify-content-between">
-                        <div className="fw-black" style={{ fontSize: "1.4rem", color: "#ff6b35", fontWeight: 900 }}>🛍️ ShopEase</div>
-                        <Badge bg="warning" text="dark" className="rounded-pill fw-bold">Seller</Badge>
-                    </div>
-
-                    {/* Page header */}
-                    <div className="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
-                        <div>
-                            <h2 className="fw-bold mb-1" style={{ fontFamily: "Nunito", fontSize: "1.7rem", color: "#1a1a2e" }}>My Products</h2>
-                            <p style={{ fontSize: "0.87rem", color: "#777", marginBottom: 0 }}>Manage, edit and track all your listed products</p>
+                        {/* Mobile header */}
+                        <div className="d-lg-none mb-3 d-flex align-items-center justify-content-between">
+                            <div className="fw-black" style={{ fontSize: "1.4rem", color: "#ff6b35", fontWeight: 900 }}>🛍️ ShopEase</div>
+                            <Badge bg="warning" text="dark" className="rounded-pill fw-bold">Seller</Badge>
                         </div>
-                        <Button className="eco-btn-main text-white d-flex align-items-center gap-2" onClick={() => navigate("/seller/product/create")}>
-                            <span style={{ fontSize: "1rem" }}>➕</span> Add New Product
-                        </Button>
-                    </div>
-                    {/* Stats chips */}
-                    <Row className="g-3 mb-4">
-                        {[
-                            { icon: "📦", label: "Total Products", val: products.length, color: "#eff6ff", iconBg: "#dbeafe" },
-                            { icon: "💰", label: "Total Revenue", val: `₹${(totalRevenue / 100000).toFixed(1)}`, color: "#f0fdf4", iconBg: "#dcfce7" },
-                            { icon: "🔴", label: "Out of Stock", val: outOfStock, color: "#fef2f2", iconBg: "#fee2e2" },
-                            { icon: "⚠️", label: "Low Stock", val: lowStock, color: "#fffbeb", iconBg: "#fef3c7" },
-                            { icon: "⭐", label: "Avg Rating", val: avgRating, color: "#fefce8", iconBg: "#fef9c3" },
-                            { icon: "🛒", label: "Total Sold", val: products.reduce((s, p) => s + p.sold, 0), color: "#fdf4ff", iconBg: "#f3e8ff" },
-                        ].map(({ icon, label, val, color, iconBg }) => (
-                            <Col xs={6} md={4} xl={2} key={label}>
-                                <div className="stat-chip h-100" style={{ background: color }}>
-                                    <div className="d-flex align-items-center gap-2 mb-1">
-                                        <div className="stat-chip-icon" style={{ background: iconBg }}>{icon}</div>
-                                    </div>
-                                    <div className="fw-black" style={{ fontSize: "1.3rem", color: "#1a1a2e", lineHeight: 1.2 }}>{val}</div>
-                                    <div style={{ fontSize: "0.72rem", color: "#6b7280", fontWeight: 700, marginTop: 2 }}>{label}</div>
-                                </div>
-                            </Col>
-                        ))}
-                    </Row>
 
-                    {/* Search + Sort + View toggle */}
-                    <Card className="eco-section-card p-3 mb-4">
-                        <div className="d-flex flex-wrap gap-3 align-items-center">
-                            <InputGroup style={{ maxWidth: 320, flex: "1 1 200px" }}>
-                                <InputGroup.Text style={{ border: "2px solid #e8eaf6", borderRight: "none", borderRadius: "12px 0 0 12px", background: "#f8f9ff" }}>🔍</InputGroup.Text>
-                                <Form.Control
-                                    className="eco-input"
-                                    style={{ borderRadius: "0 12px 12px 0", borderLeft: "none" }}
-                                    placeholder="Search by title, brand, category, tag..."
-                                    value={search}
-                                    onChange={e => setSearch(e.target.value)}
-                                />
-                            </InputGroup>
-                            <Form.Select
-                                className="eco-input"
-                                style={{ maxWidth: 190, padding: "10px 14px", cursor: "pointer" }}
-                                value={selectedCategory}
-                                onChange={e => setSelectedCategory(e.target.value)}
-                            >
-                                {categories.map(cat => (
-                                    <option key={cat} value={cat}>{cat === "All Categories" ? "📁 All Categories" : `📁 ${cat}`}</option>
-                                ))}
-                            </Form.Select>
-                            <Form.Select
-                                className="eco-input"
-                                style={{ maxWidth: 190, padding: "10px 14px", cursor: "pointer" }}
-                                value={sortBy}
-                                onChange={e => setSortBy(e.target.value)}
-                            >
-                                <option value="newest">🕐 Newest First</option>
-                                <option value="oldest">🕐 Oldest First</option>
-                                <option value="price_high">💰 Price: High → Low</option>
-                                <option value="price_low">💰 Price: Low → High</option>
-                                <option value="top_rated">⭐ Top Rated</option>
-                                <option value="best_selling">🔥 Best Selling</option>
-                                <option value="stock_low">⚠️ Low Stock First</option>
-                            </Form.Select>
-                        </div>
-                        <div className="d-flex gap-2 flex-wrap mt-3">
-                            {FILTERS.map(f => (
-                                <button key={f} type="button" className={`eco-filter-pill ${activeFilter === f ? "active" : ""}`} onClick={() => setActiveFilter(f)}>
-                                    {f}
-                                    {f !== "All" && (
-                                        <span className="ms-1" style={{ fontSize: "0.72rem", opacity: 0.7 }}>
-                                            ({f === "In Stock" ? products.filter(p => p.stock > 10).length
-                                                : f === "Low Stock" ? products.filter(p => p.stock > 0 && p.stock <= 10).length
-                                                    : f === "Out of Stock" ? products.filter(p => p.stock === 0).length
-                                                        : f === "Customizable" ? products.filter(p => p.is_customizable).length
-                                                            : products.filter(p => p.is_return).length})
-                                        </span>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    </Card>
-
-                    {/* Result count */}
-                    <div className="mb-3 d-flex align-items-center justify-content-between">
-                        <span style={{ fontSize: "0.83rem", color: "#6b7280", fontWeight: 700 }}>
-                            Showing <span style={{ color: "#3538ffff" }}>{filtered.length}</span> of {products.length} products
-                        </span>
-                        {search && (
-                            <button type="button" className="eco-filter-pill" style={{ fontSize: "0.78rem" }} onClick={() => setSearch("")}>✕ Clear search</button>
-                        )}
-                    </div>
-
-                    {/* Empty state */}
-                    {filtered.length === 0 && (
-                        <Card className="eco-section-card">
-                            <div className="empty-state">
-                                <div className="empty-ring">📦</div>
-                                <h4 className="fw-bold mb-2" style={{ color: "#1a1a2e" }}>No Products Found</h4>
-                                <p className="text-muted mb-4" style={{ fontSize: "0.9rem" }}>
-                                    {search ? `No results for "${search}". Try a different search term.` : "You haven't listed any products yet. Start by adding your first product!"}
-                                </p>
-                                <Button className="eco-btn-main text-white px-5" onClick={() => navigate("/seller/product/create")}>➕ Add Your First Product</Button>
+                        {/* Page header */}
+                        <div className="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+                            <div>
+                                <h2 className="fw-bold mb-1" style={{ fontFamily: "Nunito", fontSize: "1.7rem", color: "#1a1a2e" }}>My Products</h2>
+                                <p style={{ fontSize: "0.87rem", color: "#777", marginBottom: 0 }}>Manage, edit and track all your listed products</p>
                             </div>
-                        </Card>
-                    )}
-
-                    {/* Grid view */}
-                    {viewMode === "grid" && filtered.length > 0 && (
-                        <Row className="g-3">
-                            {filtered.map(product => (
-                                <Col xs={12} sm={6} xl={3} key={product.id}>
-                                    <Card className="product-card h-100">
-                                        {product.image_url
-                                            ? <img src={product.image_url[0]} alt={product.title} className="product-img" />
-                                            : <div className="product-img-placeholder">📦</div>
-                                        }
-                                        <Card.Body className="p-3">
-                                            <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
-                                                <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.04em" }}>{product.brand}</span>
-                                                {product.category && <Badge className="eco-badge-tag" style={{ background: "#f1f4ff", color: "#5068f0" }}>{product.category}</Badge>}
-                                                {product.tag.map((t, idx) => {
-                                                    return idx < 1 ? <Badge key={t} className="eco-badge-tag">{t.trim()}</Badge> : null;
-                                                })}
-                                                {product.is_customizable && <Badge className="eco-badge-tag">✏️ Custom</Badge>}
-                                            </div>
-                                            <div className="fw-bold mb-2" style={{ fontSize: "0.92rem", color: "#1a1a2e", lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                                                {product.title}
-                                            </div>
-                                            <div className="d-flex align-items-center gap-2 mb-2">
-                                                <span className="fw-black" style={{ fontSize: "1.1rem", color: "#ff6b35" }}>₹{product.base_price.toLocaleString()}</span>
-                                                {product.old_price && <span style={{ fontSize: "0.78rem", color: "#9ca3af", textDecoration: "line-through" }}>₹{product.old_price.toLocaleString()}</span>}
-                                                {product.discount > 0 && <Badge bg="success" className="rounded-pill" style={{ fontSize: "0.7rem" }}>{product.discount}% off</Badge>}
-                                            </div>
-                                            <div className="d-flex align-items-center justify-content-between mb-3">
-                                                {stockBadge(product.stock)}
-                                                <span style={{ fontSize: "0.78rem", color: "#6b7280", fontWeight: 700 }}>⭐ {product.rating} · 🛒 {product.sold} sold</span>
-                                            </div>
-                                            {product.color && (
-                                                <div className="d-flex gap-1 mb-3">
-                                                    {product.color.map(c => (
-                                                        <span key={c} style={{ width: 16, height: 16, borderRadius: "50%", background: c, border: "2px solid #fff", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", display: "inline-block" }} />
-                                                    ))}
-                                                    {product.color.length > 6 && <span style={{ fontSize: "0.7rem", color: "#9ca3af", fontWeight: 700, alignSelf: "center" }}>+{product.color.length - 6}</span>}
-                                                </div>
-                                            )}
-                                            <div className="d-flex gap-2">
-                                                <Button className="eco-btn-main flex-fill text-white" style={{ fontSize: "0.82rem", padding: "8px 10px" }} onClick={(e) => { setShowEditModal(true); handleProductUpdate(product) }}>✏️ Edit</Button>
-                                                <Button className="eco-btn-outline" style={{ fontSize: "0.82rem", padding: "8px 14px", color: "#dc2626", borderColor: "#fca5a5" }} onClick={() => setDeleteModal(product)}>🗑️</Button>
-                                                <Button className="eco-btn-outline" style={{ fontSize: "0.82rem", padding: "8px 14px" }} onClick={() => navigate(`/seller/product/${product.id}`)}>👁️</Button>
-                                            </div>
-                                        </Card.Body>
-                                    </Card>
+                            <Button className="eco-btn-main text-white d-flex align-items-center gap-2" onClick={() => navigate("/seller/product/create")}>
+                                <span style={{ fontSize: "1rem" }}>➕</span> Add New Product
+                            </Button>
+                        </div>
+                        {/* Stats chips */}
+                        <Row className="g-3 mb-4">
+                            {[
+                                { icon: "📦", label: "Total Products", val: processedProducts.length, color: "#eff6ff", iconBg: "#dbeafe" },
+                                { icon: "💰", label: "Total Revenue", val: fmtL(totalRevenue), color: "#f0fdf4", iconBg: "#dcfce7" },
+                                { icon: "🔴", label: "Out of Stock", val: outOfStock, color: "#fef2f2", iconBg: "#fee2e2" },
+                                { icon: "⚠️", label: "Low Stock", val: lowStock, color: "#fffbeb", iconBg: "#fef3c7" },
+                                { icon: "⭐", label: "Avg Rating", val: avgRating, color: "#fefce8", iconBg: "#fef9c3" },
+                                { icon: "🛒", label: "Total Sold", val: totalSold, color: "#fdf4ff", iconBg: "#f3e8ff" },
+                            ].map(({ icon, label, val, color, iconBg }) => (
+                                <Col xs={6} md={4} xl={2} key={label}>
+                                    <div className="stat-chip h-100" style={{ background: color }}>
+                                        <div className="d-flex align-items-center gap-2 mb-1">
+                                            <div className="stat-chip-icon" style={{ background: iconBg }}>{icon}</div>
+                                        </div>
+                                        <div className="fw-black" style={{ fontSize: "1.3rem", color: "#1a1a2e", lineHeight: 1.2 }}>{val}</div>
+                                        <div style={{ fontSize: "0.72rem", color: "#6b7280", fontWeight: 700, marginTop: 2 }}>{label}</div>
+                                    </div>
                                 </Col>
                             ))}
                         </Row>
-                    )}
-                    <div style={{ height: 40 }} />
-                </div>
-            </Col>
+
+                        {/* Search + Sort + View toggle */}
+                        <Card className="eco-section-card p-3 mb-4">
+                            <div className="d-flex flex-wrap gap-3 align-items-center">
+                                <InputGroup style={{ maxWidth: 320, flex: "1 1 200px" }}>
+                                    <InputGroup.Text style={{ border: "2px solid #e8eaf6", borderRight: "none", borderRadius: "12px 0 0 12px", background: "#f8f9ff" }}>🔍</InputGroup.Text>
+                                    <Form.Control
+                                        className="eco-input"
+                                        style={{ borderRadius: "0 12px 12px 0", borderLeft: "none" }}
+                                        placeholder="Search by title, brand, category, tag..."
+                                        value={search}
+                                        onChange={e => setSearch(e.target.value)}
+                                    />
+                                </InputGroup>
+                                <Form.Select
+                                    className="eco-input"
+                                    style={{ maxWidth: 190, padding: "10px 14px", cursor: "pointer" }}
+                                    value={selectedCategory}
+                                    onChange={e => setSelectedCategory(e.target.value)}
+                                >
+                                    {categories.map(cat => (
+                                        <option key={cat} value={cat}>{cat === "All Categories" ? "📁 All Categories" : `📁 ${cat}`}</option>
+                                    ))}
+                                </Form.Select>
+                                <Form.Select
+                                    className="eco-input"
+                                    style={{ maxWidth: 190, padding: "10px 14px", cursor: "pointer" }}
+                                    value={sortBy}
+                                    onChange={e => setSortBy(e.target.value)}
+                                >
+                                    <option value="newest">🕐 Newest First</option>
+                                    <option value="oldest">🕐 Oldest First</option>
+                                    <option value="price_high">💰 Price: High → Low</option>
+                                    <option value="price_low">💰 Price: Low → High</option>
+                                    <option value="top_rated">⭐ Top Rated</option>
+                                    <option value="best_selling">🔥 Best Selling</option>
+                                    <option value="stock_low">⚠️ Low Stock First</option>
+                                </Form.Select>
+                            </div>
+                            <div className="d-flex gap-2 flex-wrap mt-3">
+                                {FILTERS.map(f => (
+                                    <button key={f} type="button" className={`eco-filter-pill ${activeFilter === f ? "active" : ""}`} onClick={() => setActiveFilter(f)}>
+                                        {f}
+                                        {f !== "All" && (
+                                            <span className="ms-1" style={{ fontSize: "0.72rem", opacity: 0.7 }}>
+                                                ({f === "In Stock" ? products.filter(p => p.stock > 10).length
+                                                    : f === "Low Stock" ? products.filter(p => p.stock > 0 && p.stock <= 10).length
+                                                        : f === "Out of Stock" ? products.filter(p => p.stock === 0).length
+                                                            : f === "Customizable" ? products.filter(p => p.is_customizable).length
+                                                                : products.filter(p => p.is_return).length})
+                                            </span>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        </Card>
+
+                        {/* Result count */}
+                        <div className="mb-3 d-flex align-items-center justify-content-between">
+                            <span style={{ fontSize: "0.83rem", color: "#6b7280", fontWeight: 700 }}>
+                                Showing <span style={{ color: "#3538ffff" }}>{filtered.length}</span> of {products.length} products
+                            </span>
+                            {search && (
+                                <button type="button" className="eco-filter-pill" style={{ fontSize: "0.78rem" }} onClick={() => setSearch("")}>✕ Clear search</button>
+                            )}
+                        </div>
+
+                        {/* Empty state */}
+                        {filtered.length === 0 && (
+                            <Card className="eco-section-card">
+                                <div className="empty-state">
+                                    <div className="empty-ring">📦</div>
+                                    <h4 className="fw-bold mb-2" style={{ color: "#1a1a2e" }}>No Products Found</h4>
+                                    <p className="text-muted mb-4" style={{ fontSize: "0.9rem" }}>
+                                        {search ? `No results for "${search}". Try a different search term.` : "You haven't listed any products yet. Start by adding your first product!"}
+                                    </p>
+                                    <Button className="eco-btn-main text-white px-5" onClick={() => navigate("/seller/product/create")}>➕ Add Your First Product</Button>
+                                </div>
+                            </Card>
+                        )}
+
+                        {/* Grid view */}
+                        {viewMode === "grid" && filtered.length > 0 && (
+                            <Row className="g-3">
+                                {filtered.map(product => (
+                                    <Col xs={12} sm={6} xl={3} key={product.id}>
+                                        <Card className="product-card h-100">
+
+
+
+                                            {product.image_url
+                                                ? <img src={product.image_url[0]} alt={product.title} className="product-img" />
+                                                : <div className="product-img-placeholder">📦</div>
+                                            }
+                                            <Card.Body className="p-3">
+                                                <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
+                                                    <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.04em" }}>{product.brand}</span>
+                                                    {product.category && <Badge className="eco-badge-tag" style={{ background: "#f1f4ff", color: "#5068f0" }}>{product.category}</Badge>}
+                                                    {product.tag.map((t, idx) => {
+                                                        return idx < 1 ? <Badge key={t} className="eco-badge-tag">{t.trim()}</Badge> : null;
+                                                    })}
+                                                    {product.is_customizable && <Badge className="eco-badge-tag">✏️ Custom</Badge>}
+                                                </div>
+
+                                                <div className="fw-bold mb-2 d-flex justify-content-between" style={{ fontSize: "0.92rem", color: "#1a1a2e", lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                                                    {product.title}
+                                                    {
+                                                        product.status === "false" && (
+                                                            <span className="inactive-overlay text-danger d-flex align-items-center justify-content-end fw-bold">
+                                                                INACTIVE
+                                                            </span>
+                                                        )
+                                                    }
+                                                </div>
+                                                <div className="d-flex align-items-center gap-2 mb-2">
+                                                    <span className="fw-black" style={{ fontSize: "1.1rem", color: "#ff6b35" }}>₹{product.base_price.toLocaleString()}</span>
+                                                    {product.old_price && <span style={{ fontSize: "0.78rem", color: "#9ca3af", textDecoration: "line-through" }}>₹{product.old_price.toLocaleString()}</span>}
+                                                    {product.discount > 0 && <Badge bg="success" className="rounded-pill" style={{ fontSize: "0.7rem" }}>{product.discount}% off</Badge>}
+                                                </div>
+                                                <div className="d-flex align-items-center justify-content-between mb-3">
+                                                    {stockBadge(product.stock - product.sold)}
+                                                    <span style={{ fontSize: "0.78rem", color: "#6b7280", fontWeight: 700 }}>⭐ {product.rating} · 🛒 {product.sold} sold</span>
+                                                </div>
+                                                {product.color && (
+                                                    <div className="d-flex gap-1 mb-3">
+                                                        {product.color.map(c => (
+                                                            <span key={c} style={{ width: 16, height: 16, borderRadius: "50%", background: c, border: "2px solid #fff", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", display: "inline-block" }} />
+                                                        ))}
+                                                        {product.color.length > 6 && <span style={{ fontSize: "0.7rem", color: "#9ca3af", fontWeight: 700, alignSelf: "center" }}>+{product.color.length - 6}</span>}
+                                                    </div>
+                                                )}
+                                                <div className="d-flex gap-2">
+                                                    <Button className="eco-btn-main flex-fill text-white" style={{ fontSize: "0.82rem", padding: "8px 10px" }} onClick={(e) => { setShowEditModal(true); handleProductUpdate(product) }}>✏️ Edit</Button>
+                                                    <Button className="eco-btn-outline" style={{ fontSize: "0.82rem", padding: "8px 14px", color: "#dc2626", borderColor: "#fca5a5" }} onClick={() => setDeleteModal(product)}>🗑️</Button>
+                                                    <Button className="eco-btn-outline" style={{ fontSize: "0.82rem", padding: "8px 14px" }} onClick={() => navigate(`/seller/product/${product.id}`)}>👁️</Button>
+                                                </div>
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                ))}
+                            </Row>
+                        )}
+                        <div style={{ height: 40 }} />
+                    </div>
+                </Col>
             </Row>
 
             <EditProductModal show={showEditModal} product={selectedProductData} setRefresh={setRefresh} refresh={refresh} handleClose={() => setShowEditModal(false)} />
@@ -388,3 +454,5 @@ export default function SellerProducts() {
         </Container>
     );
 }
+
+export default SellerProducts;

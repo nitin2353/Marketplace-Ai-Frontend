@@ -27,7 +27,7 @@ import SellerProducts from "./pages/seller-products/SellerDashboard.jsx";
 import LandingPage from "./pages/landing-page/LandingDashboard.jsx";
 import Cart from "./pages/cart";
 import WishlistPage from "./pages/wishlist";
-import CheckoutPage from "./pages/checkout/Checkoutpage";
+import CheckoutPage from "./pages/checkout/CheckoutPage.jsx";
 import OrdersPage from "./pages/customer-order-list/OrdersPage.jsx";
 import SettingsPage from "./pages/setting/Settings.jsx";
 import ChatPage from "./pages/requirements/ChatPage";

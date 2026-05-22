@@ -1,6 +1,5 @@
 import { Modal, Button } from "react-bootstrap";
-import "./ConfirmModal.css";
-import { useNavigate } from "react-router-dom";
+import "../components/ConfirmModal.css";
 
 const VARIANT_MAP = {
     danger: {
@@ -55,16 +54,10 @@ export default function ConfirmModal({
     variant = "danger",
     loading = false,
     icon,
-
-    // new props
-    isMulti = false,
 }) {
     const cfg = VARIANT_MAP[variant] || VARIANT_MAP.danger;
     const iconEmoji = icon ?? DEFAULT_ICONS[variant] ?? "❓";
     const btnLabel = confirmText ?? (variant === "danger" ? "Yes, Delete" : "Confirm");
-
-
-    const navigate = useNavigate();
 
     return (
         <Modal
@@ -77,6 +70,8 @@ export default function ConfirmModal({
             keyboard={!loading}
         >
             <Modal.Body className="text-center cm-fade-up">
+
+                {/* ── Icon ── */}
                 <div
                     className="cm-icon-ring"
                     style={{
@@ -87,11 +82,17 @@ export default function ConfirmModal({
                     {iconEmoji}
                 </div>
 
+                {/* ── Title ── */}
                 <h5 className="cm-title">{title}</h5>
+
+                {/* ── Message ── */}
                 <p className="cm-message">{message}</p>
+
             </Modal.Body>
 
             <Modal.Footer className="d-flex gap-2">
+
+                {/* ── Cancel ── */}
                 <Button
                     className="cm-btn-cancel"
                     onClick={() => !loading && onCancel?.()}
@@ -100,46 +101,20 @@ export default function ConfirmModal({
                     {cancelText}
                 </Button>
 
-                {isMulti ? (
-                    <>
-                        <Button
-                            className="cm-btn-confirm"
-                            style={{
-                                background: "linear-gradient(135deg, #2563eb, #0d6efd)",
-                                "--btn-shadow": "rgba(37, 99, 235, 0.25)",
-                            }}
-                            onClick={() => navigate("/customer/register")}
-                            disabled={loading}
-                        >
-                            Customer
-                        </Button>
+                {/* ── Confirm ── */}
+                <Button
+                    className="cm-btn-confirm"
+                    style={{
+                        background: cfg.btnBg,
+                        "--btn-shadow": cfg.btnShadow,
+                    }}
+                    onClick={onConfirm}
+                    disabled={loading}
+                >
+                    {loading && <span className="cm-spinner" />}
+                    {loading ? "Please wait…" : btnLabel}
+                </Button>
 
-                        <Button
-                            className="cm-btn-confirm"
-                            style={{
-                                background: cfg.btnBg,
-                                "--btn-shadow": cfg.btnShadow,
-                            }}
-                            onClick={() => navigate("/seller/register")}
-                            disabled={loading}
-                        >
-                            Seller
-                        </Button>
-                    </>
-                ) : (
-                    <Button
-                        className="cm-btn-confirm"
-                        style={{
-                            background: cfg.btnBg,
-                            "--btn-shadow": cfg.btnShadow,
-                        }}
-                        onClick={onConfirm}
-                        disabled={loading}
-                    >
-                        {loading && <span className="cm-spinner" />}
-                        {loading ? "Please wait…" : btnLabel}
-                    </Button>
-                )}
             </Modal.Footer>
         </Modal>
     );

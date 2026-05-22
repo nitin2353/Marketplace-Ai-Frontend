@@ -8,9 +8,9 @@ import { useAuthWrapper } from "../../helper/AuthWrapper";
 import JWTService from "../../config/jwt.config";
 import { FMT, FMT_DATE, TABS, STATUS_META, PAYMENT_METHOD_LABELS, TIMELINE_STEPS } from "../../helper/GlobalHelper";
 import ConfirmModal from "../../components/ConfirmModal";
-import ReviewModal from "../../components/ReviewModal";
+import ReviewModal from "../../components/ReviewModal.jsx";
 import "./orderpage.css";
-import OrderTimeline from "./OrderTimeline";
+import OrderTimeline from "./OrderTimeline.jsx";
 import ReturnRequestModal from "../../components/ReturnRequestModal";
 
 // ── Local Components to keep changes within this file ────────────────────────
@@ -125,7 +125,7 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                 <div className="card-expanded-content" onClick={(e) => e.stopPropagation()}>
                     <hr className="my-3 opacity-10" />
                     <Row className="g-4">
-                        <Col lg={7}>
+                        <Col lg={9}>
                             <h6 className="section-title">Order Items</h6>
                             <Stack gap={3}>
                                 {loadingDetails ? (
@@ -146,7 +146,7 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                                             <img src={src || `https://placehold.co/100?text=Product`} className="item-img" alt="item" />
                                             <div className="flex-grow-1 min-w-0">
                                                 <div className="fw-bold text-dark text-truncate small">{item.product_title}</div>
-                                                <div className="text-muted tiny">
+                                                <div className="text-muted tiny" onClick={() => navigate(`/product/${item.product_id}`)}>
                                                     Qty: {item.quantity} • {FMT(item.unit_price)} each
                                                 </div>
                                             </div>
@@ -202,7 +202,7 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                                 })}
                             </Stack>
                         </Col>
-                        <Col lg={5}>
+                        <Col lg={3}>
                             <div className="bg-light p-3 h-100 mb-5">
                                 <h6 className="section-title">Timeline & Delivery</h6>
                                 <OrderTimeline currentStatus={order.order_status} />
@@ -244,7 +244,7 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                                 disabled={cancelling === order.id}
                                 onClick={() => setShowCancelConfirm(true)}
                             >
-                                {cancelling === order.id ? "Processing..." : "Cancel"}
+                                {cancelling === order.id ? "Processing..." : "Cancel Order"}
                             </RBButton>
                         )}
                         <RBButton

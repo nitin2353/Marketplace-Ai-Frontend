@@ -1,5 +1,5 @@
 import React from 'react'
-import OrdersPage from './Orderspage'
+import OrdersPage from './OrdersPage.jsx'
 
 const index = () => {
   return (

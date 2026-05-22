@@ -1,8 +1,8 @@
-import axiosInstance from "./axios";
+import apiConfig from '../config/axios-config';
 
 export const createReturnRequest = async (formData) => {
     try {
-        const response = await axiosInstance.post('/returns', formData, {
+        const response = await apiConfig.post('/returns', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -15,7 +15,7 @@ export const createReturnRequest = async (formData) => {
 
 export const getCustomerReturnRequests = async () => {
     try {
-        const response = await axiosInstance.get('/returns/customer');
+        const response = await apiConfig.get('/returns/customer');
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
@@ -24,7 +24,7 @@ export const getCustomerReturnRequests = async () => {
 
 export const getSellerReturnRequests = async () => {
     try {
-        const response = await axiosInstance.get('/returns/seller');
+        const response = await apiConfig.get('/returns/seller');
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
@@ -33,7 +33,7 @@ export const getSellerReturnRequests = async () => {
 
 export const getReturnRequestById = async (id) => {
     try {
-        const response = await axiosInstance.get(`/returns/${id}`);
+        const response = await apiConfig.get(`/returns/${id}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
@@ -42,7 +42,7 @@ export const getReturnRequestById = async (id) => {
 
 export const updateReturnStatus = async (id, data) => {
     try {
-        const response = await axiosInstance.patch(`/returns/${id}/status`, data);
+        const response = await apiConfig.patch(`/returns/${id}/status`, data);
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
@@ -51,7 +51,7 @@ export const updateReturnStatus = async (id, data) => {
 
 export const cancelReturnRequest = async (id) => {
     try {
-        const response = await axiosInstance.patch(`/returns/${id}/cancel`);
+        const response = await apiConfig.patch(`/returns/${id}/cancel`);
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;

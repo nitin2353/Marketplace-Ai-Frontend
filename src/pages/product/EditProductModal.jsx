@@ -3,6 +3,7 @@ import { Modal, Row, Col, Form, Button, InputGroup, Badge, Stack } from "react-b
 import { useForm } from "react-hook-form";
 import productApi from "../../api/product.api";
 import toast from "react-hot-toast";
+import { formResetData } from "../../helper/FormDefaults";
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const PRESET_TAGS = ["New Arrival", "Trending", "Best Seller", "Limited Edition", "Eco Friendly", "Premium", "Sale"];
@@ -100,7 +101,7 @@ export default function EditProductModal({ show, handleClose, product, setRefres
     const [isFreeDelivery, setIsFreeDelivery] = useState(false);
     const [taxInclusive, setTaxInclusive] = useState(false);
 
-    const { register, handleSubmit, watch, reset, formState: { errors } } = useForm({
+    const { register, handleSubmit, watch, reset, setValue, formState: { errors } } = useForm({
         defaultValues: {
             title: "", description: "", brand: "", category: "",
             base_price: "", old_price: "", stock: "",
@@ -125,32 +126,7 @@ export default function EditProductModal({ show, handleClose, product, setRefres
     useEffect(() => {
         if (!product || !show) return;
 
-        reset({
-            title: product.title || "",
-            description: product.description || "",
-            brand: product.brand || "",
-            category: product.category || "",
-            base_price: product.base_price || "",
-            old_price: product.old_price || "",
-            stock: product.stock || "",
-            weight: product.weight || "",
-            length: product.length || "",
-            width: product.width || "",
-            height: product.height || "",
-            delivery_days: product.delivery_days || "",
-            tax_percentage: product.tax_percentage || "",
-            min_stock_alert: product.min_stock_alert || "",
-            return_replace_duration: product.return_replace_duration || "",
-            return_replace_instructions: product.return_replace_instructions || "",
-            slug: product.slug || "",
-            meta_title: product.meta_title || "",
-            meta_description: product.meta_description || "",
-            customization_type: product.customization_type || "",
-            customization_fields: product.customization_fields || "",
-            sold: product.sold || "",
-            rating: product.rating || "",
-            reviews: product.reviews || "",
-        });
+        reset(formResetData.product(product));
 
         // Tags
         const tagList = Array.isArray(product.tag)
@@ -188,6 +164,14 @@ export default function EditProductModal({ show, handleClose, product, setRefres
             setVariants([{ ...DEFAULT_VARIANT }]);
         }
     }, [product, show, reset]);
+
+    // Auto-sum variant stock
+    useEffect(() => {
+        if (hasVariants) {
+            const sum = variants.reduce((acc, v) => acc + (Number(v.stock) || 0), 0);
+            setValue("stock", sum);
+        }
+    }, [variants, hasVariants, setValue]);
 
     // ── Tag helpers ──
     const addTag = (t) => {
@@ -358,14 +342,22 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                         </InputGroup>
                                     </Field>
                                 </Col>
-                                <Col md={4}>
+                                <Col md={2}>
                                     <Field label="Meta Title (SEO)">
                                         <Form.Control className="cp-input" placeholder="SEO title" {...register("meta_title")} />
                                     </Field>
                                 </Col>
-                                <Col md={4}>
+                                <Col md={3}>
                                     <Field label="Meta Description (SEO)">
                                         <Form.Control className="cp-input" placeholder="SEO description" {...register("meta_description")} />
+                                    </Field>
+                                </Col>
+                                <Col md={3}>
+                                    <Field label="Status">
+                                        <Form.Select className="cp-select" {...register("status")}>
+                                            <option value="true" selected>Active</option>
+                                            <option value="false">Inactive</option>
+                                        </Form.Select>
                                     </Field>
                                 </Col>
                             </Row>
@@ -405,9 +397,11 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                     </Field>
                                 </Col>
                                 <Col sm={6} md={4}>
-                                    <Field label="Stock Quantity *" error={errors.stock?.message}>
-                                        <Form.Control className={`cp-input ${errors.stock ? "is-invalid" : ""}`} type="number" min="0" placeholder="100"
-                                            {...register("stock", { required: "Stock required", min: { value: 0, message: "Cannot be negative" } })} />
+                                    <Field label={hasVariants ? "Total Stock Quantity (Auto)" : "Stock Quantity *"} error={errors.stock?.message}>
+                                        <Form.Control className={`cp-input ${errors.stock ? "is-invalid" : ""}`} type="number" min="0" 
+                                            placeholder={hasVariants ? "Auto-calculated" : "100"}
+                                            disabled={hasVariants}
+                                            {...register("stock", { required: !hasVariants && "Stock required", min: { value: 0, message: "Cannot be negative" } })} />
                                     </Field>
                                 </Col>
                                 <Col sm={6} md={4}>

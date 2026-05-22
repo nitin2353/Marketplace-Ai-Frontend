@@ -1,9 +1,9 @@
-import API from "./axios";
+import apiConfig from '../config/axios-config';
 
 // GET SELLER SUMMARY
 const getSellerSummary = async (sellerId) => {
     try {
-        const response = await API.get(`/report/seller-summary/${sellerId}`);
+        const response = await apiConfig.get(`/report/seller-summary/${sellerId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching seller summary" };
@@ -13,7 +13,7 @@ const getSellerSummary = async (sellerId) => {
 // GET WEEKLY UNITS SOLD BY PRODUCT
 const getWeeklyUnitsSold = async (productId) => {
     try {
-        const response = await API.get(`/report/weekly-units/${productId}`);
+        const response = await apiConfig.get(`/report/weekly-units/${productId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching weekly units sold" };
@@ -23,7 +23,7 @@ const getWeeklyUnitsSold = async (productId) => {
 // GET MONTHLY SALES BY PRODUCT
 const getMonthlySales = async (productId) => {
     try {
-        const response = await API.get(`/report/monthly-sales/${productId}`);
+        const response = await apiConfig.get(`/report/monthly-sales/${productId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching monthly sales" };
@@ -33,7 +33,7 @@ const getMonthlySales = async (productId) => {
 // GET ORDER STATUS MIX BY SELLER
 const getOrderStatusMix = async (sellerId) => {
     try {
-        const response = await API.get(`/report/order-status-mix/${sellerId}`);
+        const response = await apiConfig.get(`/report/order-status-mix/${sellerId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching order status mix" };
@@ -43,7 +43,7 @@ const getOrderStatusMix = async (sellerId) => {
 // GET RECENT ORDERS BY PRODUCT
 const getRecentOrdersByProduct = async (productId) => {
     try {
-        const response = await API.get(`/report/recent-orders/${productId}`);
+        const response = await apiConfig.get(`/report/recent-orders/${productId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching recent orders" };
@@ -52,7 +52,7 @@ const getRecentOrdersByProduct = async (productId) => {
 
 const getRecentOrders = async () => {
     try {
-        const response = await API.get(`/report/recent-orders`);
+        const response = await apiConfig.get(`/report/recent-orders`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching recent orders" };
@@ -62,7 +62,7 @@ const getRecentOrders = async () => {
 // GET RATING BREAKDOWN BY PRODUCT
 const getRatingBreakdown = async (productId) => {
     try {
-        const response = await API.get(`/report/rating-breakdown/${productId}`);
+        const response = await apiConfig.get(`/report/rating-breakdown/${productId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching rating breakdown" };
@@ -73,10 +73,10 @@ const getRatingBreakdown = async (productId) => {
 const getProductReportDashboard = async (productId, sellerId) => {
     try {
         const [weekly, monthly, recentOrders, ratingBreakdown] = await Promise.all([
-            API.get(`/report/weekly-units/${productId}`),
-            API.get(`/report/monthly-sales/${productId}`),
-            API.get(`/report/recent-orders/${productId}`),
-            API.get(`/report/rating-breakdown/${productId}`),
+            apiConfig.get(`/report/weekly-units/${productId}`),
+            apiConfig.get(`/report/monthly-sales/${productId}`),
+            apiConfig.get(`/report/recent-orders/${productId}`),
+            apiConfig.get(`/report/rating-breakdown/${productId}`),
         ]);
 
         return {
@@ -96,7 +96,7 @@ const getProductReportDashboard = async (productId, sellerId) => {
 // OPTIONAL: GET SELLER REPORT DASHBOARD
 const getSellerReportDashboard = async (sellerId) => {
     try {
-        const response = await API.get(`/report/seller-summary/${sellerId}`);
+        const response = await apiConfig.get(`/report/seller-summary/${sellerId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching seller dashboard report" };
@@ -106,7 +106,7 @@ const getSellerReportDashboard = async (sellerId) => {
 
 const getRecentActivities = async () => {
     try {
-        const response = await API.get("/report/recent-activities");
+        const response = await apiConfig.get("/report/recent-activities");
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching recent activities" };

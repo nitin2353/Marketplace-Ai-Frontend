@@ -1,5 +1,5 @@
 import React from 'react'
-import CheckoutPage from './Checkoutpage'
+import CheckoutPage from './CheckoutPage.jsx'
 
 const index = () => {
   return (

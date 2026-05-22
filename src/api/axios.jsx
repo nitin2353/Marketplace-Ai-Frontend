@@ -1,7 +1,7 @@
-import axios from "axios";
+import apiConfig from '../config/axios-config';
 
-const API = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1"
+const API = apiConfig.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL || "https://marketplace-ai-backend-lffk.onrender.com/api/v1"
 });
 
 // 🔐 Token attach (auto)

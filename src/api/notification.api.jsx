@@ -1,9 +1,9 @@
-import API from "./axios";
+import apiConfig from '../config/axios-config';
 
 // GET MY NOTIFICATIONS (Authenticated User)
 const getMyNotifications = async (page = 1, limit = 10) => {
     try {
-        const response = await API.get(`/notification?page=${page}&limit=${limit}`);
+        const response = await apiConfig.get(`/notification?page=${page}&limit=${limit}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching notifications" };
@@ -23,7 +23,7 @@ const getUnreadCount = async () => {
 // MARK ONE AS READ
 const markAsRead = async (notificationId) => {
     try {
-        const response = await API.patch(`/notification/${notificationId}/read`);
+        const response = await apiConfig.patch(`/notification/${notificationId}/read`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error marking notification as read" };
@@ -33,7 +33,7 @@ const markAsRead = async (notificationId) => {
 // MARK ALL AS READ
 const markAllAsRead = async () => {
     try {
-        const response = await API.patch(`/notification/mark-all-read`);
+        const response = await apiConfig.patch(`/notification/mark-all-read`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error marking all notifications as read" };
@@ -43,7 +43,7 @@ const markAllAsRead = async () => {
 // DELETE NOTIFICATION
 const deleteNotification = async (notificationId) => {
     try {
-        const response = await API.delete(`/notification/${notificationId}`);
+        const response = await apiConfig.delete(`/notification/${notificationId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error deleting notification" };

@@ -93,7 +93,8 @@ export default function StepReview({
                                 <span>× {item.qty}</span>
                             </div>
                         </div>
-                        <span className="co-order-price">{FMT(item.price * item.qty)}</span>
+                        {console.log("item", item)}
+                        <span className="co-order-price">{FMT(item.price)}</span>
                     </div>
                 ))}
             </div>

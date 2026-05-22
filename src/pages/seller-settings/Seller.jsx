@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Row, Col, Stack, InputGroup, Form, Container } from "react-bootstrap";
 import toast from "react-hot-toast";
 import JWTService from "../../config/jwt.config";       // apna path
-import SellerSidebar from "../../components/SellerSidebar";
-import SellerNavbar from "../../components/SellerNavbar";
+import SellerSidebar from "../../components/SellerSidebar.jsx";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
 import authApi from "../../api/authApi";
 import userSettingsApi from "../../api/userSettings.api";
 import { API_BASE_URL } from "../../helper/Constraints";
-import "../Seller-settings/Sellersettings.css";
+import "./Sellersettings.css";
 import "../../style/Dashboard.css"
 
 const IMG_BASE = API_BASE_URL.replace("/api/v1", "/uploads/profiles/");

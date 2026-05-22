@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import SellerSidebar from "../../components/SellerSidebar";
 import GlobalLoader from "../../components/GlobalLoader";
 import productApi from "../../api/product.api";
-import SellerNavbar from "../../components/SellerNavbar";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
 import DataTable from "../../components/DataTable";
 import reportApi from "../../api/reportApi";
 import orderApi from "../../api/order.api";
@@ -64,6 +64,7 @@ export default function SellerDashboardHome() {
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -80,19 +81,58 @@ export default function SellerDashboardHome() {
   );
 
   // ── Derived values ──
-  const totalRevenue = products.reduce((s, p) => s + p.base_price * p.sold, 0);
-  const avgRating = products.length
-    ? (products.reduce((s, p) => s + Number(p.rating), 0) / products.length).toFixed(1)
-    : "0.0";
-  const outOfStock = products.filter(p => p.stock === 0).length;
-  const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10).length;
-  const totalSold = products.reduce((s, p) => s + p.sold, 0);
+  const processedProducts = useMemo(() => {
+    const actualSoldMap = {};
+    orders.forEach(order => {
+      if (order.order_status === "cancelled" || order.order_status === "payment_failed") return;
+      (order.items || []).forEach(item => {
+        actualSoldMap[item.product_id] = (actualSoldMap[item.product_id] || 0) + Number(item.quantity || 0);
+      });
+    });
+    return products.map(p => ({
+      ...p,
+      sold: actualSoldMap[p.id] || 0
+    }));
+  }, [products, orders]);
 
-  const sidebarStats = [
-    { icon: "📦", label: "Total Products", val: products.length },
-    { icon: "💰", label: "Total Revenue", val: `₹${(totalRevenue / 100000).toFixed(1)}L` },
+  const totalRevenue = useMemo(() => {
+    return orders.reduce((sum, order) => {
+      if (order.order_status === "cancelled" || order.order_status === "payment_failed") return sum;
+      const sellerItemsTotal = (order.items || []).reduce((s, item) => s + Number(item.line_total || 0), 0);
+      return sum + sellerItemsTotal;
+    }, 0);
+  }, [orders]);
+
+  const totalSold = useMemo(() => {
+    return orders.reduce((sum, order) => {
+      if (order.order_status === "cancelled" || order.order_status === "payment_failed") return sum;
+      const sellerItemsQty = (order.items || []).reduce((s, item) => s + Number(item.quantity || 0), 0);
+      return sum + sellerItemsQty;
+    }, 0);
+  }, [orders]);
+
+  const avgRating = useMemo(() => {
+    return processedProducts.length
+      ? (processedProducts.reduce((s, p) => s + Number(p.rating), 0) / processedProducts.length).toFixed(1)
+      : "0.0";
+  }, [processedProducts]);
+
+  const outOfStock = useMemo(() => processedProducts.filter(p => p.stock === 0).length, [processedProducts]);
+  const lowStock = useMemo(() => processedProducts.filter(p => p.stock > 0 && p.stock <= 10).length, [processedProducts]);
+
+  const totalOrdersCount = useMemo(() => {
+    return orders.filter(o => o.order_status !== "cancelled" && o.order_status !== "payment_failed").length;
+  }, [orders]);
+
+  const totalReturnsCount = useMemo(() => {
+    return orders.filter(o => o.order_status === "returned" || o.order_status === "return_requested").length;
+  }, [orders]);
+
+  const sidebarStats = useMemo(() => [
+    { icon: "📦", label: "Total Products", val: processedProducts.length },
+    { icon: "💰", label: "Total Revenue", val: fmtL(totalRevenue) },
     { icon: "⭐", label: "Avg Rating", val: avgRating },
-  ];
+  ], [processedProducts, totalRevenue, avgRating]);
 
   // ── Fetch Products ──
   useEffect(() => {
@@ -134,22 +174,26 @@ export default function SellerDashboardHome() {
       try {
         const seller = JWTService.decodeTokenDetails();
         const res = await orderApi.getSellerOrders(seller.id);
-        const orders = res.data || [];
+        const ordersData = res.data || [];
+        setOrders(ordersData);
 
         // ── Build Monthly Data ──────────────────────────────
         const monthMap = {};
         MONTHS.forEach(m => { monthMap[m] = { month: m, revenue: 0, orders: 0, returns: 0 }; });
 
-        orders.forEach(order => {
+        ordersData.forEach(order => {
+          if (order.order_status === "cancelled" || order.order_status === "payment_failed") return;
           const date = new Date(order.created_time);
           const month = MONTHS[date.getMonth()];
 
           // Only current year
           if (date.getFullYear() !== new Date().getFullYear()) return;
 
+          const sellerOrderRevenue = (order.items || []).reduce((s, item) => s + Number(item.line_total || 0), 0);
+
           monthMap[month].orders += 1;
-          monthMap[month].revenue += Number(order.subtotal || 0);
-          if (order.status === "returned" || order.status === "cancelled") {
+          monthMap[month].revenue += sellerOrderRevenue;
+          if (order.order_status === "returned" || order.order_status === "return_requested") {
             monthMap[month].returns += 1;
           }
         });
@@ -160,15 +204,18 @@ export default function SellerDashboardHome() {
         const weekMap = {};
         DAYS.forEach(d => { weekMap[d] = { day: d, revenue: 0, orders: 0, returns: 0 }; });
 
-        orders.forEach(order => {
+        ordersData.forEach(order => {
+          if (order.order_status === "cancelled" || order.order_status === "payment_failed") return;
           const date = new Date(order.created_time);
           const diffDays = Math.floor((today - date) / (1000 * 60 * 60 * 24));
           if (diffDays > 6) return; // only last 7 days
 
           const dayName = DAYS[date.getDay()];
+          const sellerOrderRevenue = (order.items || []).reduce((s, item) => s + Number(item.line_total || 0), 0);
+
           weekMap[dayName].orders += 1;
-          weekMap[dayName].revenue += Number(order.subtotal || 0);
-          if (order.status === "returned" || order.status === "cancelled") {
+          weekMap[dayName].revenue += sellerOrderRevenue;
+          if (order.order_status === "returned" || order.order_status === "return_requested") {
             weekMap[dayName].returns += 1;
           }
         });
@@ -187,7 +234,12 @@ export default function SellerDashboardHome() {
   const fetchRecentOrders = async () => {
     try {
       const res = await reportApi.getRecentOrders();
-      setRecentOrders((res.data || []).slice(0, 5));
+      // Map the orders to use the specific line item amount (discounted amount) instead of the entire order's net total_amount
+      const mappedOrders = (res.data || []).slice(0, 5).map(o => ({
+        ...o,
+        total_amount: o.amount 
+      }));
+      setRecentOrders(mappedOrders);
     } catch (error) {
       console.error(error);
       toast.error("Failed to load recent orders");
@@ -223,12 +275,12 @@ export default function SellerDashboardHome() {
     },
     {
       icon: "🛒", iconBg: "#f0fdf4", label: "Total Orders",
-      value: chartTotalOrders || recentOrders.length, delta: "+12%", trend: "up",
-      sub: `${chartTotalReturns} returns`, border: "#bbf7d0",
+      value: totalOrdersCount, delta: "+12%", trend: "up",
+      sub: `${totalReturnsCount} return${totalReturnsCount !== 1 ? "s" : ""}`, border: "#bbf7d0",
     },
     {
       icon: "📦", iconBg: "#eff6ff", label: "Total Products",
-      value: products.length, delta: "+3", trend: "up",
+      value: processedProducts.length, delta: "+3", trend: "up",
       sub: `${outOfStock} out of stock`, border: "#bfdbfe",
     },
     {
@@ -239,7 +291,7 @@ export default function SellerDashboardHome() {
     {
       icon: "⭐", iconBg: "#fefce8", label: "Avg Rating",
       value: avgRating, delta: "+0.2", trend: "up",
-      sub: `${products.reduce((s, p) => s + p.reviews, 0).toLocaleString()} reviews`,
+      sub: `${processedProducts.reduce((s, p) => s + (p.reviews || 0), 0).toLocaleString()} reviews`,
       border: "#fef08a",
     },
     {
@@ -255,7 +307,7 @@ export default function SellerDashboardHome() {
   const categoryData = useMemo(() => {
     const map = {};
 
-    products.forEach((p) => {
+    processedProducts.forEach((p) => {
       const category = p?.category || "Other";
 
       if (!map[category]) {
@@ -279,36 +331,36 @@ export default function SellerDashboardHome() {
     return Object.values(map)
       .sort((a, b) => b.value - a.value)
       .slice(0, 5);
-  }, [products]);
+  }, [processedProducts]);
 
   console.log("map", categoryData)
 
   // ── Stock Health ──
   const stockData = [
-    { name: "Healthy", value: products.filter(p => p.stock > 15).length, fill: "#22c55e" },
-    { name: "Low Stock", value: products.filter(p => p.stock > 0 && p.stock <= 15).length, fill: "#f59e0b" },
+    { name: "Healthy", value: processedProducts.filter(p => p.stock > 15).length, fill: "#22c55e" },
+    { name: "Low Stock", value: processedProducts.filter(p => p.stock > 0 && p.stock <= 15).length, fill: "#f59e0b" },
     { name: "Out", value: outOfStock, fill: "#ef4444" },
   ];
 
   // ── Rating Distribution ──
   const ratingDist = useMemo(() => {
     const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-    products.forEach(p => {
+    processedProducts.forEach(p => {
       const r = Math.round(Number(p.rating));
       if (dist[r] !== undefined) dist[r]++;
     });
-    const total = products.length || 1;
+    const total = processedProducts.length || 1;
     return [5, 4, 3, 2, 1].map(star => ({
       star, count: dist[star], pct: Math.round((dist[star] / total) * 100),
     }));
-  }, [products]);
+  }, [processedProducts]);
 
   // ── Top Products ──
   const topProducts = useMemo(() =>
-    [...products]
+    [...processedProducts]
       .sort((a, b) => (b.base_price * b.sold) - (a.base_price * a.sold))
       .slice(0, 5),
-    [products]
+    [processedProducts]
   );
   const maxRev = topProducts[0] ? topProducts[0].base_price * topProducts[0].sold : 1;
 
@@ -599,7 +651,7 @@ export default function SellerDashboardHome() {
                 <Col md={5}>
                   <div className="sdh-card">
                     <div className="sdh-card-title">📦 Stock Health</div>
-                    <div className="sdh-card-sub">{products.length} products total</div>
+                    <div className="sdh-card-sub">{processedProducts.length} products total</div>
                     <div className="sdh-chart-wrap" style={{ height: 180 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <RadialBarChart cx="50%" cy="50%" innerRadius="30%" outerRadius="90%"
@@ -667,7 +719,7 @@ export default function SellerDashboardHome() {
                         {"★".repeat(Math.round(avgRating))}{"☆".repeat(5 - Math.round(avgRating))}
                       </div>
                       <div style={{ fontSize: ".72rem", color: "var(--muted)", fontWeight: 700 }}>
-                        {products.reduce((s, p) => s + (p.review_count || 0), 0).toLocaleString()} total reviews
+                        {processedProducts.reduce((s, p) => s + (p.reviews || 0), 0).toLocaleString()} total reviews
                       </div>
                     </div>
                     {console.log("ratingDist", ratingDist)}

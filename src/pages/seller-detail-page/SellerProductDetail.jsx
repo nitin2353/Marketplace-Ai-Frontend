@@ -16,7 +16,7 @@ import reportApi from "../../api/reportApi";
 import DataTable from "../../components/DataTable";
 import orderApi from "../../api/order.api";
 import JWTService from "../../config/jwt.config";
-import SellerNavbar from "../../components/SellerNavbar";
+import SellerNavbar from "../../components/SellerNavbar.jsx";
 
 // ── Formatters ────────────────────────────────────────────────────────────────
 const fmt = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
@@ -65,6 +65,7 @@ export default function SellerProductDetail() {
     const [weeklyData, setWeeklyData] = useState([]);
     const [monthlyData, setMonthlyData] = useState([]);
     const [recentOrders, setRecentOrders] = useState([]);
+    const [salesStats, setSalesStats] = useState({ sold: 0, revenue: 0 });
 
     // ── Fetch Product ──
     useEffect(() => {
@@ -74,12 +75,19 @@ export default function SellerProductDetail() {
                 const { data } = await productApi.getProductById(id);
                 const raw = data?.data || data;
                 if (!raw) { toast.error("Product not found"); navigate("/seller/products"); return; }
-                {console.log('raw', raw)}
+                const normalizedVariants = (Array.isArray(raw.variants) ? raw.variants : []).map(v => ({
+                    ...v,
+                    price: Number(v?.price ?? v?.final_price ?? 0),
+                    old_price: Number(v?.old_price ?? 0),
+                    stock: Number(v?.stock ?? 0)
+                }));
+                const totalVariantStock = normalizedVariants.reduce((sum, v) => sum + v.stock, 0);
+
                 setProduct({
                     ...raw,
                     base_price: Number(raw.base_price),
                     old_price: raw.old_price ? Number(raw.old_price) : null,
-                    stock: Number(raw.stock || 0),
+                    stock: normalizedVariants.length > 0 ? totalVariantStock : Number(raw.stock || 0),
                     sold: Number(raw.sold || 0),
                     rating: Number(raw.rating || 0),
                     reviews: Number(raw.review_count || 0),
@@ -87,6 +95,7 @@ export default function SellerProductDetail() {
                     tag: typeof raw.tag === "string" ? raw.tag.split(",").map(t => t.trim()).filter(Boolean) : (raw.tag || []),
                     color: typeof raw.color === "string" ? raw.color.split(",").map(c => c.trim()).filter(Boolean) : (raw.color || []),
                     image_url: Array.isArray(raw.image_url) ? raw.image_url : (raw.image_url ? [raw.image_url] : []),
+                    variants: normalizedVariants
                 });
             } catch (e) {
                 console.error(e);
@@ -106,20 +115,38 @@ export default function SellerProductDetail() {
                 const res = await orderApi.getSellerOrders(seller.id);
                 const orders = res.data || [];
                 const monthMap = {};
-                orders.forEach(item => {
-                    if (String(item.product_id) === String(id)) {
-                        const m = MONTHS[new Date(item.created_time).getMonth()];
-                        if (!monthMap[m]) monthMap[m] = { month: m, units: 0, revenue: 0 };
-                        monthMap[m].units += Number(item.total_items || 0);
-                        monthMap[m].revenue += Number(item.subtotal || 0);
+                let calculatedSold = 0;
+                let calculatedRevenue = 0;
+
+                orders.forEach(order => {
+                    if (order.order_status === 'cancelled' || order.order_status === 'payment_failed') {
+                        return;
                     }
+                    const items = Array.isArray(order.items) ? order.items : [];
+                    items.forEach(item => {
+                        if (String(item.product_id) === String(id)) {
+                            const m = MONTHS[new Date(order.created_time).getMonth()];
+                            if (!monthMap[m]) monthMap[m] = { month: m, units: 0, revenue: 0 };
+
+                            const qty = Number(item.quantity || 0);
+                            const itemRev = Number(item.line_total || (qty * Number(item.price || 0)));
+
+                            monthMap[m].units += qty;
+                            monthMap[m].revenue += itemRev;
+
+                            calculatedSold += qty;
+                            calculatedRevenue += itemRev;
+                        }
+                    });
                 });
+
                 setMonthlyData(MONTHS.map(m => monthMap[m] || { month: m, units: 0, revenue: 0 }));
+                setSalesStats({ sold: calculatedSold, revenue: calculatedRevenue });
             } catch (err) {
                 console.error(err);
             }
         })();
-    }, [id]);
+    }, [id, refresh]);
 
     // ── Fetch Weekly Data ──
     useEffect(() => {
@@ -163,10 +190,12 @@ export default function SellerProductDetail() {
     const prevImg = () => setActiveImg((i) => (i - 1 + imgCount) % imgCount);
     const nextImg = () => setActiveImg((i) => (i + 1) % imgCount);
 
-    // ── Derived values ──
-    const totalRev = product ? product.base_price * product.sold : 0;
-    const stockPct = product ? Math.min(100, Math.round((product.stock / Math.max(1, product.stock + product.sold)) * 100)) : 0;
-    const stockColor = !product ? "#22c55e" : product.stock === 0 ? "var(--danger)" : product.stock <= 10 ? "var(--warning)" : "var(--success)";
+    // ── Derived values ── 
+    const displaySold = product ? (salesStats.sold || product.sold || 0) : 0;
+    const totalRev = product ? (salesStats.revenue || (product.base_price * displaySold)) : 0;
+    const remainingStock = product ? Math.max(0, product.stock - displaySold) : 0;
+    const stockPct = product ? Math.min(100, Math.round((remainingStock / Math.max(1, product.stock)) * 100)) : 0;
+    const stockColor = !product ? "#22c55e" : remainingStock === 0 ? "var(--danger)" : remainingStock <= 10 ? "var(--warning)" : "var(--success)";
 
     const statusPie = useMemo(() => {
         const map = {};
@@ -190,7 +219,7 @@ export default function SellerProductDetail() {
     // ── Sidebar stats ──
     const sidebarStats = product ? [
         { icon: "💰", label: "Product Revenue", val: fmtL(totalRev) },
-        { icon: "🛒", label: "Units Sold", val: product.sold },
+        { icon: "🛒", label: "Units Sold", val: displaySold },
         { icon: "⭐", label: "Rating", val: product.rating },
     ] : [];
 
@@ -226,9 +255,6 @@ export default function SellerProductDetail() {
                                         </p>
                                     </div>
                                     <div className="spd-desktop-actions d-none d-lg-flex gap-2">
-                                        <button className="spd-action-btn ghost" onClick={() => navigate(`/product/${id}`)}>
-                                            👁️ View Live
-                                        </button>
                                         <button className="spd-action-btn primary" onClick={() => setShowEdit(true)}>
                                             ✏️ Edit Product
                                         </button>
@@ -295,11 +321,11 @@ export default function SellerProductDetail() {
                                             {[
                                                 { icon: "💰", val: fmt(product.base_price), lbl: "Selling Price", bg: "#fff3ee", border: "#ffd3b8" },
                                                 { icon: "🏷️", val: product.old_price ? fmt(product.old_price) : "—", lbl: "MRP", bg: "#f0fdf4", border: "#bbf7d0" },
-                                                { icon: "🚀", val: product.sold, lbl: "Units Sold", bg: "#eff6ff", border: "#bfdbfe" },
+                                                { icon: "🚀", val: displaySold, lbl: "Units Sold", bg: "#eff6ff", border: "#bfdbfe" },
                                                 {
-                                                    icon: "📦", val: product.stock, lbl: "In Stock",
-                                                    bg: product.stock === 0 ? "var(--danger-soft)" : product.stock <= 10 ? "var(--warning-soft)" : "#f0fdf4",
-                                                    border: product.stock === 0 ? "#fecaca" : product.stock <= 10 ? "#fef08a" : "#bbf7d0"
+                                                    icon: "📦", val: remainingStock, lbl: "In Stock",
+                                                    bg: remainingStock === 0 ? "var(--danger-soft)" : remainingStock <= 10 ? "var(--warning-soft)" : "#f0fdf4",
+                                                    border: remainingStock === 0 ? "#fecaca" : remainingStock <= 10 ? "#fef08a" : "#bbf7d0"
                                                 },
                                                 { icon: "⭐", val: product.rating, lbl: "Rating", bg: "#fefce8", border: "#fef08a" },
                                                 { icon: "💬", val: product.review_count, lbl: "Reviews", bg: "#fdf4ff", border: "#e9d5ff" },
@@ -316,7 +342,15 @@ export default function SellerProductDetail() {
                                             {/* Product Details card */}
                                             <Col xs={12}>
                                                 <div className="spd-card">
-                                                    <div className="spd-card-title">📋 Product Details</div>
+                                                    <span className="spd-card-title d-inline-flex  justify-content-between">
+                                                        📋 Product Details
+                                                    </span>
+                                                    <span className="text-danger d-inline-flex float-end fw-bold">
+                                                        {
+                                                            product.status === "false" ? "INACTIVE" : "ACTIVE"
+
+                                                        }
+                                                    </span>
                                                     <div className="spd-card-sub">Core listing information</div>
                                                     {[
                                                         { key: "Brand", val: product.brand || "—" },
@@ -516,7 +550,7 @@ export default function SellerProductDetail() {
                                             <div className="spd-card-title">📦 Stock Health</div>
                                             <div className="spd-card-sub">Current inventory status</div>
                                             <div style={{ textAlign: "center", margin: "8px 0 12px" }}>
-                                                <div style={{ fontFamily: "var(--font-display)", fontSize: "2.5rem", fontWeight: 800, color: stockColor, lineHeight: 1 }}>{product.stock}</div>
+                                                <div style={{ fontFamily: "var(--font-display)", fontSize: "2.5rem", fontWeight: 800, color: stockColor, lineHeight: 1 }}>{remainingStock}</div>
                                                 <div style={{ fontSize: ".72rem", fontWeight: 700, color: "var(--muted)" }}>units remaining</div>
                                             </div>
                                             <div className="spd-stock-track">
@@ -528,8 +562,8 @@ export default function SellerProductDetail() {
                                             <div style={{ fontSize: ".7rem", fontWeight: 700, color: "var(--muted)", marginBottom: 14 }}>{stockPct}% of total inventory</div>
                                             <div className="spd-divider" style={{ margin: "10px 0" }} />
                                             {[
-                                                { lbl: "Total Sold", val: product.sold, color: "var(--p)" },
-                                                { lbl: "In Stock", val: product.stock, color: stockColor },
+                                                { lbl: "Total Sold", val: displaySold, color: "var(--p)" },
+                                                { lbl: "In Stock", val: remainingStock, color: stockColor },
                                                 { lbl: "Min Alert", val: product.min_stock_alert || "—", color: "var(--warning)" },
                                             ].map(({ lbl, val, color }) => (
                                                 <div key={lbl} style={{ display: "flex", justifyContent: "space-between", marginBottom: 7 }}>

@@ -29,7 +29,12 @@ const API_FIELDS_MAP = {
                         typeof p.img === "string" && p.img.trim() ? [p.img.trim()] :
                             [];
 
-        const variants = Array.isArray(p.variants) ? p.variants : [];
+        const variants = (Array.isArray(p.variants) ? p.variants : []).map(v => ({
+            ...v,
+            price: Number(v?.price ?? v?.final_price ?? 0),
+            old_price: Number(v?.old_price ?? 0),
+            stock: Number(v?.stock ?? 0)
+        }));
 
         const colors = [...new Set(
             variants.map(v => v?.color).filter(Boolean)
@@ -71,7 +76,7 @@ const API_FIELDS_MAP = {
 
             colors,
             sizes,
-            stock: totalVariantStock > 0 ? totalVariantStock : Number(p.stock || 0),
+            stock: variants.length > 0 ? totalVariantStock : Number(p.stock || 0),
             variants,
 
             rating: Number(p.rating ?? 0),
