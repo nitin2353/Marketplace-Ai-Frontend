@@ -13,7 +13,7 @@ const getMyNotifications = async (page = 1, limit = 10) => {
 // GET UNREAD COUNT
 const getUnreadCount = async () => {
     try {
-        const response = await API.get(`/notification/unread-count`);
+        const response = await apiConfig.get(`/notification/unread-count`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error fetching unread count" };
