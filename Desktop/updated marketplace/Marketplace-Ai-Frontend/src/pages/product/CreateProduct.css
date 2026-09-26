@@ -1,0 +1,430 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+/* ── Base ── */
+.cp-page {
+    min-height: 100vh;
+    background: #f1f4ff;
+    font-family: 'Nunito', sans-serif;
+}
+
+/* ── Section card ── */
+.cp-card {
+    background: #fff;
+    border-radius: 18px;
+    border: 1.5px solid #eef0f8;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+    padding: 24px;
+    transition: border-color 0.2s;
+}
+.cp-card.active-step {
+    border-color: #355aff;
+}
+
+/* ── Section title ── */
+.cp-section-title {
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #355aff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+.cp-section-title::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, #3835ff 0%, transparent 100%);
+    border-radius: 2px;
+}
+
+/* ── Label ── */
+.cp-label {
+    font-size: 0.73rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b7280;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* ── Input ── */
+.cp-input {
+    border-radius: 10px !important;
+    border: 2px solid #e8eaf6 !important;
+    padding: 10px 14px !important;
+    font-size: 0.9rem !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 600 !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+    background: #fff !important;
+    color: #1a1a2e !important;
+}
+.cp-input:focus {
+    border-color: #355aff !important;
+    box-shadow: 0 0 0 3px rgba(53, 100, 255, 0.12) !important;
+    outline: none !important;
+}
+.cp-input.is-invalid {
+    border-color: #dc3545 !important;
+}
+.cp-input:disabled {
+    background: #f8f9ff !important;
+    color: #9ca3af !important;
+}
+
+/* ── Textarea ── */
+.cp-textarea {
+    border-radius: 12px !important;
+    border: 2px solid #e8eaf6 !important;
+    padding: 11px 14px !important;
+    font-size: 0.9rem !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 600 !important;
+    transition: border-color 0.2s !important;
+    resize: vertical !important;
+    min-height: 100px !important;
+    color: #1a1a2e !important;
+}
+.cp-textarea:focus {
+    border-color: #355aff !important;
+    box-shadow: 0 0 0 3px rgba(53, 100, 255, 0.12) !important;
+    outline: none !important;
+}
+
+/* ── Select ── */
+.cp-select {
+    border-radius: 10px !important;
+    border: 2px solid #e8eaf6 !important;
+    padding: 10px 14px !important;
+    font-size: 0.9rem !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 600 !important;
+    color: #1a1a2e !important;
+    background: #fff !important;
+    transition: border-color 0.2s !important;
+    cursor: pointer;
+}
+.cp-select:focus {
+    border-color: #355aff !important;
+    box-shadow: 0 0 0 3px rgba(53, 100, 255, 0.12) !important;
+    outline: none !important;
+}
+
+/* ── Input Group addon ── */
+.cp-addon {
+    background: #f8f9ff !important;
+    border: 2px solid #e8eaf6 !important;
+    font-weight: 800 !important;
+    font-size: 0.85rem !important;
+    color: #6b7280 !important;
+}
+.cp-addon-left {
+    border-right: none !important;
+    border-radius: 10px 0 0 10px !important;
+}
+.cp-addon-right {
+    border-left: none !important;
+    border-radius: 0 10px 10px 0 !important;
+}
+.cp-input-inner-left {
+    border-radius: 0 10px 10px 0 !important;
+    border-left: none !important;
+}
+.cp-input-inner-right {
+    border-radius: 10px 0 0 10px !important;
+    border-right: none !important;
+}
+
+/* ── Primary button ── */
+.cp-btn-primary {
+    background: linear-gradient(135deg, #355aff, #3577ff) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    letter-spacing: 0.3px !important;
+    font-family: 'Nunito', sans-serif !important;
+    color: #fff !important;
+    transition: transform 0.15s, box-shadow 0.15s !important;
+    padding: 11px 22px !important;
+}
+.cp-btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(53, 100, 255, 0.38) !important;
+}
+.cp-btn-primary:disabled {
+    opacity: 0.7 !important;
+    cursor: not-allowed !important;
+}
+.cp-btn-primary:active:not(:disabled) {
+    transform: translateY(0) !important;
+}
+
+/* ── Outline button ── */
+.cp-btn-outline {
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    border: 2px solid #e8eaf6 !important;
+    background: #fff !important;
+    color: #555 !important;
+    font-family: 'Nunito', sans-serif !important;
+    transition: all 0.18s !important;
+    padding: 11px 22px !important;
+}
+.cp-btn-outline:hover {
+    border-color: #355aff !important;
+    color: #355aff !important;
+    background: #f0f8ff !important;
+}
+
+/* ── Small button ── */
+.cp-btn-sm {
+    padding: 6px 14px !important;
+    font-size: 0.8rem !important;
+    border-radius: 8px !important;
+}
+
+/* ── Toggle button ── */
+.cp-toggle {
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    padding: 8px 18px !important;
+    border: 2px solid #e8eaf6 !important;
+    background: #fff !important;
+    color: #9ca3af !important;
+    cursor: pointer;
+    transition: all 0.18s !important;
+    font-family: 'Nunito', sans-serif !important;
+}
+.cp-toggle.on {
+    border-color: #355aff !important;
+    background: linear-gradient(135deg, #f0f8ff, #f0f8ff) !important;
+    color: #355aff !important;
+}
+.cp-toggle.off-active {
+    border-color: #6b7280 !important;
+    background: #f9fafb !important;
+    color: #374151 !important;
+}
+
+/* ── Product type card ── */
+.cp-type-card {
+    flex: 1;
+    min-width: 200px;
+    padding: 20px 22px;
+    border-radius: 16px;
+    border: 2.5px solid #e8eaf6;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+.cp-type-card:hover {
+    border-color: #355aff;
+    background: #f0f8ff;
+}
+.cp-type-card.selected-single {
+    border-color: #355aff;
+    background: #f0f8ff;
+}
+.cp-type-card.selected-variant {
+    border-color: #355aff;
+    background: #f0f8ff;
+}
+
+/* ── Tag pill ── */
+.cp-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f0f8ff;
+    color: #355aff;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+.cp-tag-pill button {
+    background: none;
+    border: none;
+    color: #3543ff;
+    font-size: 0.88rem;
+    padding: 0;
+    line-height: 1;
+    cursor: pointer;
+}
+
+/* ── Variant card ── */
+.cp-variant-card {
+    background: #f8f9ff;
+    border: 1.5px solid #e8eaf6;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+.cp-variant-badge {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #355aff, #355aff);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ── Image upload ── */
+.cp-image-zone {
+    border: 2.5px dashed #d1d5db;
+    border-radius: 16px;
+    background: #f8f9ff;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    padding: 16px;
+}
+.cp-image-zone:hover,
+.cp-image-zone.drag {
+    border-color: #3553ff;
+    background: #fff7f4;
+}
+.cp-img-thumb {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 2px solid #e8eaf6;
+    display: block;
+}
+.cp-img-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+.cp-img-remove {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.58rem;
+    font-weight: 900;
+    border: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    line-height: 1;
+    z-index: 2;
+}
+.cp-img-cover-badge {
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.55rem;
+    font-weight: 900;
+    background: #355aff;
+    color: #fff;
+    border-radius: 0 0 8px 8px;
+    padding: 1px 0;
+    letter-spacing: 0.05em;
+}
+.cp-img-add-box {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    border: 2px dashed #d1d5db;
+    background: #f1f4ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #9ca3af;
+    transition: border-color 0.2s, color 0.2s;
+    flex-shrink: 0;
+}
+.cp-img-add-box:hover {
+    border-color: #3564ff;
+    color: #3543ff;
+}
+
+/* ── Discount badge ── */
+.cp-discount-badge {
+    background: #dcfce7;
+    color: #166534;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+/* ── Success ring ── */
+.cp-success-ring {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #355aff, #355aff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    margin: 0 auto;
+}
+
+/* ── Skeleton ── */
+.cp-skel {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: cp-shimmer 1.5s infinite;
+    border-radius: 6px;
+}
+@keyframes cp-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ── Error text ── */
+.cp-error {
+    font-size: 0.75rem;
+    color: #dc3545;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+/* ── Info alert ── */
+.cp-info {
+    background: #eff6ff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.83rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    border: 1.5px solid #bfdbfe;
+}
+.cp-warn {
+    background: #fff8e6;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.83rem;
+    font-weight: 700;
+    color: #92400e;
+    border: 1.5px solid #fde68a;
+}

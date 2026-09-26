@@ -1,0 +1,328 @@
+import toast from "react-hot-toast";
+import JWTService from "../config/jwt.config";
+import { Row, Col, Stack, InputGroup, Form, Container } from "react-bootstrap";
+
+const ALL_TAGS = ["New Arrival", "Trending", "Best Seller", "Limited Edition", "Eco Friendly", "Premium", "Sale", "Exclusive", "Handmade", "Organic", "Featured"];
+
+const SORT_OPTIONS = [
+    { v: "relevance", l: "Relevance" },
+    { v: "price_lo", l: "Price: Low → High" },
+    { v: "price_hi", l: "Price: High → Low" },
+    { v: "rating", l: "Top Rated" },
+    { v: "newest", l: "Newest First" },
+    { v: "popular", l: "Most Popular" },
+];
+
+export const TABLE_HEADERS = [
+    { label: "Order ID", key: "id" },
+    { label: "Buyer", key: "buyer" },
+    { label: "Qty", key: "qty" },
+    { label: "Amount", key: "amount" },
+    { label: "Status", key: "status" },
+    { label: "Date", key: "date" },
+];
+
+
+const API_FIELDS_MAP = {
+
+    products: (p) => {
+        const imageList =
+            Array.isArray(p.image_url) ? p.image_url.filter(Boolean) :
+                Array.isArray(p.images) ? p.images.filter(Boolean) :
+                    typeof p.image_url === "string" && p.image_url.trim() ? [p.image_url.trim()] :
+                        typeof p.img === "string" && p.img.trim() ? [p.img.trim()] :
+                            [];
+
+        const variants = (Array.isArray(p.variants) ? p.variants : []).map(v => ({
+            ...v,
+            price: Number(v?.price ?? v?.final_price ?? 0),
+            old_price: Number(v?.old_price ?? 0),
+            stock: Number(v?.stock ?? 0)
+        }));
+
+        const colors = [...new Set(
+            variants.map(v => v?.color).filter(Boolean)
+        )];
+
+        const sizes = [...new Set(
+            variants.map(v => v?.size).filter(Boolean)
+        )];
+
+        const totalVariantStock = variants.reduce(
+            (sum, v) => sum + Number(v?.stock || 0),
+            0
+        );
+
+        const tags =
+            typeof p.tag === "string"
+                ? p.tag.split(",").map(t => t.trim()).filter(Boolean)
+                : Array.isArray(p.tag)
+                    ? p.tag.filter(Boolean)
+                    : [];
+
+        return {
+            id: p.id,
+            title: p.title ?? "",
+            description: p.description ?? "",
+            brand: p.brand || p.business_name || "General",
+
+            category: p.category ?? "General",
+
+            price: Number(p.base_price ?? p.price ?? 0),
+            old_price: Number(p.old_price ?? 0),
+            discount: Number(p.discount ?? 0),
+
+            img: imageList[0] || "",
+            images: imageList,
+
+            tags,
+            tag: tags[0] || "",
+
+            colors,
+            sizes,
+            stock: variants.length > 0 ? totalVariantStock : Number(p.stock || 0),
+            variants,
+
+            rating: Number(p.rating ?? 0),
+            reviews: Number(p.review_count ?? 0),
+            sold: Number(p.sold ?? 0),
+
+            is_return: Boolean(p.is_return),
+            is_replace: Boolean(p.is_replace),
+            is_customizable: Boolean(p.is_customizable),
+            return_replace_duration: Number(p.return_replace_duration ?? 0),
+            return_replace_instructions: p.return_replace_instructions ?? "",
+
+            created_at: p.created_at ?? null,
+            seller_id: p.seller_id ?? null,
+        };
+    },
+
+    cart: (row) => ({
+        id: row.cart_id,
+        product_id: row.product_id,
+        title: row.title,
+        brand: row.brand,
+        price: parseFloat(row.amount),
+        old_price: parseFloat(row.old_price),
+        discount: row.discount,
+        qty: row.total_quantity,
+        stock: Number(row.available_stock) || Number(row.product_avl_stock) || 0,
+        image_url: Array.isArray(row.image_url) ? JSON.stringify(row.image_url[0]) : JSON.stringify(row.image_url),
+        color: row.color ? row.color.split(",")[0].trim() : null,
+        colors: row.color ? row.color.split(",").map(c => c.trim()) : [],
+        tag: row.tag ? row.tag.split(",").map(t => t.trim()) : [],
+        rating: row.rating,
+        reviews: row.reviews,
+        size: row.size,
+        product_price: row.product_price,
+        is_return: row.is_return,
+        is_replace: row.is_replace,
+        return_replace_duration: row.return_replace_duration,
+        tax_percentage: Number(row.tax_percentage) || 0,
+    }),
+
+    wishlist: (raw) => ({
+        wishlistId: raw.id,
+        id: raw.product_id,
+        title: raw.title ?? "Unnamed Product",
+        description: raw.description ?? "",
+        brand: raw.brand ?? "",
+        category: raw.category ?? null,
+        seller_id: raw.seller_id,
+        img: Array.isArray(raw.image_url) ? raw.image_url[0] : raw.image_url ?? "",
+        images: Array.isArray(raw.image_url) ? raw.image_url : [raw.image_url].filter(Boolean),
+        price: Number(raw.base_price) || 0,
+        old_price: Number(raw.old_price) || 0,
+        discount: raw.discount != null ? Number(raw.discount) : 0,
+        rating: Number(raw.rating) || 0,
+        reviews: Number(raw.reviews) || 0,
+        sold: Number(raw.sold) || 0,
+        stock: Number(raw.stock) || 0,
+        tags: typeof raw.tag === "string"
+            ? raw.tag.split(",").map(t => t.trim()).filter(Boolean)
+            : Array.isArray(raw.tag) ? raw.tag : [],
+        is_return: raw.is_return ?? false,
+        is_replace: raw.is_replace ?? false,
+        is_customizable: raw.is_customizable ?? false,
+        return_replace_duration: raw.return_replace_duration ?? 0,
+        return_replace_instructions: raw.return_replace_instructions ?? "",
+        addedOn: raw.created_time ?? raw.created_at ?? null,
+        variants: raw.variants ?? null,
+    }),
+
+    cartitem: (raw) => ({
+        id: raw.cart_id,
+        product_id: raw.product_id,
+        variant_id: raw.variant_id,
+        title: raw.title ?? "Unnamed Product",
+        brand: raw.brand ?? "",
+        img: Array.isArray(raw.image_url) ? raw.image_url[0] : raw.image_url ?? "",
+        images: Array.isArray(raw.image_url) ? raw.image_url : [raw.image_url].filter(Boolean),
+        price: Number(raw.final_price) || 0,
+        base_price: Number(raw.base_price) || 0,
+        old_price: Number(raw.base_price) || 0,
+        color: raw.color ?? null,
+        size: raw.size ?? null,
+        stock: Number(raw.variant_stock) || Number(raw.stock) || 0,
+        qty: Number(raw.total_quantity) || 1,
+        discount: raw.base_price && raw.final_price
+            ? ((1 - Number(raw.final_price) / Number(raw.base_price)) * 100)
+            : 0,
+    })
+}
+
+
+export const FMT = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
+
+
+const COUPONS = {
+    SAVE10: 10,
+    SHOP20: 20,
+    FIRST50: 50,
+};
+
+// Full: "2026-04-21 10:30:00"
+export const FORMATED_DATE_TIME = (date) => {
+    const pad = (n) => String(n).padStart(2, '0');
+    const d = new Date(date);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
+
+// Only Date: "2026-04-21"
+export const FORMATED_DATE = (date) => {
+    const pad = (n) => String(n).padStart(2, '0');
+    const d = new Date(date);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
+// Only Time: "10:30:00"
+export const FORMATED_TIME = (date) => {
+    const pad = (n) => String(n).padStart(2, '0');
+    const d = new Date(date);
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
+
+export const METHODS = [
+    {
+        id: "card",
+        icon: "💳",
+        label: "Credit / Debit Card",
+        sub: "Visa, Mastercard, RuPay",
+    },
+    {
+        id: "upi",
+        icon: "📱",
+        label: "UPI",
+        sub: "GPay, PhonePe, Paytm & more",
+    },
+    {
+        id: "netbanking",
+        icon: "🏦",
+        label: "Net Banking",
+        sub: "All major Indian banks",
+    },
+    {
+        id: "wallet",
+        icon: "👛",
+        label: "Mobile Wallet",
+        sub: "Paytm, Mobikwik, Freecharge",
+    },
+    {
+        id: "cod",
+        icon: "💵",
+        label: "Cash on Delivery",
+        sub: "Pay when you receive",
+    },
+];
+
+export const METHOD_ICONS = {
+    card: "💳",
+    upi: "📱",
+    netbanking: "🏦",
+    wallet: "👛",
+    cod: "💵",
+};
+
+export const FMT_DATE = (d) =>
+    d ? new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—";
+
+export const FMT_DATE_TIME = (d) =>
+    d ? new Date(d).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+
+
+
+export const TABS = [
+    { key: "all", label: "All Orders" },
+    { key: "placed", label: "Placed" },
+    { key: "confirmed", label: "Confirmed" },
+    { key: "processing", label: "Processing" },
+    { key: "shipped", label: "Shipped" },
+    { key: "delivered", label: "Delivered" },
+    { key: "cancelled", label: "Cancelled" },
+];
+
+
+export const STATUS_META = {
+    placed: { icon: "📋", label: "Placed" },
+    confirmed: { icon: "✅", label: "Confirmed" },
+    processing: { icon: "⚙️", label: "Processing" },
+    shipped: { icon: "🚚", label: "Shipped" },
+    delivered: { icon: "📦", label: "Delivered" },
+    cancelled: { icon: "❌", label: "Cancelled" },
+    payment_failed: { icon: "⚠️", label: "Payment Failed" },
+};
+
+export const TIMELINE_STEPS = ["placed", "confirmed", "processing", "shipped", "delivered"];
+
+
+export const PAYMENT_METHOD_LABELS = {
+    cod: { icon: "💵", label: "Cash on Delivery" },
+    card: { icon: "💳", label: "Card" },
+    upi: { icon: "📱", label: "UPI" },
+    netbanking: { icon: "🏦", label: "Net Banking" },
+    wallet: { icon: "👛", label: "Wallet" },
+};
+
+export const LogoutTab = () => {
+    const handleLogout = async () => {
+        try {
+            JWTService.clearTokenDetails()
+            toast.success("Logged out successfully!");
+            window.location.href = "/auth/login";
+        } catch (err) {
+            toast.error(err?.message || "Failed to logout");
+        }
+    };
+    function SectionHead({ icon, title, action }) {
+        return (
+            <div className="ss-card-header">
+                <div className="ss-card-title">{icon} {title}</div>
+                {action}
+            </div>
+        );
+    }
+
+    return (
+        <Stack gap={4}>
+            <div className="ss-card ss-fade ss-fade-1">
+                <SectionHead icon="🚪" title="Logout" />
+                <div className="ss-card-body">
+                    <p style={{ fontSize: "0.88rem", color: "#374151", marginBottom: 16, lineHeight: 1.6 }}>
+                        Logout from your account. You will be redirected to the login page.
+                    </p>
+                    <div className="ss-danger-zone">
+                        <button className="ss-btn-logout" onClick={handleLogout}>
+                            🚪 Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Stack>
+    );
+}
+
+
+
+
+export default { ALL_TAGS, TABLE_HEADERS, SORT_OPTIONS, API_FIELDS_MAP, COUPONS, FORMATED_DATE_TIME, FORMATED_DATE, FORMATED_TIME, METHODS, METHOD_ICONS, FMT, FMT_DATE, FMT_DATE_TIME, TABS, STATUS_META, TIMELINE_STEPS, PAYMENT_METHOD_LABELS, LogoutTab };
