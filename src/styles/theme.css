@@ -1,0 +1,64 @@
+/* ═══════════════════════════════════════════════════════
+   AI MARKETPLACE — Theme Variables
+   ═══════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* ── Brand Colors ── */
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #dbeafe;
+  --secondary: #0f172a;
+  --accent: #f97316;
+  --accent-dark: #ea580c;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --warning: #f59e0b;
+  --info: #0891b2;
+
+  /* ── Backgrounds ── */
+  --bg-main: #f5f7fb;
+  --bg-surface: #ffffff;
+  --bg-soft: #f8fafc;
+  --bg-hover: #eef2ff;
+
+  /* ── Text ── */
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --text-light: #9ca3af;
+  --text-white: #ffffff;
+
+  /* ── Borders & Shadows ── */
+  --border-light: #e5e7eb;
+  --border-medium: #d1d5db;
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 10px 25px rgba(15, 23, 42, 0.10);
+  --shadow-lg: 0 20px 45px rgba(15, 23, 42, 0.14);
+
+  /* ── Border Radius ── */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  /* ── Fonts ── */
+  --font-main: 'Nunito', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Nunito', sans-serif;
+
+  /* ── Gradients ── */
+  --primary-gradient: linear-gradient(135deg, #2563eb, #1d4ed8);
+  --accent-gradient: linear-gradient(135deg, #f97316, #ea580c);
+  --success-gradient: linear-gradient(135deg, #16a34a, #15803d);
+
+  /* ── Layout shortcuts (aliases used in Dashboard.css) ── */
+  --p: var(--primary);
+  --p2: var(--primary-dark);
+  --acc: var(--accent);
+  --bg: var(--bg-main);
+  --white: var(--bg-surface);
+  --border: var(--border-light);
+  --text: var(--text-main);
+  --muted: var(--text-muted);
+  --sidebar-w: 280px;
+}

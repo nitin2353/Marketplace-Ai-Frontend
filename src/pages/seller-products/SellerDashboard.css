@@ -1,0 +1,248 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+* {
+    font-family: 'Nunito', sans-serif;
+}
+
+body {
+    background: #f1f4ff !important;
+}
+
+.eco-hero {
+    background: linear-gradient(145deg, #3835ff 0%, #1e46f7 55%, #493cff 100%) !important;
+}
+
+.eco-sidebar-stat {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 14px 16px;
+}
+
+.eco-nav-item {
+    border-radius: 12px;
+    padding: 10px 14px;
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.eco-nav-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+.eco-nav-item.active {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+}
+
+.eco-section-card {
+    border-radius: 18px !important;
+    border: none !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.07) !important;
+}
+
+.eco-input {
+    border-radius: 12px !important;
+    border: 2px solid #e8eaf6 !important;
+    padding: 10px 14px !important;
+    font-size: 0.9rem !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+.eco-input:focus {
+    border-color: #5350e7 !important;
+    box-shadow: 0 0 0 3px rgba(53, 124, 255, 0.15) !important;
+    outline: none !important;
+}
+
+.eco-btn-main {
+    background: linear-gradient(135deg, #3553ff, #5242e6) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-weight: 800 !important;
+    font-size: 0.9rem !important;
+    padding: 10px 20px !important;
+    letter-spacing: 0.3px !important;
+    transition: transform 0.15s, box-shadow 0.15s !important;
+}
+
+.eco-btn-main:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 8px 22px rgba(53, 134, 255, 0.38) !important;
+}
+
+.eco-btn-outline {
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    border: 2px solid #e8eaf6 !important;
+    background: #fff !important;
+    color: #555 !important;
+    transition: border-color 0.2s, color 0.2s !important;
+    padding: 8px 16px !important;
+    font-size: 0.88rem !important;
+}
+
+.eco-btn-outline:hover {
+    border-color: #435ceb !important;
+    color: #3538ff !important;
+    background: #f4f5ff !important;
+}
+
+.product-card {
+    border-radius: 18px !important;
+    border: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07) !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+    overflow: hidden;
+    background: #fff;
+}
+
+.product-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.13) !important;
+}
+
+.product-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    background: #f8f9ff;
+}
+
+.product-img-placeholder {
+    width: 100%;
+    height: 180px;
+    background: linear-gradient(135deg, #f1f4ff, #e8eaf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+.eco-badge-stock-low {
+    background: #fef2f2 !important;
+    color: #dc2626 !important;
+    border: 1px solid #5242e6 !important;
+}
+
+.eco-badge-stock-ok {
+    background: #f0fdf4 !important;
+    color: #16a34a !important;
+    border: 1px solid #86efac !important;
+}
+
+.eco-badge-stock-out {
+    background: #fafafa !important;
+    color: #6b7280 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+.eco-badge-tag {
+    background: #eef4ff !important;
+    color: #5242e6 !important;
+    border: 1.5px solid #6251f7 !important;
+    border-radius: 20px !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    padding: 2px 10px !important;
+}
+
+.eco-filter-pill {
+    border-radius: 20px !important;
+    font-weight: 700 !important;
+    font-size: 0.8rem !important;
+    padding: 6px 16px !important;
+    border: 2px solid #e8eaf6 !important;
+    background: #ffffff !important;
+    color: #777 !important;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.eco-filter-pill.active {
+    border-color: #5242e6 !important;
+    background: linear-gradient(135deg, #eef4ff, #f4f8ff) !important;
+    color: #5242e6 !important;
+}
+
+.stat-chip {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.stat-chip-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.eco-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.eco-table th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #9ca3af;
+    font-weight: 800;
+    padding: 12px 16px;
+    background: #f8f9ff;
+    border-bottom: 2px solid #e8eaf6;
+}
+
+.eco-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f4ff;
+    font-size: 0.88rem;
+    vertical-align: middle;
+    color: #374151;
+}
+
+.eco-table tr:hover td {
+    background: #fafbff;
+}
+
+.eco-table tr:last-child td {
+    border-bottom: none;
+}
+
+.eco-modal .modal-content {
+    border-radius: 22px !important;
+    border: none !important;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18) !important;
+}
+
+.empty-state {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.empty-ring {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b35, #ffcd3c);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin: 0 auto 20px;
+}

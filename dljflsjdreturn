@@ -1,0 +1,20 @@
+[35msrc/components/Sellernavbar.jsx[m[36m:[mconst [1;31mSellerNavbar[m = ({
+[35msrc/components/Sellernavbar.jsx[m[36m:[mexport default [1;31mSellerNavbar[m;
+[35msrc/pages/SellerReviews/SellerReviews.jsx[m[36m:[mimport [1;31mSellerNavbar[m from "../../components/[1;31mSellerNavbar[m.jsx";
+[35msrc/pages/SellerReviews/SellerReviews.jsx[m[36m:[m                    <[1;31mSellerNavbar[m pageTitle="Reviews" />
+[35msrc/pages/product/CreateProduct.jsx[m[36m:[mimport [1;31mSellerNavbar[m from "../../components/[1;31mSellerNavbar[m.jsx";
+[35msrc/pages/product/CreateProduct.jsx[m[36m:[m                    <[1;31mSellerNavbar[m pageTitle="Add Product" />
+[35msrc/pages/returns/SellerReturns.jsx[m[36m:[mimport [1;31mSellerNavbar[m from "../../components/[1;31mSellerNavbar[m.jsx";
+[35msrc/pages/returns/SellerReturns.jsx[m[36m:[m                    <[1;31mSellerNavbar[m pageTitle="Return & Replacement Requests"/>
+[35msrc/pages/seller-dashboard/SellerDashboardHome.jsx[m[36m:[mimport [1;31mSellerNavbar[m from "../../components/[1;31mSellerNavbar[m.jsx";
+[35msrc/pages/seller-dashboard/SellerDashboardHome.jsx[m[36m:[m            <[1;31mSellerNavbar[m pageTitle="Dashboard" />
+[35msrc/pages/seller-detail-page/SellerProductDetail.jsx[m[36m:[mimport [1;31mSellerNavbar[m from "../../components/[1;31mSellerNavbar[m.jsx";
+[35msrc/pages/seller-detail-page/SellerProductDetail.jsx[m[36m:[m                <[1;31mSellerNavbar[m pageTitle="Product Detail" />
+[35msrc/pages/seller-orders/SellerOrders.jsx[m[36m:[mimport [1;31mSellerNavbar[m from "../../components/[1;31mSellerNavbar[m.jsx";
+[35msrc/pages/seller-orders/SellerOrders.jsx[m[36m:[m                <[1;31mSellerNavbar[m />
+[35msrc/pages/seller-payments/SellerPayments.jsx[m[36m:[mimport [1;31mSellerNavbar[m from "../../components/[1;31mSellerNavbar[m.jsx";
+[35msrc/pages/seller-payments/SellerPayments.jsx[m[36m:[m                        <[1;31mSellerNavbar[m pageTitle="Payments & Earnings" />
+[35msrc/pages/seller-products/SellerDashboard.jsx[m[36m:[mimport [1;31mSellerNavbar[m from "../../components/[1;31mSellerNavbar[m";
+[35msrc/pages/seller-products/SellerDashboard.jsx[m[36m:[m                    <[1;31mSellerNavbar[m />
+[35msrc/pages/seller-settings/Seller.jsx[m[36m:[mimport [1;31mSellerNavbar[m from "../../components/[1;31mSellerNavbar[m.jsx";
+[35msrc/pages/seller-settings/Seller.jsx[m[36m:[m                    <[1;31mSellerNavbar[m pageTitle="Settings" />

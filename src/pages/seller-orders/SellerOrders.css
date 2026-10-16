@@ -1,0 +1,813 @@
+/* ═══════════════════════════════════════════════════════════════
+   SellerOrders.css
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+    --p: #3549ff;
+    --p2: #1e51f7;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --bg: #f1f4ff;
+    --white: #ffffff;
+    --border: #e8eaf6;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --info: #1d4ed8;
+    --r: 12px;
+    --r-lg: 16px;
+    --r-xl: 20px;
+}
+
+/* ── Animations ── */
+.so-fu {
+    animation: soFu 0.38s ease both;
+}
+
+@keyframes soFu {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Page ── */
+.so-page {
+    min-height: 100vh;
+    background: var(--bg);
+}
+
+/* ── Topbar ── */
+.so-topbar {
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+}
+
+.so-topbar-title {
+    font-size: 1rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 0.02em;
+    width: 300px;
+}
+
+.so-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ── Stat cards ── */
+.so-stat {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: transform 0.12s;
+}
+
+.so-stat:hover {
+    transform: translateY(-2px);
+}
+
+.so-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.so-stat-val {
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1;
+}
+
+.so-stat-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+}
+
+/* ── Filter / toolbar bar ── */
+.so-toolbar {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.so-search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 180px;
+}
+
+.so-search {
+    width: 100%;
+    border: 1.5px solid var(--border) !important;
+    border-radius: 10px !important;
+    padding: 9px 14px 9px 38px !important;
+    font-size: 0.84rem !important;
+    font-family: "Nunito", sans-serif !important;
+    background: #fafbff !important;
+    color: var(--text) !important;
+    transition: border-color 0.15s !important;
+}
+
+.so-search:focus {
+    outline: none !important;
+    border-color: #355aff !important;
+    box-shadow: 0 0 0 3px rgba(53, 83, 255, 0.1) !important;
+}
+
+.so-search-icon {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.so-select {
+    border: 1.5px solid var(--border) !important;
+    border-radius: 10px !important;
+    padding: 9px 12px !important;
+    font-size: 0.82rem !important;
+    font-family: "Nunito", sans-serif !important;
+    color: var(--text) !important;
+    background: #fafbff !important;
+    cursor: pointer;
+    min-width: 140px;
+}
+
+.so-select:focus {
+    outline: none !important;
+    border-color: #355aff !important;
+    box-shadow: 0 0 0 3px rgba(53, 83, 255, 0.1) !important;
+}
+
+/* ── Bulk action bar ── */
+.so-bulk-bar {
+    border-radius: var(--r);
+    padding: 11px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    animation: soFu 0.2s ease;
+}
+
+.so-bulk-label {
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: #fff;
+    flex: 1;
+}
+
+.so-bulk-btn {
+    border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    padding: 6px 14px !important;
+    font-family: "Nunito", sans-serif !important;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.12s !important;
+}
+
+.so-bulk-btn:hover {
+    background: rgba(255, 255, 255, 0.28) !important;
+}
+
+.so-bulk-btn:disabled {
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+}
+
+/* ── Table ── */
+.so-table-wrap {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+}
+
+.so-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: "Nunito", sans-serif;
+}
+
+.so-table thead tr {
+    background: #fafbff;
+    border-bottom: 1.5px solid var(--border);
+}
+
+.so-table th {
+    padding: 12px 16px;
+    font-size: 0.72rem;
+    font-weight: 900;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    text-align: left;
+}
+
+.so-table th.center,
+.so-table td.center {
+    text-align: center;
+}
+
+.so-table td {
+    padding: 13px 16px;
+    font-size: 0.83rem;
+    color: var(--text);
+    border-bottom: 1px solid #f1f4ff;
+    vertical-align: middle;
+}
+
+.so-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.so-table tbody tr {
+    transition: background 0.12s;
+    cursor: pointer;
+}
+
+.so-table tbody tr:hover {
+    background: #f7f8fd;
+}
+
+.so-table tbody tr.selected {
+    background: #f7f8fd;
+}
+
+.selected:hover {
+    background: #f7f8fd !important;
+}
+
+/* ── Checkbox ── */
+.so-chk {
+    width: 16px;
+    height: 16px;
+    /* accent-color: var(--p); */
+    cursor: pointer;
+}
+
+/* ── Order number ── */
+.so-order-num {
+    font-weight: 900;
+    color: #3549ff;
+    font-size: 0.82rem;
+}
+
+.so-order-date {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 700;
+    margin-top: 1px;
+}
+
+/* ── Product thumb strip in table ── */
+.so-thumb-strip {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.so-thumb {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.so-thumb-more {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: #f1f4ff;
+    border: 1px dashed #c7d0f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.66rem;
+    font-weight: 900;
+    color: var(--p);
+}
+
+/* ── Customer info ── */
+.so-cust-name {
+    font-weight: 800;
+    font-size: 0.84rem;
+    color: var(--text);
+}
+
+.so-cust-meta {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+/* ── Status badges ── */
+.so-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 900;
+    border-radius: 20px;
+    padding: 4px 10px;
+    white-space: nowrap;
+    text-transform: capitalize;
+}
+
+.so-status.placed {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.so-status.confirmed {
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.so-status.processing {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.so-status.shipped {
+    background: #fdf4ff;
+    color: #7e22ce;
+}
+
+.so-status.delivered {
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.so-status.cancelled {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.so-status.payment_failed {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.so-pay-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    border-radius: 6px;
+    padding: 2px 8px;
+}
+
+.so-pay-badge.paid {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.so-pay-badge.pending {
+    background: #fff7ed;
+    color: #92400e;
+}
+
+.so-pay-badge.failed {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.so-pay-badge.refunded {
+    background: #f0f4ff;
+    color: #4338ca;
+}
+
+/* ── Action dropdown trigger ── */
+.so-action-btn {
+    border: 1.5px solid #385aca !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    color: var(--muted) !important;
+    font-size: 0.8rem !important;
+    font-weight: 800 !important;
+    padding: 5px 12px !important;
+    cursor: pointer;
+    font-family: "Nunito", sans-serif !important;
+    transition: all 0.12s !important;
+    white-space: nowrap;
+}
+
+.so-action-btn:hover {
+    border-color: #385aca !important;
+    color: #385aca !important;
+    background-color: #6887eb1c !important;
+}
+
+/* ── Status update select (inline) ── */
+.so-status-select {
+    border: 1.5px solid var(--border) !important;
+    border-radius: 8px !important;
+    padding: 5px 10px !important;
+    font-size: 0.76rem !important;
+    font-family: "Nunito", sans-serif !important;
+    color: var(--text) !important;
+    background: #fafbff !important;
+    cursor: pointer;
+    min-width: 130px;
+}
+
+.so-status-select:focus {
+    outline: none !important;
+    border-color: var(--p) !important;
+}
+
+/* ── Drawer overlay ── */
+.so-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(17, 24, 39, 0.5);
+    display: flex;
+    justify-content: flex-end;
+    opacity: 1;
+}
+
+.so-drawer {
+    width: 100%;
+    max-width: 520px;
+    background: var(--white);
+    height: 100%;
+    overflow-y: auto;
+    animation: drawerIn 0.25s ease;
+    box-shadow: -8px 0 40px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes drawerIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.so-drawer-header {
+    background: linear-gradient(135deg, #5356ff, #4243aa);
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10 !important;
+}
+
+.so-drawer-close {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: none !important;
+    color: #fff !important;
+    border-radius: 50% !important;
+    width: 32px !important;
+    height: 32px !important;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    transition: background 0.12s !important;
+}
+
+.so-drawer-close:hover {
+    background: rgba(255, 255, 255, 0.32) !important;
+}
+
+.so-drawer-body {
+    padding: 20px 22px;
+}
+
+.so-drawer-section {
+    border: 1.5px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+}
+
+.so-drawer-section-title {
+    font-size: 0.72rem;
+    font-weight: 900;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ── Timeline ── */
+.so-timeline {
+    position: relative;
+    padding-left: 22px;
+}
+
+.so-timeline::before {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--border);
+    border-radius: 2px;
+}
+
+.so-tl-item {
+    position: relative;
+    padding-bottom: 16px;
+}
+
+.so-tl-item:last-child {
+    padding-bottom: 0;
+}
+
+.so-tl-dot {
+    position: absolute;
+    left: -19px;
+    top: 4px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 2px solid var(--white);
+}
+
+.so-tl-dot.done {
+    background: #22c55e;
+}
+
+.so-tl-dot.active {
+    background: #5356ff;
+    box-shadow: 0 0 0 3px rgba(53, 56, 255, 0.2);
+}
+
+.so-tl-label {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.so-tl-sub {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+/* ── Order items in drawer ── */
+.so-item-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f4ff;
+}
+
+.so-item-row:last-child {
+    border-bottom: none;
+}
+
+.so-item-img {
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+}
+
+/* ── Update status panel ── */
+.so-update-panel {
+    background: #fafbff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+}
+
+/* ── Confirm dialog ── */
+.so-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(17, 24, 39, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.so-confirm-box {
+    background: var(--white);
+    border-radius: var(--r-xl);
+    padding: 28px 28px 24px;
+    max-width: 380px;
+    width: 100%;
+    animation: soFu 0.2s ease;
+    text-align: center;
+}
+
+/* ── Skeleton ── */
+.so-skel {
+    background: linear-gradient(90deg, #e8eaf6 25%, #f1f4ff 50%, #e8eaf6 75%);
+    background-size: 200% 100%;
+    animation: soSkelAnim 1.4s infinite;
+    border-radius: 6px;
+}
+
+@keyframes soSkelAnim {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ── Buttons ── */
+.so-btn-primary {
+    border: none !important;
+    border-radius: 10px !important;
+    background: linear-gradient(135deg, #6153ff, #5364ff) !important;
+    color: #ffffff !important;
+    font-weight: 900 !important;
+    font-size: 0.86rem !important;
+    padding: 10px 22px !important;
+    font-family: "Nunito", sans-serif !important;
+    cursor: pointer;
+    transition: opacity 0.15s !important;
+    box-shadow: 0 4px 14px rgba(53, 67, 255, 0.28) !important;
+}
+
+.so-btn-primary:hover:not(:disabled) {
+    opacity: 0.9 !important;
+}
+
+.so-btn-primary:disabled {
+    opacity: 0.45 !important;
+    cursor: not-allowed !important;
+}
+
+.so-btn-outline {
+    border: 1.5px solid var(--border) !important;
+    border-radius: 10px !important;
+    background: #fff !important;
+    color: var(--muted) !important;
+    font-weight: 700 !important;
+    font-size: 0.86rem !important;
+    padding: 10px 20px !important;
+    font-family: "Nunito", sans-serif !important;
+    cursor: pointer;
+    transition: background 0.12s !important;
+}
+
+.so-btn-outline:hover {
+    background: #f8f9ff !important;
+}
+
+.so-btn-danger {
+    border: none !important;
+    border-radius: 10px !important;
+    background: #dc2626 !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+    font-size: 0.86rem !important;
+    padding: 10px 22px !important;
+    font-family: "Nunito", sans-serif !important;
+    cursor: pointer;
+    transition: opacity 0.15s !important;
+}
+
+.so-btn-danger:hover {
+    opacity: 0.88 !important;
+}
+
+/* ── Pagination ── */
+.so-pg-btn {
+    border: 1.5px solid var(--border) !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    color: var(--muted) !important;
+    font-size: 0.82rem !important;
+    font-weight: 800 !important;
+    padding: 6px 14px !important;
+    cursor: pointer;
+    font-family: "Nunito", sans-serif !important;
+    transition: all 0.12s !important;
+}
+
+.so-pg-btn:hover:not(:disabled) {
+    border-color: #5356ff !important;
+    /* color: #000000 !important; */
+}
+
+.so-pg-btn.active {
+    background: #5356ff !important;
+    border-color: #5356ff !important;
+    color: #ffffff !important;
+}
+
+.so-pg-btn:disabled {
+    opacity: 0.35 !important;
+    cursor: not-allowed !important;
+}
+
+/* ── Color dot ── */
+.so-color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .so-table-wrap {
+        overflow-x: auto;
+    }
+
+    .so-table {
+        min-width: 680px;
+    }
+
+    .so-drawer {
+        max-width: 100%;
+    }
+}
+
+.seller-orders-layout {
+    min-height: 100vh;
+}
+
+.seller-orders-content {
+    min-height: 100vh;
+    margin-left: 0;
+}
+
+@media (min-width: 992px) {
+    .seller-orders-content {
+        margin-left: 25%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .seller-orders-content {
+        margin-left: 16.666667%;
+    }
+}
+
