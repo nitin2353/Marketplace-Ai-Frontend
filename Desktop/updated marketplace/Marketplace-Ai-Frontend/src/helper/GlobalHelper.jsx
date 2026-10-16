@@ -55,7 +55,7 @@ const API_FIELDS_MAP = {
 
         const tags =
             typeof p.tag === "string"
-                ? p.tag.split(",").map(t => t.trim()).filter(Boolean)
+                ? p.tag?.split(",").map(t => t.trim()).filter(Boolean)
                 : Array.isArray(p.tag)
                     ? p.tag.filter(Boolean)
                     : [];
@@ -95,6 +95,7 @@ const API_FIELDS_MAP = {
 
             created_at: p.created_at ?? null,
             seller_id: p.seller_id ?? null,
+            seller_name: p.seller_name ?? null,
         };
     },
 
@@ -176,10 +177,11 @@ const API_FIELDS_MAP = {
 export const FMT = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
 
 
-const COUPONS = {
-    SAVE10: 10,
-    SHOP20: 20,
-    FIRST50: 50,
+export const COUPONS = {
+    // SAVE10: 10,
+    // SHOP20: 20,
+    // FIRST50: 50,
+    WELCOME10: 10,
 };
 
 // Full: "2026-04-21 10:30:00"

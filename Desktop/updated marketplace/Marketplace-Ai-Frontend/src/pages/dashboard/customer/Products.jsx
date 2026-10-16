@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../../../api/axios";
 import Card from "../../../components/Card";
+import apiConfig from "../config/axios-config";
 
 export default function Products() {
 

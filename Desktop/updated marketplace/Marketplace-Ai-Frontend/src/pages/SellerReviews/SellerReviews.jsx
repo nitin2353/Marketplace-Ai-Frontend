@@ -142,6 +142,8 @@ function ReviewCard({
 }) {
 
     const name = review.user_name || review.user?.full_name || "Anonymous";
+    const full_name = review.user_name || review.user?.full_name || "Anonymous";
+    const comment = review?.comment;
     const color = avatarColor(name);
     const images = Array.isArray(review.images) ? review.images : [];
 
@@ -161,55 +163,129 @@ function ReviewCard({
         >
 
             {/* Avatar */}
+
             <div
-                className="sr-avatar"
-                style={{ background: color }}
+                className="review-card p-3 p-md-4 rounded-4 border w-100"
+                style={{
+                    backgroundColor: "#ffffff",
+                    borderColor: "#e5e7eb",
+                    boxShadow: "0 3px 12px rgba(15, 23, 42, 0.05)",
+                }}
             >
-                {initials(name)}
-            </div>
+                {/* Customer Header */}
+                <div className="d-flex align-items-center gap-3 mb-3">
+                    <span
+                        className="sr-avatar flex-shrink-0"
+                        style={{
+                            background: color,
+                            width: 46,
+                            height: 46,
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#ffffff",
+                            fontWeight: 700,
+                            fontSize: 15,
+                        }}
+                    >
+                        {initials(name)}
+                    </span>
 
-            {/* Body */}
-            <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                        <h6
+                            className="mb-1 fw-bold text-dark"
+                            style={{
+                                fontSize: "15px",
+                                overflowWrap: "anywhere",
+                            }}
+                        >
+                            {full_name}
+                        </h6>
 
-                {/* ...tumhara existing content... */}
+                        <small className="text-muted">
+                            Customer Review
+                        </small>
+                    </div>
+                </div>
 
+                {/* Review Comment */}
+                <div
+                    className="mb-3"
+                    style={{
+                        backgroundColor: "#f8fafc",
+                        borderRadius: "10px",
+                        padding: "14px",
+                        borderLeft: "3px solid #6366f1",
+                    }}
+                >
+                    <p
+                        className="mb-0"
+                        style={{
+                            color: "#374151",
+                            fontSize: "14px",
+                            lineHeight: 1.7,
+                            whiteSpace: "pre-wrap",
+                            overflowWrap: "anywhere",
+                        }}
+                    >
+                        {comment || "No comment provided."}
+                    </p>
+                </div>
 
                 {/* Review Images */}
-                {images.length > 0 && (
-                    <div className="d-flex gap-2 mt-2 flex-wrap">
-                        {images.slice(0, 5).map((img, i) => (
-                            <img
-                                key={i}
-                                src={img}
-                                alt={`Review image ${i + 1}`}
-                                className="sr-product-img"
-                                style={{
-                                    cursor: "pointer",
-                                    width: 70,
-                                    height: 70,
-                                    objectFit: "cover",
-                                    borderRadius: 8
-                                }}
-                                onClick={() => setSelectedImage(img)}
-                                onError={e => {
-                                    e.target.style.display = "none";
-                                }}
-                            />
-                        ))}
+                {images?.length > 0 && (
+                    <div className="mb-3">
+                        <div className="small fw-semibold text-secondary mb-2">
+                            Review Photos
+                        </div>
+
+                        <div className="d-flex gap-2 flex-wrap">
+                            {images.slice(0, 5).map((img, i) => (
+                                <img
+                                    key={i}
+                                    src={img}
+                                    alt={`Review image ${i + 1}`}
+                                    className="sr-product-img review-image"
+                                    style={{
+                                        cursor: "pointer",
+                                        width: 76,
+                                        height: 76,
+                                        objectFit: "cover",
+                                        borderRadius: 10,
+                                        border: "1px solid #e5e7eb",
+                                        transition: "transform 0.2s ease",
+                                    }}
+                                    onClick={() => setSelectedImage(img)}
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = "none";
+                                    }}
+                                />
+                            ))}
+                        </div>
                     </div>
                 )}
 
-                {/* Reply */}
-                <ReplySection
-                    review={review}
-                    onReplySubmit={onReply}
-                    onReplyDelete={onReplyDelete}
-                    submitting={submittingId === review.id}
-                    clearing={clearingId === review.id}
+                {/* Divider */}
+                <hr
+                    style={{
+                        borderColor: "#e5e7eb",
+                        opacity: 1,
+                        margin: "16px 0",
+                    }}
                 />
 
+                {/* Seller Reply */}
+                <div className="review-reply-section">
+                    <ReplySection
+                        review={review}
+                        onReplySubmit={onReply}
+                        onReplyDelete={onReplyDelete}
+                        submitting={submittingId === review.id}
+                        clearing={clearingId === review.id}
+                    />
+                </div>
             </div>
-
             {/* IMAGE MODAL */}
             <Modal
                 show={!!selectedImage}

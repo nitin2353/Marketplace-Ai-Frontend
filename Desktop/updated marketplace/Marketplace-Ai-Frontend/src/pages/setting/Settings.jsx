@@ -13,19 +13,18 @@ import Security from "./Security.jsx";
 import StepAddress from "../../components/StepAddress.jsx";
 import addressApi from "../../api/address.api.jsx";
 import { useAuthWrapper } from "../../helper/AuthWrapper.jsx";
-import CustomerReturnsList from "../../components/returns/CustomerReturnsList.jsx";
 import { LogoutTab } from "../../helper/GlobalHelper.jsx";
-
+import { useLocation } from "react-router-dom";
 
 export default function SettingsPage() {
     const searchRef = useRef();
-    const [activeTab, setActiveTab] = useState("profile");
+    const location = useLocation();
+    const { from } = location.state || {};
+    const [activeTab, setActiveTab] = useState(from === 'productDefaultAddress' ? 'addresses' : "profile");
     const [loading, setLoading] = useState(false);
     const [pageLoading, setPageLoading] = useState(true);
 
     const { refresh } = useAuthWrapper();
-
-
 
     // Security State
     const [security, setSecurity] = useState({
@@ -230,17 +229,17 @@ export default function SettingsPage() {
                     {/* Content Area */}
                     <Col lg={9}>
 
-                        {activeTab === "profile" && (
+                        {(activeTab === "profile" && from !== 'productDefaultAddress') && (
                             <Profile userProfile={userProfile} loading={loading} setLoading={setLoading} />
                         )}
 
                         {/* ──────────────────────── Security Tab ──────────────────────────── */}
-                        {activeTab === "security" && (
+                        {(activeTab === "security" && from !== 'productDefaultAddress') && (
                             <Security userProfile={userProfile} loading={loading} setLoading={setLoading} />
                         )}
 
                         {/* ──────────────────────── Notifications Tab ──────────────────────────── */}
-                        {activeTab === "notifications" && (
+                        {(activeTab === "notifications" && from !== 'productDefaultAddress') && (
                             <Card className="pd-settings-card">
                                 <Card.Header className="pd-settings-header">
                                     <h5>Notification Preferences</h5>
@@ -376,7 +375,7 @@ export default function SettingsPage() {
 
 
 
-                        {activeTab === "addresses" && (
+                        {(activeTab === "addresses" || from === 'productDefaultAddress') && (
                             <StepAddress
                                 selectedAddr={selectedAddr}
                                 addresses={addresses}

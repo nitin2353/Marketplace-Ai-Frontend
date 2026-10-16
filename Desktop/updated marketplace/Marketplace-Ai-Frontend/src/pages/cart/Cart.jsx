@@ -8,6 +8,8 @@ import GlobalLoader from "../../components/GlobalLoader";
 import GlobalHelper from "../../helper/GlobalHelper";
 import { useAuthWrapper } from "../../helper/AuthWrapper";
 import { FMT } from "../../helper/GlobalHelper";
+import JWTService from "../../config/jwt.config";
+import orderApi from "../../api/order.api";
 
 
 
@@ -21,11 +23,23 @@ export default function CartPage() {
     const [couponMsg, setCouponMsg] = useState(null);
     const [removing, setRemoving] = useState(null);
     const [updatingQty, setUpdatingQty] = useState(null);
+    const [isFirstOrder, setIstFirstOrder] = useState(0);
 
     const searchRef = useRef();
     const navigate = useNavigate();
     const { refresh, setRefresh, coupon, setCoupon } = useAuthWrapper();
     const addToast = useCallback((msg) => toast.success(msg), []);
+
+
+    const checkIsFirstOrder = async () => {
+        try {
+            const { id } = JWTService?.decodeTokenDetails();
+            const { data } = await orderApi.getCustomerOrders(id);
+            setIstFirstOrder(data.length);
+        } catch (error) {
+            console.error("Order count fetch error:", error.message);
+        }
+    }
 
 
     const fetchCart = async () => {
@@ -46,7 +60,7 @@ export default function CartPage() {
         }
     };
 
-    useEffect(() => { fetchCart(); }, []);
+    useEffect(() => { fetchCart(); checkIsFirstOrder() }, []);
 
 
     const updateQty = async (cartId, delta) => {
@@ -106,16 +120,35 @@ export default function CartPage() {
 
     const applyCoupon = () => {
         const code = coupon.trim().toUpperCase();
-        if (GlobalHelper.COUPONS[code]) {
-            setDiscount(GlobalHelper.COUPONS[code]);
-            setCouponMsg({ type: "success", text: `✅ Coupon applied! ${GlobalHelper.COUPONS[code]}% off` });
+
+        // WELCOME10 is only for first-time customers
+        if (code === "WELCOME10" && isFirstOrder !== 0) {
+            setDiscount(0);
+            setCouponMsg({
+                type: "error",
+                text: "❌ WELCOME10 is valid only for your first order."
+            });
+            setCoupon("")
+            return;
+        }
+        const couponDiscount = GlobalHelper.COUPONS[code];
+
+        if (couponDiscount !== undefined) {
+            setDiscount(couponDiscount);
+            setCouponMsg({  
+                type: "success",
+                text: `✅ Coupon applied! ${couponDiscount}% off`
+            });
         } else {
             setDiscount(0);
-            setCouponMsg({ type: "error", text: "❌ Invalid coupon code" });
+            setCouponMsg({
+                type: "error",
+                text: "❌ Invalid coupon code"
+            });
         }
     };
 
-    console.log(items);
+
 
 
     const subtotal = items.reduce((s, i) => s + i.product_price * i.qty, 0);
@@ -230,7 +263,7 @@ export default function CartPage() {
                                             <div style={{ position: "relative", flexShrink: 0, textAlign: "center" }}>
                                                 {item.image_url
                                                     ? <img
-                                                        src={item.image_url.split(',')[0].replace(/[{}"\\]/g, "")}
+                                                        src={item.image_url?.split(',')[0].replace(/[{}"\\]/g, "")}
                                                         alt={item.title}
                                                         className="cart-img"
                                                         // onError={e => { e.target.src = `https://placehold.co/100x100/f1f4ff/ff6b35?text=${encodeURIComponent(item.title.slice(0, 2))}`; }}
@@ -390,7 +423,7 @@ export default function CartPage() {
                                 </div>
 
                                 {/* Coupon */}
-                                {/* <div style={{ marginBottom: 16 }}>
+                                <div style={{ marginBottom: 16 }}>
                                     <div style={{
                                         fontSize: ".75rem", fontWeight: 800, color: "#6b7280",
                                         textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 8
@@ -415,10 +448,10 @@ export default function CartPage() {
                                             {couponMsg.text}
                                         </div>
                                     )}
-                                    <div style={{ marginTop: 6, fontSize: ".72rem", color: "#9ca3af", fontWeight: 700 }}>
+                                    {/* <div style={{ marginTop: 6, fontSize: ".72rem", color: "#9ca3af", fontWeight: 700 }}>
                                         Try: SAVE10 · SHOP20 · FIRST50
-                                    </div>
-                                </div> */}
+                                    </div> */}
+                                </div>
 
                                 <div className="summary-divider" />
 
@@ -446,7 +479,6 @@ export default function CartPage() {
                                     ...(saved > 0 ? [{ label: "You Save", val: `-${FMT(saved)}`, color: "#22c55e" }] : []),
                                     ...(couponSave > 0 ? [{ label: `Coupon (${discount}% off)`, val: `-${FMT(couponSave)}`, color: "#22c55e" }] : []),
                                     { label: "Delivery", val: delivery === 0 ? "FREE 🎉" : FMT(delivery), color: delivery === 0 ? "#22c55e" : "#374151" },
-                                    // { label: "Tax", val: FMT(tax), color: "#374151" },
                                 ].map(({ label, val, color }) => (
                                     <div key={label} className="d-flex justify-content-between align-items-center mb-2">
                                         <span style={{ fontSize: ".85rem", color: "#6b7280", fontWeight: 700 }}>{label}</span>

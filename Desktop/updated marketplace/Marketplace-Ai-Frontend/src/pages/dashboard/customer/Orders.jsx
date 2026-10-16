@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import API from "../../../config/axios-config";
+import apiConfig from "../config/axios-config";
 
 export default function Orders() {
 
@@ -10,7 +10,7 @@ export default function Orders() {
     }, []);
 
     const loadOrders = async () => {
-        const res = await API.get("/order");
+        const res = await apiConfig.get("/order");
         setOrders(res.data.data);
     };
 

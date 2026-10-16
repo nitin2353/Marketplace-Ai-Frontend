@@ -4,6 +4,7 @@ import {
 } from "@react-pdf/renderer";
 import s from '../style/InvoiceStyle'
 import logo from "../assets/logo.png";
+import signature from "../assets/icon.png";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
 const ORANGE = "#000000ff";
@@ -52,22 +53,89 @@ const parseImg = (raw) => {
         }
         if (str.startsWith("[")) return JSON.parse(str)[0] || null;
         if (Array.isArray(raw)) return raw[0] || null;
-        return str.split(",")[0].trim() || null;
+        return str?.split(",")[0].trim() || null;
     } catch { return null; }
 };
 
 
-// const getBillHeight = (items = []) => {
-//     const baseHeight = 520;
-//     const itemHeight = 70;
-//     const notesHeight = 80;
-//     const signatureHeight = 70;
 
-//     return baseHeight + (items.length * itemHeight) + notesHeight + signatureHeight;
-// };
+const estimateLines = (value, charsPerLine) => {
+    const text = String(value ?? "").trim();
 
-const getBillHeight = (items = []) => {
-    return 650 + (items.length * 85);
+    if (!text) return 0;
+
+    return text.split("\n").reduce((total, line) => {
+        return total + Math.max(
+            1,
+            Math.ceil(line.length / charsPerLine)
+        );
+    }, 0);
+};
+
+const getBillHeight = (items = [], order = {}) => {
+    const baseHeight = 650;
+
+    const itemsHeight = items.reduce((total, item) => {
+        const titleLines = estimateLines(
+            item.product_title || "Unnamed Product",
+            24
+        );
+
+        const brandLines = estimateLines(
+            [item.product_brand, item.product_category]
+                .filter(Boolean)
+                .join(" · "),
+            34
+        );
+
+        const variantLines = estimateLines(
+            [item.variant_size, item.variant_color]
+                .filter(Boolean)
+                .join(" · "),
+            34
+        );
+
+        const descriptionLines = estimateLines(
+            item.product_description !== "Test"
+                ? item.product_description?.slice(0, 70)
+                : "",
+            34
+        );
+
+        const extraLines =
+            (item.product_tag ? 1 : 0) +
+            (item.dimension?.final_pack ? 1 : 0);
+
+        const contentLines = Math.max(
+            1,
+            titleLines,
+            brandLines,
+            variantLines,
+            descriptionLines,
+            extraLines
+        );
+
+        // Minimum height per product row + room for wrapped text.
+        const rowHeight = Math.max(
+            85,
+            42 + contentLines * 12
+        );
+
+        return total + rowHeight;
+    }, 0);
+
+    const address = order.address_snapshot || {};
+
+    const addressLines =
+        estimateLines(address.address_line_1, 38) +
+        estimateLines(address.address_line_2, 38) +
+        estimateLines(address.instructions, 38);
+
+    return Math.ceil(
+        baseHeight +
+        itemsHeight +
+        addressLines * 10
+    );
 };
 
 const oStatusColor = (s) => ({
@@ -144,11 +212,21 @@ const Invoice = ({ order = {}, qrDataUrl = null }) => {
     const isCancelled = order.order_status === "cancelled";
     const hasNotes = order.notes?.trim() || addr.instructions?.trim();
 
-    const billHeight = getBillHeight(items);
+    const subtotal = Number(order.subtotal) || 0;
+    const deliveryCharge = Number(order.delivery_charge) || 0;
+    const discountAmount = Number(order.discount_amount) || 0;
+
+    const grandTotal = subtotal + deliveryCharge - discountAmount;
+
+    const billHeight = getBillHeight(items, order);
 
     return (
         <Document title={invNo} author="ShopEase" subject={`Invoice – ${order.order_number}`}>
-            <Page size={{ width: BILL_WIDTH, height: billHeight }} style={s.page}>
+            <Page
+                size={{ width: BILL_WIDTH, height: billHeight }}
+                style={s.page}
+                wrap={false}
+            >
 
                 {/* ─── HEADER ────────────────────────────────────────────── */}
                 <View style={s.header}>
@@ -186,8 +264,8 @@ const Invoice = ({ order = {}, qrDataUrl = null }) => {
                             <Text style={s.invNum}>#{invNo}</Text>
                         </View>
                         <Text style={s.brandSub}>
-                                BILL OF SUPPLY
-                            </Text>
+                            BILL OF SUPPLY
+                        </Text>
 
                         <View style={{ alignItems: "flex-end" }}>
                             <Text style={s.invDate}>
@@ -268,7 +346,7 @@ const Invoice = ({ order = {}, qrDataUrl = null }) => {
                 </View>
                 {items.map((item, i) => {
                     const tags = item.product_tag
-                        ? item.product_tag.split(",").slice(0, 3).join(" · ")
+                        ? item.product_tag?.split(",").slice(0, 3).join(" · ")
                         : null;
                     const fp = item.dimension?.final_pack;
                     const hasDims = fp && (fp.weight > 0 || fp.length > 0);
@@ -315,7 +393,7 @@ const Invoice = ({ order = {}, qrDataUrl = null }) => {
                     );
                 })}
 
-                {/* ─── TOTALS ────────────────────────────────────────────── */}
+                {/* ─── TOTALS ───────────────────────────────────  ─────────── */}
                 <View style={s.totalsOuter}>
                     <View style={s.totalsBox}>
                         <TRow label="Subtotal" value={fmt(order.subtotal)} />
@@ -334,7 +412,7 @@ const Invoice = ({ order = {}, qrDataUrl = null }) => {
                             <Text style={s.grandLbl}>
                                 {isPaid ? "TOTAL PAID" : isCOD ? "TOTAL (COD)" : "TOTAL AMOUNT"}
                             </Text>
-                            <Text style={s.grandVal}>{fmt(order.total_amount)}</Text>
+                           <Text style={s.grandVal}>{fmt(grandTotal)}</Text>
                         </View>
                     </View>
                 </View>
@@ -372,22 +450,42 @@ const Invoice = ({ order = {}, qrDataUrl = null }) => {
                     </View>
                 </View>
 
-
                 <View style={s.signatureRow}>
                     <View style={s.signatureBox}>
+
+                        <Image
+                            src={seller?.seller_signature}
+                            style={{
+                                width: 40,
+                                height: 30,
+                                objectFit: "contain",
+                                marginBottom: 4,
+                            }}
+                        />
+
                         <View style={s.signatureLine} />
-                        <Text style={s.signatureText}>Authorized Signature</Text>
-                        <Text style={s.signatureSubText}>{sellerName}</Text>
+
+                        <Text style={s.signatureText}>
+                            Authorized Signature
+                        </Text>
+
+                        <Text style={s.signatureSubText}>
+                            {sellerName}
+                        </Text>
+
                     </View>
                 </View>
 
-                {/* ─── FOOTER ────────────────────────────────────────────── */}
+                {/* FOOTER */}
                 <View style={s.footer}>
-                    <Text style={s.footerL}>{invNo}  ·  {fmtDT(new Date())}</Text>
+                    <Text style={s.footerL}>
+                        {invNo} · {fmtDT(new Date())}
+                    </Text>
+
                     <Text style={s.footerBrand}>SHOPEASE</Text>
+
                     <Text style={s.footerR}>shopease.in</Text>
                 </View>
-
 
             </Page>
         </Document>

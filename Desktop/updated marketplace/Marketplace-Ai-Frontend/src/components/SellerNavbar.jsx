@@ -65,7 +65,7 @@ const SellerNavbar = ({
 
     const initials =
         displayName && displayName !== "My Store"
-            ? displayName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
+            ? displayName?.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
             : "SE";
 
     const btnStyle = (active = false) => ({

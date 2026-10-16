@@ -145,7 +145,6 @@ export default function CreateProduct() {
 
         setLoading(true);
         try {
-            console.log(payload);
             const fd = new FormData();
 
             // Basic fields
@@ -168,7 +167,7 @@ export default function CreateProduct() {
             // Images
             imageFiles.forEach(img => fd.append("images", img.file));
 
-            const res = await productApi.createProduct(fd);
+            const res = await productApi?.createProduct(fd);
             if (res?.success) {
                 setSubmitted(true);
                 toast.success("Product Created Successfully!");

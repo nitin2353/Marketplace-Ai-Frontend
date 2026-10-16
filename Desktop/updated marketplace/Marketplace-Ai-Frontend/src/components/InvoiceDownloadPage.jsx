@@ -24,7 +24,6 @@ const InvoiceDownloadPage = () => {
             try {
                 setLoading(true);
                 setError('');
-                alert('done')
                 const {data} = await AiMarketPlaceApi.getOrderById(id);
                 
                 const orderData = data?.data;

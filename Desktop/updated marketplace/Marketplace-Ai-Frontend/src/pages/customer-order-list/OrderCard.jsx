@@ -116,7 +116,7 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
                                     const parsed = JSON.parse(imgData);
                                     src = Array.isArray(parsed) ? parsed[0] : parsed;
                                 } else {
-                                    src = imgData.split(',')[0].replace(/[{}"\\]/g, "");
+                                    src = imgData?.split(',')[0].replace(/[{}"\\]/g, "");
                                 }
                             }
                         } catch (e) {
@@ -203,7 +203,7 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
                                                                     const parsed = JSON.parse(imgData);
                                                                     return Array.isArray(parsed) ? parsed[0] : parsed;
                                                                 }
-                                                                return imgData.split(',')[0].replace(/[{}"\\]/g, "");
+                                                                return imgData?.split(',')[0].replace(/[{}"\\]/g, "");
                                                             }
                                                             return imgData;
                                                         } catch (e) { return ""; }

@@ -6,7 +6,7 @@ import orderApi from "../../api/order.api";
 import { useAuthWrapper } from "../../helper/AuthWrapper";
 import JWTService from "../../config/jwt.config";
 import "./SellerOrders.css";
-import { FMT } from "../../helper/GlobalHelper";
+import { FMT, FMT_DATE_TIME } from "../../helper/GlobalHelper";
 import OrderDrawer from "../../components/OrderDrawer";
 import { PAYMENT_METHOD_META } from "../../helper/Constraints";
 import PayBadge from "../../components/PayBadge";
@@ -747,7 +747,8 @@ export default function SellerOrders() {
                                                         #{order.order_number}
                                                     </p>
                                                     <p className="so-order-date mb-0">
-                                                        {fmtDate(order.created_time)}
+                                                        {console.log("order.created_time" ,FMT_DATE_TIME(order.created_time))}
+                                                        {FMT_DATE_TIME(order.created_time)}
                                                     </p>
                                                 </td>
                                                 <td>
@@ -761,13 +762,13 @@ export default function SellerOrders() {
                                                 <td>
                                                     <div className="so-thumb-strip">
                                                         {visible.map((item) => {
-                                                            const src = Array.isArray(item.product_image_url)
+                                                            const src = Array.isArray(item.product_image_url?.split(',')[0].replace(/[{}"\\]/g, ""))
                                                                 ? item.product_image_url[0]
                                                                 : item.product_image_url;
                                                             return (
                                                                 <img
                                                                     key={item.id}
-                                                                    src={item.product_image_url.split(',')[0].replace(/[{}"\\]/g, "")}
+                                                                    src={item.product_image_url?.split(',')[0].replace(/[{}"\\]/g, "")}
                                                                     alt={item.product_title || "Product"}
                                                                     className="so-thumb"
                                                                     onError={(e) => {

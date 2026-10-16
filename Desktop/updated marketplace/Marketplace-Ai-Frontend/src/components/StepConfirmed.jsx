@@ -10,8 +10,6 @@ import "../style/checkout.css";
 export default function StepConfirmed({ orderId, total, address, paymentMethod, cart = [] }) {
     const navigate = useNavigate();
 
-    console.log("StepConfirmed props", { orderId, total, address, paymentMethod, cart });
-
 
     return (    
         <div className="co-confirmed-wrap">

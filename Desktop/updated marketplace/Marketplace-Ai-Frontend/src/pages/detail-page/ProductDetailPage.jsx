@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import productApi from "../../api/product.api";
 import toast from "react-hot-toast";
 import GlobalLoader from "../../components/GlobalLoader";
+import { FaGripLinesVertical } from "react-icons/fa";
 import Toolbar from "../../components/Toolbar";
 import GlobalHelper from "../../helper/GlobalHelper";
 import wishlistApi from "../../api/wishlist.api";
@@ -18,7 +19,11 @@ import { FMT } from "../../helper/GlobalHelper";
 import JWTService from "../../config/jwt.config";
 import { IoIosStarOutline, IoIosShareAlt, IoIosHeartEmpty, IoIosHeart } from "react-icons/io";
 import { FiShoppingCart, FiZap, FiMessageSquare } from "react-icons/fi";
+import { MdLocationOn } from "react-icons/md";
 import './detail.css';
+import { GrLocation } from "react-icons/gr";
+import addressApi from "../../api/address.api";
+import { FaShop } from "react-icons/fa6";
 
 // ── Skeleton ────────────────────────────────────────────────────────────────
 function DetailSkeleton() {
@@ -75,13 +80,29 @@ export default function ProductDetail() {
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsSummary, setReviewsSummary] = useState(null);
   const [buyingNow, setBuyingNow] = useState(false);
+  const [defaultAddress, setDefaultAddress] = useState('');
   const [reviewPage, setReviewPage] = useState(1);
   const reviewsPerPage = 4;
+  const [seller_name, setSellerName] = useState("")
 
   const { refresh, setRefresh } = useAuthWrapper()
   const searchRef = useRef();
 
+
+  const fetchDefaultAddress = async () => {
+    try {
+      const { data } = await addressApi.getAddressesByUserId();
+      setDefaultAddress(data[0])
+    } catch (err) {
+      console.error("Failed to fetch Default Address:", err);
+      toast.error("Failed to load address.");
+    }
+  }
+
+
+
   useEffect(() => {
+    JWTService.isTokenAvailable() && fetchDefaultAddress();
     fetchProduct();
     fetchWishlist()
     fetchReviews()
@@ -111,6 +132,7 @@ export default function ProductDetail() {
       if (raw) {
         const p = GlobalHelper.API_FIELDS_MAP["products"](raw);
         setProduct(p);
+        setSellerName(p.seller_name['name'])
         setActiveColor(p?.variants?.[0]?.color || p?.colors?.[0] || null);
         setActiveSize(p?.variants?.[0]?.size || null);
         setActiveVariant(p?.variants?.[0] || null);
@@ -243,7 +265,7 @@ export default function ProductDetail() {
         variant_id: activeVariant?.id || null,
         quantity: qty
       };
-      const res = await orderApi.buyNow(payload);
+      const res = await orderApi?.buyNow(payload);
       if (res.success) {
         localStorage.setItem("buyNowData", JSON.stringify(res.data));
         navigate("/dashboard/checkout?type=buy-now");
@@ -449,6 +471,34 @@ export default function ProductDetail() {
                 </div>
               )}
 
+              <div style={{ margin: '-10px 0px 20px 10px' }} >
+                {
+                  JWTService.isTokenAvailable() ? (
+                    <span className="fs-4 text-dark" style={{ cursor: "pointer" }} onClick={() => navigate('/dashboard/settings', {
+                      state: {
+                        from: 'productDefaultAddress',
+                      }
+                    })}>
+                      <GrLocation /> {<span className="text-primary fs-6 text-decoration-underline">Deliver to {defaultAddress?.name?.split(' ')[0] + " - " + defaultAddress?.city + " " + defaultAddress?.pincode}</span>}
+                    </span>
+                  )
+                    : (
+                      ""
+                    )
+                }
+                <span style={{ fontSize: "20px", marginBottom: "50px" }}>
+                 {JWTService.isTokenAvailable() ? ( " | ") : ""}
+                </span>
+                <span>
+                  <span className="fw-bold">
+                    <FaShop fontSize={'15px'} style={{ marginBottom: "5px" }} />{" Sold by : "}
+                  </span>  {seller_name}</span>
+
+              </div>
+
+
+
+
               {/* Quantity */}
               <div className="d-flex align-items-center gap-4 mb-5">
                 <div className="d-flex align-items-center border rounded-pill p-1 bg-white shadow-sm">
@@ -463,11 +513,12 @@ export default function ProductDetail() {
                 </div>
               </div>
 
+
               {/* Actions */}
               <div className="d-none d-md-flex gap-3 mb-5">
                 <Button variant="primary" className="flex-fill rounded-pill fw-bold py-3 shadow" style={{ height: 56 }}
-                  onClick={() => { JWTService.isTokenAvailable() ? handleAddToCart() : navigate("/auth/login") }} disabled={displayStock === 0 || addedToCart}>
-                  <FiShoppingCart className="me-2" /> {addedToCart ? "Added" : "Add to Cart"}
+                  onClick={() => { JWTService.isTokenAvailable() ? handleAddToCart() : navigate("/auth/login") }}>
+                  <FiShoppingCart className="me-2" /> {"Add to Cart"}
                 </Button>
                 <Button variant="outline-primary" className="flex-fill rounded-pill fw-bold py-3 shadow-sm" style={{ height: 56, borderWidth: 2 }}
                   onClick={() => { JWTService.isTokenAvailable() ? handleBuyNow() : navigate("/auth/login") }} disabled={displayStock === 0}>

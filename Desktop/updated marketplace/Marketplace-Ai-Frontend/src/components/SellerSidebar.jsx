@@ -49,7 +49,7 @@ export default function SellerSidebar({ stats = [] }) {
                                 alignItems: "center",
                                 gap: "10px"
                             }}
-                            onClick={() => handleNavigate("/")}
+                            onClick={() => handleNavigate("/seller/dashboard")}
                         >
                             
                             <img src="../../src/assets/logo.png" width="100%" alt="" />

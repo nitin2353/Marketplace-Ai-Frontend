@@ -15,7 +15,7 @@ const getListOfUsers = async () => {
 
 const getOrderById = async (orderId, id) => {
   try {
-    const response = await API.get(`/global/order/invoice-generate/${orderId}/${id}`);
+    const response = await apiConfig.get(`/global/order/invoice-generate/${orderId}/${id}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: "Error fetching order" };

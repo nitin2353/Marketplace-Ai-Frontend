@@ -15,7 +15,11 @@ const signupCustomer = async (data) => {
 
 const signupSeller = async (data) => {
   try {
-    const response = await apiConfig.post("/auth/seller/register", data);
+    const response = await apiConfig.post("/auth/seller/register", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   } catch (error) {
     throw error.response?.data || {
@@ -166,7 +170,7 @@ const resetPassword = async (data) => {
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: "Error creating new password" };
-  } 
+  }
 };
 
 export default {

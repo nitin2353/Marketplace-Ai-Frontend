@@ -30,9 +30,9 @@ export default function OrderSummary({
             <div style={{ marginBottom: 16 }}>
                 {cart.map((item) => (
                     <div key={item.id} className="co-order-item">
-                        {console.log('item.img', item.image_url)}
+                        {console.log('item.img', cart)}
                         <img
-                            src={item.image_url.split(',')[0].replace(/[{}"\\]/g, "")}
+                            src={item.image_url?.split(',')[0].replace(/[{}"\\]/g, "")}
                             alt={item.title}
                             className="co-order-img"
                             onError={(e) => {
@@ -55,7 +55,7 @@ export default function OrderSummary({
             </div>
 
             {/* Coupon */}
-            {/* <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 16 }}>
                 <p className="co-label mb-2">Have a coupon?</p>
                 <div className="co-coupon-wrap">
                     <input
@@ -72,10 +72,10 @@ export default function OrderSummary({
                         {couponMsg.text}
                     </p>
                 )}
-                <p style={{ fontSize: "0.7rem", color: "#9ca3af", fontWeight: 700, marginTop: 4 }}>
+                {/* <p style={{ fontSize: "0.7rem", color: "#9ca3af", fontWeight: 700, marginTop: 4 }}>
                     Try: SAVE10 · SHOP20 · FIRST50
-                </p>
-            </div> */}
+                </p> */}
+            </div>
 
             <div className="co-divider" />
 

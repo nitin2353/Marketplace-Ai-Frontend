@@ -17,9 +17,10 @@ import { useRazorpay } from "../../helper/useRazorpay";
 import JWTService from "../../config/jwt.config";
 import paymentApi from "../../api/payment.api";
 import "../../style/checkout.css"
+import { COUPONS } from '../../helper/GlobalHelper'
 
 
-const COUPONS = { SAVE10: 10, SHOP20: 20, FIRST50: 50 };
+
 const STEPS = ["Address", "Payment", "Review", "Done"];
 
 
@@ -78,11 +79,24 @@ export default function CheckoutPage() {
     const [step, setStep] = useState(0);   // 0=Address 1=Payment 2=Review 3=Done
     const [placing, setPlacing] = useState(false);
     const [orderId, setOrderId] = useState("");
+    const [isFirstOrder, setIstFirstOrder] = useState(0);
 
     const { coupon, setCoupon } = useAuthWrapper();
 
 
     const { subtotal, saved, couponSave, delivery, tax_amount, total } = calcTotals(cart, discount);
+
+    const checkIsFirstOrder = async () => {
+        try {
+            const { id } = JWTService?.decodeTokenDetails();
+            const { data } = await orderApi.getCustomerOrders(id);
+            setIstFirstOrder(data.length);
+        } catch (error) {
+            console.error("Order count fetch error:", error.message);
+        }
+    }
+
+
 
 
     const fetchCart = useCallback(async () => {
@@ -92,8 +106,9 @@ export default function CheckoutPage() {
         if (type === "buy-now") {
             const data = JSON.parse(localStorage.getItem("buyNowData"));
             if (data) {
-                setCart(data.items.map(i => ({
+                setCart(data.items?.map(i => ({
                     product_id: i.product_id,
+                    image_url: i.image_url,
                     variant_id: i.variant_id,
                     title: i.title,
                     product_price: i.price,
@@ -149,6 +164,7 @@ export default function CheckoutPage() {
     useEffect(() => {
         fetchCart();
         loadAddresses();
+        checkIsFirstOrder();
     }, [fetchCart, loadAddresses, refresh]);
 
 
@@ -165,16 +181,41 @@ export default function CheckoutPage() {
 
 
     const applyCoupon = useCallback(() => {
-        const code = coupon.trim().toUpperCase() || "";
-        if (COUPONS[code]) {
-            console.log("Applying coupon:", code, "for discount:", COUPONS[code]);
-            setDiscount(COUPONS[code]);
-            setCouponMsg({ type: "success", text: `✅ ${COUPONS[code]}% off applied!` });
+        const code = coupon.trim().toUpperCase();
+
+        // WELCOME10 is only valid for first-time customers
+        if (code === "WELCOME10" && isFirstOrder !== 0) {
+            setDiscount(0);
+            setCouponMsg({
+                type: "error",
+                text: "❌ WELCOME10 is valid only for your first order."
+            });
+            setCoupon("")
+            return;
+        }
+
+        const couponDiscount = COUPONS[code];
+
+        if (couponDiscount !== undefined) {
+            console.log(
+                "Applying coupon:", code,
+                "for discount:", couponDiscount
+            );
+
+            setDiscount(couponDiscount);
+            setCouponMsg({
+                type: "success",
+                text: `✅ ${couponDiscount}% off applied!`
+            });
         } else {
             setDiscount(0);
-            setCouponMsg({ type: "error", text: "❌ Invalid coupon code." });
+            setCouponMsg({
+                type: "error",
+                text: "❌ Invalid coupon code."
+            });
         }
-    }, [coupon]);
+    }, [coupon, isFirstOrder]);
+
 
     const handleCouponChange = useCallback((v) => {
         setCoupon(v);
@@ -360,7 +401,7 @@ export default function CheckoutPage() {
         <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
 
             {/* Topbar */}
-            <div className="co-topbar d-flex align-items-center justify-content-between px-3" style={{ borderBottom: "1px solid var(--border-light)", height: "64px" }}>
+            {step != 3 && <div className="co-topbar d-flex align-items-center justify-content-between px-3" style={{ borderBottom: "1px solid var(--border-light)", height: "64px" }}>
                 <button
                     className="d-flex align-items-center justify-content-center fw-bold rounded-2 border-0 text-white"
                     style={{ height: "32px", width: "32px", fontSize: "0.9rem", fontWeight: 900, background: "var(--primary-gradient)", }}
@@ -374,7 +415,7 @@ export default function CheckoutPage() {
                 <span style={{ fontWeight: 700, fontSize: "0.9rem" }} className="text-dark">
                     Checkout 🔒
                 </span>
-            </div>
+            </div>}
 
             <Container className="py-4">
 

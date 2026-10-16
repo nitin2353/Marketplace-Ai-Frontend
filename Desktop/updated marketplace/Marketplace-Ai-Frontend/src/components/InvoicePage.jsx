@@ -63,8 +63,8 @@ const InvoicePage = () => {
         setError(null);
         setPdfReady(false);
 
-        const p1 = parms.split('invoice/')[1].split('/')[0]
-        const p2 = parms.split('invoice/')[1].split('/')[1]
+        const p1 = parms?.split('invoice/')[1]?.split('/')[0]
+        const p2 = parms?.split('invoice/')[1]?.split('/')[1]
 
         try {
             const { data } = await AiMarketPlaceApi.getOrderById(p1, p2);

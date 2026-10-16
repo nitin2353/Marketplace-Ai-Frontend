@@ -198,7 +198,7 @@ const s = StyleSheet.create({
         justifyContent: "flex-end",
         paddingHorizontal: 28,
         paddingTop: 60,
-        paddingBottom: 14,
+        paddingBottom: 22,
     },
 
     signatureBox: {

@@ -62,7 +62,7 @@ const getProductById = async (id) => {
 
 const createProduct = async (payload) => {
   try {
-    const response = await apiConfig.post('/product/create', payload, {
+    const response = await apiConfig.post('/product/create', payload, { 
       headers: {
         "Content-Type": "multipart/form-data",
       },

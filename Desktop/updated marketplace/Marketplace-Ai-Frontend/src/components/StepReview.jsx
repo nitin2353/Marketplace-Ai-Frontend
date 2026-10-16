@@ -74,7 +74,7 @@ export default function StepReview({
                 {cart.map((item) => (
                     <div key={item.id} className="co-order-item">
                         <img
-                            src={item.image_url.split(',')[0].replace(/[{}"\\]/g, "")}
+                            src={item.image_url?.split(',')[0].replace(/[{}"\\]/g, "")}
                             alt={item.title}
                             className="co-order-img"
                             onError={(e) => {
@@ -99,7 +99,7 @@ export default function StepReview({
             </div>
 
             {/* ── Coupon ── */}
-            {/* <div className="co-review-block">
+            <div className="co-review-block">
                 <div className="co-review-block-header"><span>🏷️ Coupon</span></div>
                 <div className="co-coupon-wrap">
                     <input
@@ -117,10 +117,10 @@ export default function StepReview({
                         {couponMsg.text}
                     </p>
                 )}
-                <p style={{ fontSize: "0.7rem", color: "#9ca3af", fontWeight: 700, marginTop: 4 }}>
+                {/* <p style={{ fontSize: "0.7rem", color: "#9ca3af", fontWeight: 700, marginTop: 4 }}>
                     Try: SAVE10 · SHOP20 · FIRST50
-                </p>
-            </div> */}
+                </p> */}
+            </div>
 
             {/* ── Price breakdown ── */}
             <div className="co-review-block">

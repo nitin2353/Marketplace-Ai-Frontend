@@ -153,6 +153,7 @@ export default function SellerRegister() {
   const [done, setDone] = useState(false);
   const [apiError, setApiError] = useState(null);
   const [submittedData, setSubmittedData] = useState(null);
+  const [imageFiles, setImageFiles] = useState([]);
 
   const navigate = useNavigate();
 
@@ -219,15 +220,36 @@ export default function SellerRegister() {
   };
 
   // ── Form submit handler (called by handleSubmit) ───────────────────────────
+
   const onSubmit = async (payload) => {
     setLoading(true);
+
     try {
-      const res = await authApi?.signupSeller(payload)
+      const formData = new FormData();
+
+      // Append all normal registration fields
+      Object.entries(payload).forEach(([key, value]) => {
+        if (key !== "seller_signature_image") {
+          formData.append(key, value ?? "");
+        }
+      });
+
+      // Append signature image
+      const signatureFile = payload.seller_signature_image?.[0];
+
+      if (signatureFile) {
+        formData.append("seller_signature_image", signatureFile);
+      }
+
+      const res = await authApi?.signupSeller(formData);
 
       if (res.success) {
-        toast.success(res.message || "Your Account successfully Created");
-        localStorage.setItem('token', res.token)
-        navigate('/auth/login');
+        toast.success(
+          res.message || "Your Account successfully Created"
+        );
+
+        localStorage.setItem("token", res.token);
+        navigate("/auth/login");
       }
     } catch (err) {
       console.error("Registration error:", err);
@@ -478,6 +500,22 @@ export default function SellerRegister() {
                           className={`sr-input ${errors.dob ? "is-invalid" : ""}`}
                           {...register("dob")}
                         />
+                      </Form.Group>
+                    </Col>
+
+                    <Col>
+                      <Form.Group className="mb-4">
+                        <SrLabel>Upload Your Signature Image</SrLabel>
+
+                        <Form.Control
+                          type="file"
+                          accept="image/*"
+                          className="sr-input"
+                          {...register("seller_signature_image")}
+                        />
+                        <Form.Text className="text-muted">
+                          Upload an image (JPG, PNG, etc.).
+                        </Form.Text>
                       </Form.Group>
                     </Col>
                   </Row>
@@ -927,6 +965,7 @@ export default function SellerRegister() {
                   </Button>
                 )}
               </div>
+
 
               {/* Trust footer */}
               <div className="d-flex justify-content-center gap-3 flex-wrap mt-4">

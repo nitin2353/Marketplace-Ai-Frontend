@@ -1,7 +1,8 @@
 import API from "./axios";
+import apiConfig from "../config/axios-config";
 
 export const getQuotes = (requirement_id) => 
-    API.get(`/quote/${requirement_id}`);
+    apiConfig.get(`/quote/${requirement_id}`);
 
 export const createQuote = (data) => 
-    API.post("/quote", data);
+    apiConfig.post("/quote", data);

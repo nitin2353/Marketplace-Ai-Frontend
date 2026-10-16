@@ -590,7 +590,7 @@ function highlightMatch(text, query) {
     if (!query.trim()) return text;
     try {
         const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, "gi");
-        const parts = text.split(regex);
+        const parts = text?.split(regex);
         return parts.map((part, i) =>
             regex.test(part)
                 ? <span key={i} style={{ color: "var(--primary)", fontWeight: 800 }}>{part}</span>

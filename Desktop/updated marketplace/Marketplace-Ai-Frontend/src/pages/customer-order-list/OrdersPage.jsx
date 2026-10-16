@@ -86,7 +86,7 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                         return (
                             <div key={idx} className="preview-img-wrapper shadow-sm">
                                 <img
-                                    src={item.product_image_url.split(',')[0].replace(/[{}"\\]/g, "") || `https://placehold.co/100?text=Product`}
+                                    src={item.product_image_url?.split(',')[0].replace(/[{}"\\]/g, "") || `https://placehold.co/100?text=Product`}
                                     alt="item"
                                     onError={(e) => e.target.src = "https://placehold.co/100?text=Error"}
                                 />
@@ -95,7 +95,7 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                     })}
                     {items.length > 3 && <div className="more-count">+{items.length - 3}</div>}
                 </div>
-                
+
                 <div className="order-summary-text text-center text-md-start">
                     <h6 className="mb-1 fw-bold" >
                         {items[0]?.product_title || "Multiple Items"}
@@ -122,15 +122,17 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                                     <div className="text-center py-4"><div className="spinner-border spinner-border-sm text-primary"></div></div>
                                 ) : items.map((item, i) => {
                                     return (
-                                        <div key={i} className="item-row d-flex flex-column flex-md-row gap-3 align-items-md-center p-3 p-md-2 rounded-3 hover-bg-light border border-light border-md-0 mb-2 mb-md-0" onClick={() => navigate(`/product/${item.product_id}`)}> 
-                                            <img src={item.product_image_url.split(',')[0].replace(/[{}"\\]/g, "") || `https://placehold.co/100?text=Product`} className="item-img" alt="item" />
-                                            <div className="flex-grow-1 min-w-0">
-                                                <div className="fw-bold text-truncate small" style={{color: "#0046b7"}}>{item.product_title}</div>
-                                                <div className="text-muted tiny">
-                                                    Qty: {item.quantity} • {FMT(item.unit_price)} each
+                                        <Row>
+                                            <Col key={i} className="item-row d-flex flex-column flex-md-row gap-3 align-items-md-center p-3 p-md-2 rounded-3 hover-bg-light border border-light border-md-0 mb-2 mb-md-0" onClick={() => navigate(`/product/${item.product_id}`)}>
+                                                <img src={item.product_image_url?.split(',')[0].replace(/[{}"\\]/g, "") || `https://placehold.co/100?text=Product`} className="item-img" alt="item" />
+                                                <div className="flex-grow-1 min-w-0">
+                                                    <div className="fw-bold text-truncate small" style={{ color: "#0046b7" }}>{item.product_title}</div>
+                                                    <div className="text-muted tiny">
+                                                        Qty: {item.quantity} • {FMT(item.unit_price)} each
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="item-actions d-flex flex-wrap gap-2 mt-2 mt-md-0 justify-content-md-end">
+                                            </Col>
+                                            <Col className="d-flex float-end align-item-center text-align-center gap-2 mt-2 mt-md-0 justify-content-md-end" style={{"height" : "40px"}}>
                                                 {isDelivered && (
                                                     <>
                                                         <RBButton
@@ -176,8 +178,9 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                                                         })()}
                                                     </>
                                                 )}
-                                            </div>
-                                        </div>
+                                            </Col>
+                                        </Row>
+                                        // </div>
                                     );
                                 })}
                             </Stack>
@@ -535,9 +538,9 @@ export default function OrdersPage() {
                     fetchOrders();
                 }}
             />
-        {
-            loading && <GlobalLoader />
-        }
+            {
+                loading && <GlobalLoader />
+            }
         </div>
     );
 }

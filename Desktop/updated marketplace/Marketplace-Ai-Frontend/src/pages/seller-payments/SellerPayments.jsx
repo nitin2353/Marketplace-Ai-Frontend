@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Col, Container, Row, Card, Badge, Button, Modal, Form } from "react-bootstrap";
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -11,6 +11,7 @@ import DataTable from "../../components/DataTable";
 import paymentApi from "../../api/payment.api";
 import GlobalLoader from "../../components/GlobalLoader";
 import toast from "react-hot-toast";
+import { FORMATED_DATE_TIME } from "../../helper/GlobalHelper.jsx";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
@@ -21,7 +22,7 @@ const SellerPayments = () => {
     const [chartData, setChartData] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
-
+    const receiptRef = useRef(null);
     // Filters
     const [filters, setFilters] = useState({
         status: "",
@@ -76,6 +77,177 @@ const SellerPayments = () => {
         }
     };
 
+
+    const handlePrintReceipt = () => {
+        const receiptElement = receiptRef.current;
+
+        if (!receiptElement) {
+            toast.error("Receipt content not found");
+            return;
+        }
+
+        const printWindow = window.open(
+            "",
+            "_blank",
+            "width=900,height=700"
+        );
+
+        if (!printWindow) {
+            toast.error("Please allow pop-ups to print the receipt");
+            return;
+        }
+
+        printWindow.document.open();
+        printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>ShopEase - Payment Receipt</title>
+            <meta charset="UTF-8" />
+            <style>
+                @page {
+                    size: A4 portrait;
+                    margin: 12mm;
+                }
+
+                * {
+                    box-sizing: border-box;
+                }
+
+                body {
+                    font-family: Arial, sans-serif;
+                    color: #111827;
+                    background: #ffffff;
+                    margin: 0;
+                    padding: 0;
+                    font-size: 13px;
+                }
+
+                .receipt-print-area {
+                    width: 100%;
+                    padding: 10px;
+                }
+
+                .receipt-header {
+                    text-align: center;
+                    margin-bottom: 25px;
+                    padding-bottom: 15px;
+                    border-bottom: 1px solid #d1d5db;
+                }
+
+                .receipt-header h3 {
+                    font-size: 26px;
+                    margin: 0 0 12px;
+                    font-weight: bold;
+                }
+
+                .receipt-header h5 {
+                    font-size: 18px;
+                    margin: 10px 0;
+                }
+
+                .receipt-header p {
+                    margin: 8px 0 0;
+                    color: #4b5563;
+                }
+
+                .row {
+                    display: flex;
+                    flex-wrap: nowrap;
+                    gap: 18px;
+                    align-items: stretch;
+                }
+
+                .col-md-6 {
+                    width: 50%;
+                    flex: 1 1 50%;
+                    min-width: 0;
+                }
+
+                .receipt-section {
+                    height: 100%;
+                    padding: 16px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 8px;
+                    overflow-wrap: anywhere;
+                }
+
+                .receipt-section h6 {
+                    font-size: 15px;
+                    margin: 0 0 18px;
+                    padding-bottom: 10px;
+                    border-bottom: 1px solid #e5e7eb;
+                }
+
+                .receipt-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    gap: 12px;
+                    margin-bottom: 15px;
+                    line-height: 1.5;
+                }
+
+                .receipt-row span {
+                    color: #4b5563;
+                    flex: 0 0 42%;
+                }
+
+                .receipt-row strong {
+                    flex: 1;
+                    text-align: right;
+                    overflow-wrap: anywhere;
+                    word-break: break-word;
+                }
+
+                .receipt-total {
+                    font-size: 15px;
+                    color: #15803d;
+                }
+
+                hr {
+                    border: 0;
+                    border-top: 1px solid #d1d5db;
+                    margin: 15px 0;
+                }
+
+                .receipt-footer {
+                    text-align: center;
+                    margin-top: 25px;
+                    padding-top: 15px;
+                    border-top: 1px solid #d1d5db;
+                    font-weight: bold;
+                }
+
+                .receipt-section,
+                .receipt-header,
+                .receipt-footer,
+                .receipt-row {
+                    break-inside: avoid;
+                }
+
+                @media print {
+                    body {
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            ${receiptElement.outerHTML}
+        </body>
+        </html>
+    `);
+        printWindow.document.close();
+
+        printWindow.onload = () => {
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        };
+    };
+
     const handleExportCSV = () => {
         if (!Array.isArray(transactions) || transactions.length === 0) {
             toast.error("No transactions available to export");
@@ -121,7 +293,7 @@ const SellerPayments = () => {
         ]);
 
         const csvContent = [
-            headers.map(escapeCSV).join(","),
+            headers?.map(escapeCSV).join(","),
             ...rows.map((row) => row.map(escapeCSV).join(",")),
         ].join("\n");
 
@@ -152,7 +324,7 @@ const SellerPayments = () => {
         {
             label: "Date",
             key: "created_time",
-            render: (val) => val ? new Date(val).toLocaleDateString() : "N/A",
+            render: (val) => val ? FORMATED_DATE_TIME(val) : "N/A",
             sortable: true
         },
         { label: "Customer", key: "customer_name" },
@@ -492,63 +664,159 @@ const SellerPayments = () => {
                 <Modal.Header closeButton className="border-0">
                     <Modal.Title className="fw-bold">Transaction Details</Modal.Title>
                 </Modal.Header>
+
                 <Modal.Body className="p-4">
                     {selectedTransaction && (
-                        <Row className="g-4">
-                            <Col md={6}>
-                                <div className="mb-4">
-                                    <label className="text-muted small text-uppercase fw-bold mb-1">Order Information</label>
-                                    <div className="h5 fw-bold mb-0">{selectedTransaction.order_number}</div>
-                                    <div className="text-muted small">{new Date(selectedTransaction.created_at).toLocaleString()}</div>
-                                </div>
-                                <div className="mb-4">
-                                    <label className="text-muted small text-uppercase fw-bold mb-1">Customer</label>
-                                    <div className="fw-bold">{selectedTransaction.customer_name}</div>
-                                    <div className="text-muted small">{selectedTransaction.customer_email}</div>
-                                </div>
-                                <div>
-                                    <label className="text-muted small text-uppercase fw-bold mb-1">Shipping Address</label>
-                                    <div className="small">
-                                        {selectedTransaction.address_line_1}<br />
-                                        {selectedTransaction.city}, {selectedTransaction.state} - {selectedTransaction.pincode}
-                                    </div>
-                                </div>
-                            </Col>
-                            <Col md={6} className="bg-light p-4 rounded-4">
-                                <label className="text-muted small text-uppercase fw-bold mb-3">Earnings Breakdown</label>
-                                <div className="d-flex justify-content-between mb-2">
-                                    <span>Total Amount</span>
-                                    <span className="fw-bold">₹{Number(selectedTransaction.amount).toLocaleString()}</span>
-                                </div>
-                                <div className="d-flex justify-content-between mb-2 text-danger">
-                                    <span>Platform Fee (10%)</span>
-                                    <span>- ₹{Number(selectedTransaction.platform_fee).toLocaleString()}</span>
-                                </div>
-                                <div className="d-flex justify-content-between mb-3 text-danger">
-                                    <span>Refund Amount</span>
-                                    <span>- ₹{Number(selectedTransaction.refund_amount || 0).toLocaleString()}</span>
-                                </div>
+                        <div ref={receiptRef} className="receipt-print-area">
+                            <div className="receipt-header">
+                                <h3>ShopEase</h3>
                                 <hr />
-                                <div className="d-flex justify-content-between h4 fw-bold text-success mb-0">
-                                    <span>My Earnings</span>
-                                    <span>₹{Number(selectedTransaction.seller_earning).toLocaleString()}</span>
-                                </div>
+                                <h5>Payment Receipt</h5>
+                                <p>
+                                    Order: {selectedTransaction.order_number || "N/A"}
+                                </p>
+                            </div>
 
-                                <div className="mt-4 pt-3 border-top">
-                                    <div className="d-flex justify-content-between align-items-center">
-                                        <span className="small text-muted">Settlement Status</span>
-                                        <Badge bg={selectedTransaction.settlement_status === 'paid' ? 'success' : 'warning'}>
-                                            {selectedTransaction.settlement_status?.toUpperCase()}
-                                        </Badge>
+                            <Row className="g-4">
+                                <Col md={6}>
+                                    <div className="receipt-section">
+                                        <h6 className="fw-bold">Order Information</h6>
+
+                                        <div className="receipt-row">
+                                            <span>Order Number : </span>
+                                            <strong>
+                                                {selectedTransaction.order_number || "N/A"}
+                                            </strong>
+                                        </div>
+
+                                        <div className="receipt-row">
+                                            <span>Date : </span>
+                                            <strong>
+                                                {selectedTransaction.created_at
+                                                    ? new Date(
+                                                        selectedTransaction.created_at
+                                                    ).toLocaleString("en-IN")
+                                                    : "N/A"}
+                                            </strong>
+                                        </div>
+
+                                        <div className="receipt-row">
+                                            <span>Customer : </span>
+                                            <strong>
+                                                {selectedTransaction.customer_name || "N/A"}
+                                            </strong>
+                                        </div>
+
+                                        <div className="receipt-row">
+                                            <span>Email : </span>
+                                            <strong>
+                                                {selectedTransaction.customer_email || "N/A"}
+                                            </strong>
+                                        </div>
+
+                                        <div className="receipt-row">
+                                            <span>Payment Method : </span>
+                                            <strong>
+                                                {selectedTransaction.payment_method
+                                                    ?.toUpperCase() || "N/A"}
+                                            </strong>
+                                        </div>
+
+                                        <div className="receipt-row">
+                                            <span>Shipping Address : </span>
+                                            <strong>
+                                                {[
+                                                    selectedTransaction.address_line_1,
+                                                    selectedTransaction.city,
+                                                    selectedTransaction.state,
+                                                    selectedTransaction.pincode
+                                                ].filter(Boolean).join(", ") || "N/A"}
+                                            </strong>
+                                        </div>
                                     </div>
-                                </div>
-                            </Col>
-                        </Row>
+                                </Col>
+
+                                <Col md={6}>
+                                    <div className="receipt-section">
+                                        <h6 className="fw-bold">Earnings Breakdown</h6>
+
+                                        <div className="receipt-row">
+                                            <span>Total Amount : </span>
+                                            <strong>
+                                                ₹{Number(
+                                                    selectedTransaction.amount || 0
+                                                ).toLocaleString("en-IN", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2
+                                                })}
+                                            </strong>
+                                        </div>
+
+                                        <div className="receipt-row">
+                                            <span>Platform Fee : </span>
+                                            <strong>
+                                                ₹{Number(
+                                                    selectedTransaction.platform_fee || 0
+                                                ).toLocaleString("en-IN", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2
+                                                })}
+                                            </strong>
+                                        </div>
+
+                                        <div className="receipt-row">
+                                            <span>Refund Amount : </span>
+                                            <strong>
+                                                ₹{Number(
+                                                    selectedTransaction.refund_amount || 0
+                                                ).toLocaleString("en-IN", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2
+                                                })}
+                                            </strong>
+                                        </div>
+
+                                        <hr />
+
+                                        <div className="receipt-row receipt-total">
+                                            <span>My Earnings : </span>
+                                            <strong>
+                                                ₹{Number(
+                                                    selectedTransaction.seller_earning || 0
+                                                ).toLocaleString("en-IN", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2
+                                                })}
+                                            </strong>
+                                        </div>
+
+                                        <div className="receipt-row">
+                                            <span>Settlement Status : </span>
+                                            <strong>
+                                                {selectedTransaction.settlement_status
+                                                    ?.toUpperCase() || "PENDING"}
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </Col>
+                            </Row>
+                            <hr />
+                            <div className="receipt-footer fw-bold">
+                                Thank you for using ShopEase.
+                            </div>
+                        </div>
                     )}
                 </Modal.Body>
                 <Modal.Footer className="border-0">
                     <Button variant="secondary" onClick={() => setShowDetailModal(false)}>Close</Button>
-                    <Button variant="primary" onClick={() => window.print()}>Print Receipt</Button>
+
+                    <Button
+                        variant="primary"
+                        onClick={handlePrintReceipt}
+                    >
+                        <FaDownload className="me-2" />
+                        Print Receipt
+                    </Button>
                 </Modal.Footer>
             </Modal>
         </div>

@@ -6,6 +6,8 @@ import cartApi from '../api/cartApi';
 import toast from 'react-hot-toast';
 import AddToCartModal from './AddToCartModal';
 import { FMT } from '../helper/GlobalHelper';
+import JWTService from '../config/jwt.config';
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -16,8 +18,8 @@ function TagBadge({ tag }) {
                 : tag === "Trending" ? { bg: "#fef9c3", color: "#a16207" }
                     : { bg: "#f8fafc", color: "#64748b" };
     return (
-        <span className="pd-card-badge" style={{ 
-            background: style.bg, 
+        <span className="pd-card-badge" style={{
+            background: style.bg,
             color: style.color,
             padding: "4px 10px",
             borderRadius: "4px",
@@ -33,12 +35,15 @@ function TagBadge({ tag }) {
 
 const ProductCard = ({ product, onAdd, onWishlist, onView, isWished, delay = 0, setCartModal }) => {
     const { setIsLike } = useAuthWrapper();
+    const navigate = useNavigate();
+
+
     const stock = Number(product.stock) || 0;
 
     return (
-        <div 
-            className="pd-card" 
-            style={{ 
+        <div
+            className="pd-card"
+            style={{
                 animationDelay: `${delay}s`,
                 background: "var(--bg-surface)",
                 borderRadius: "var(--radius-md)",
@@ -47,22 +52,22 @@ const ProductCard = ({ product, onAdd, onWishlist, onView, isWished, delay = 0, 
                 transition: "all 0.3s ease",
                 cursor: "pointer",
                 height: "100%",
-                width:"100%",
+                width: "100%",
                 display: "flex",
                 flexDirection: "column"
-            }} 
+            }}
             onClick={() => onView(product)}
         >
             <div className="pd-card-img-wrap" style={{ position: "relative", background: "#f8fafc" }}>
-                <img 
-                    src={product.img} 
-                    alt={product.title} 
+                <img
+                    src={product.img}
+                    alt={product.title}
                     style={{ width: "100%", aspectRatio: "1/1", objectFit: "contain", transition: "transform 0.5s" }}
                     onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
                     onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-                    onError={e => { e.target.src = `https://placehold.co/400x400/eff6ff/2563eb?text=${encodeURIComponent(product.title.slice(0, 2))}`; }} 
+                    onError={e => { e.target.src = `https://placehold.co/400x400/eff6ff/2563eb?text=${encodeURIComponent(product.title.slice(0, 2))}`; }}
                 />
-                
+
                 {product.tag && (
                     <div style={{ position: "absolute", top: 10, left: 10 }}>
                         <TagBadge tag={product.tag} />
@@ -70,40 +75,40 @@ const ProductCard = ({ product, onAdd, onWishlist, onView, isWished, delay = 0, 
                 )}
 
                 <div style={{ position: "absolute", top: 10, right: 10 }}>
-                    <button 
+                    <button
                         className="wishlist-btn"
-                        style={{ 
-                            background: "white", 
-                            border: "none", 
-                            width: "32px", 
-                            height: "32px", 
-                            borderRadius: "50%", 
-                            display: "flex", 
-                            alignItems: "center", 
+                        style={{
+                            background: "white",
+                            border: "none",
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
                             justifyContent: "center",
                             boxShadow: "var(--shadow-sm)",
                             fontSize: "1rem",
                             color: isWished ? "var(--danger)" : "#cbd5e1",
                             transition: "all 0.2s"
-                        }} 
-                        title="Wishlist" 
-                        onClick={e => { e.stopPropagation(); onWishlist(product); setIsLike(product.id.split(',')) }}
+                        }}
+                        title="Wishlist"
+                        onClick={e => { if(!JWTService.isTokenAvailable()){ {navigate("/auth/login"); return;}}else{  e.stopPropagation(); onWishlist(product); setIsLike(product.id?.split(','))} }}
                     >
                         {isWished ? "❤️" : "🤍"}
                     </button>
                 </div>
 
                 {product.discount > 0 && (
-                    <div style={{ 
-                        position: "absolute", 
-                        bottom: 10, 
-                        left: 10, 
-                        background: "var(--danger)", 
-                        color: "white", 
-                        padding: "2px 8px", 
-                        borderRadius: "4px", 
-                        fontSize: "0.7rem", 
-                        fontWeight: 700 
+                    <div style={{
+                        position: "absolute",
+                        bottom: 10,
+                        left: 10,
+                        background: "var(--danger)",
+                        color: "white",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        fontSize: "0.7rem",
+                        fontWeight: 700
                     }}>
                         {product.discount}% OFF
                     </div>
@@ -120,10 +125,10 @@ const ProductCard = ({ product, onAdd, onWishlist, onView, isWished, delay = 0, 
                     </span>
                 </div>
 
-                <h3 style={{ 
-                    fontSize: "0.95rem", 
-                    fontWeight: 600, 
-                    color: "var(--text-main)", 
+                <h3 style={{
+                    fontSize: "0.95rem",
+                    fontWeight: 600,
+                    color: "var(--text-main)",
                     margin: "4px 0 8px",
                     overflow: "hidden",
                     display: "-webkit-box",
@@ -155,9 +160,9 @@ const ProductCard = ({ product, onAdd, onWishlist, onView, isWished, delay = 0, 
                         )}
                     </div>
 
-                    <div style={{ 
-                        fontSize: "0.75rem", 
-                        color: stock === 0 ? "var(--danger)" : stock < 15 ? "#b45309" : "var(--success)", 
+                    <div style={{
+                        fontSize: "0.75rem",
+                        color: stock === 0 ? "var(--danger)" : stock < 15 ? "#b45309" : "var(--success)",
                         fontWeight: 700,
                         marginBottom: "12px",
                         display: "flex",
@@ -170,7 +175,7 @@ const ProductCard = ({ product, onAdd, onWishlist, onView, isWished, delay = 0, 
                     <button
                         className="btn-add-to-cart"
                         disabled={stock === 0}
-                        style={{ 
+                        style={{
                             width: "100%",
                             padding: "10px",
                             borderRadius: "var(--radius-md)",
@@ -186,10 +191,17 @@ const ProductCard = ({ product, onAdd, onWishlist, onView, isWished, delay = 0, 
                             justifyContent: "center",
                             gap: "8px"
                         }}
-                        onClick={e => { 
-                            e.stopPropagation(); 
+
+                        onClick={(e) => {
+                            e.stopPropagation();
+
+                            if (!JWTService.isTokenAvailable()) {
+                                navigate("/auth/login");
+                                return;
+                            }
+
                             if (stock > 0) {
-                                setCartModal(product); 
+                                setCartModal(product);
                                 onAdd(product);
                             }
                         }}
