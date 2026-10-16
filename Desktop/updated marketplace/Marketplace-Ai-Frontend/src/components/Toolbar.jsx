@@ -43,7 +43,7 @@ const Toolbar = ({
     const [inputSearch, setInputSearch] = useState(committedSearch || "");
     const search = inputSearch;
     const [suggestions, setSuggestions] = useState([]);
-    const [activeIndex, setActiveIndex] = useState(0);
+    const [activeIndex, setActiveIndex] = useState(-1);
     const [isLoading, setIsLoading] = useState(false);
     const [cartQuantity, setCartQuanity] = useState()
     const [wishlistQuantity, setWishlistQty] = useState(0)
@@ -120,7 +120,7 @@ const Toolbar = ({
                 setSuggestions(rows);
             }
 
-            setActiveIndex(0);
+            setActiveIndex(-1);
         } catch (err) {
             console.error("Suggestion error:", err);
             setSuggestions([{ keyword: "No items found", isEmpty: true }]);
@@ -188,9 +188,11 @@ const Toolbar = ({
         const q = keyword?.trim() ?? "";
 
         setInputSearch(q);
+        searchValueRef.current = q;
         setCommittedSearch(q);
-        setSuggestions([]);
-        setActiveIndex(0);
+
+        setSuggestions([]); // Enter ya click ke baad suggestions close
+        setActiveIndex(-1);
 
         await fetchProducts(q);
     }, [fetchProducts, setCommittedSearch]);
@@ -208,63 +210,71 @@ const Toolbar = ({
     }, [fetchProducts, searchRef, setCommittedSearch]);
 
     const handleKeyDown = (e) => {
-        if (!suggestions.length && e.key !== "Enter" && e.key !== "Backspace") return;
-
         switch (e.key) {
-            case "ArrowDown":
+            case "ArrowDown": {
                 e.preventDefault();
-                setActiveIndex(prev => Math.min(prev + 1, suggestions.length - 1));
-                break;
 
-            case "ArrowUp":
-                e.preventDefault();
-                setActiveIndex(prev => Math.max(prev - 1, 0));
+                const validSuggestions = suggestions
+                    .map((item, index) => ({ item, index }))
+                    .filter(({ item }) => !item.isEmpty);
+
+                if (validSuggestions.length === 0) return;
+
+                const currentPosition = validSuggestions.findIndex(
+                    ({ index }) => index === activeIndex
+                );
+
+                const nextPosition = Math.min(
+                    currentPosition + 1,
+                    validSuggestions.length - 1
+                );
+
+                setActiveIndex(validSuggestions[nextPosition].index);
                 break;
+            }
+
+            case "ArrowUp": {
+                e.preventDefault();
+
+                const validSuggestions = suggestions
+                    .map((item, index) => ({ item, index }))
+                    .filter(({ item }) => !item.isEmpty);
+
+                if (validSuggestions.length === 0) return;
+
+                const currentPosition = validSuggestions.findIndex(
+                    ({ index }) => index === activeIndex
+                );
+
+                const previousPosition =
+                    currentPosition <= 0 ? 0 : currentPosition - 1;
+
+                setActiveIndex(validSuggestions[previousPosition].index);
+                break;
+            }
 
             case "Enter": {
                 e.preventDefault();
 
                 const selected = suggestions[activeIndex];
 
-                if (selected?.isEmpty) {
-                    fetchProducts(searchValueRef.current);
-                    setSuggestions([]);
-                    break;
+                if (selected && !selected.isEmpty) {
+                    handleSelect(selected.keyword);
+                } else {
+                    const query = searchValueRef.current.trim();
+
+                    setSuggestions([]); // Suggestions close
+                    setActiveIndex(-1); // Highlight reset
+                    setCommittedSearch(query);
+                    fetchProducts(query);
                 }
 
-                const q = selected?.keyword || searchValueRef.current || "";
-
-                setInputSearch(q);
-                setCommittedSearch(q);
-
-                setSuggestions([]);
-                setActiveIndex(0);
-
-                fetchProducts(q);
                 break;
             }
 
-            case "Backspace":
-
-                if (selected?.isEmpty) {
-                    fetchProducts(searchValueRef.current);
-                    setSuggestions([]);
-                    break;
-                }
-
-                const q = selected?.keyword || searchValueRef.current || "";
-
-                setInputSearch(q);
-                setCommittedSearch(q);
-
-                setSuggestions([]);
-                setActiveIndex(0);
-
-                fetchProducts(q);
-                break;
-
             case "Escape":
                 setSuggestions([]);
+                setActiveIndex(-1);
                 break;
 
             default:
@@ -323,9 +333,9 @@ const Toolbar = ({
                             paddingLeft: "16px",
                             color: "var(--text-light)"
                         }}>
-                            {isLoading ? (
+                            {/* {isLoading ? (
                                 <span style={{ display: "inline-block", width: 18, height: 18, border: "2px solid var(--primary)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin .6s linear infinite" }} />
-                            ) : "🔍"}
+                            ) : "🔍"} */}
                         </InputGroup.Text>
 
                         <Form.Control
@@ -384,6 +394,7 @@ const Toolbar = ({
                             border: "1px solid var(--border-light)"
                         }}
                     >
+                        {console.log('suggestions', suggestions)}
                         {suggestions.map((item, index) => (
                             <ListGroup.Item
                                 key={index}
@@ -392,31 +403,31 @@ const Toolbar = ({
                                 ref={el => (itemRefs.current[index] = el)}
                                 onMouseEnter={() => !item.isEmpty && setActiveIndex(index)}
                                 onClick={() => !item.isEmpty && handleSelect(item.keyword)}
-                                style={{
-                                    fontFamily: "var(--font-body)",
-                                    fontWeight: item.isEmpty ? 600 : index === activeIndex ? 600 : 500,
-                                    fontSize: "0.9rem",
-                                    border: "none",
-                                    borderBottom: "1px solid var(--border-light)",
-                                    padding: "12px 20px",
-                                    cursor: item.isEmpty ? "default" : "pointer",
+                            // style={{
+                            //     fontFamily: "var(--font-body)",
+                            //     fontWeight: item.isEmpty ? 600 : index === activeIndex ? 600 : 500,
+                            //     fontSize: "0.9rem",
+                            //     border: "none",
+                            //     borderBottom: "1px solid var(--border-light)",
+                            //     padding: "12px 20px",
+                            //     cursor: item.isEmpty ? "default" : "pointer",
 
-                                    background: item.isEmpty
-                                        ? "#f8fafc" // light solid bg for empty
-                                        : index === activeIndex
-                                            ? "var(--bg-hover)"
-                                            : "#ffffff", // normal solid bg
+                            //     background: item.isEmpty
+                            //         ? "#f8fafc" // light solid bg for empty
+                            //         : index === activeIndex
+                            //             ? "var(--bg-hover)"
+                            //             : "#ffffff", // normal solid bg
 
-                                    color: item.isEmpty
-                                        ? "#94a3b8" // muted text
-                                        : index === activeIndex
-                                            ? "var(--primary)"
-                                            : "var(--text-main)",
+                            //     color: item.isEmpty
+                            //         ? "#94a3b8" // muted text
+                            //         : index === activeIndex
+                            //             ? "var(--primary)"
+                            //             : "var(--text-main)",
 
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 12,
-                                }}
+                            //     display: "flex",
+                            //     alignItems: "center",
+                            //     gap: 12,
+                            // }}
                             >
                                 <span style={{ fontSize: "0.9rem", opacity: 0.4 }}>
                                     {item.isEmpty ? "📭" : "🔍"}
@@ -430,7 +441,7 @@ const Toolbar = ({
             </div>
 
             {/* ── RIGHT ICONS ── */}
-            <div className="d-flex align-items-center gap-3 ms-auto" style={{marginBottom: '-8px'}}>
+            <div className="d-flex align-items-center gap-3 ms-auto" style={{ marginBottom: '-8px' }}>
 
                 {/* Cart */}
                 <div

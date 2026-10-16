@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import productApi from "../../api/product.api";
 import toast from "react-hot-toast";
 import { formResetData } from "../../helper/FormDefaults";
+import Select from "react-select";
+import globalApi from "../../api/globalApi";
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const PRESET_TAGS = ["New Arrival", "Trending", "Best Seller", "Limited Edition", "Eco Friendly", "Premium", "Sale"];
@@ -100,6 +102,8 @@ export default function EditProductModal({ show, handleClose, product, setRefres
     const [isCod, setIsCod] = useState(true);
     const [isFreeDelivery, setIsFreeDelivery] = useState(false);
     const [taxInclusive, setTaxInclusive] = useState(false);
+    const [categories, setCategories] = useState([]);
+
 
     const { register, handleSubmit, watch, reset, setValue, formState: { errors } } = useForm({
         defaultValues: {
@@ -164,6 +168,23 @@ export default function EditProductModal({ show, handleClose, product, setRefres
             setVariants([{ ...DEFAULT_VARIANT }]);
         }
     }, [product, show, reset]);
+
+
+
+
+    const getCategories = async () => {
+        try {
+            let res = await globalApi?.getCategories();
+            setCategories(res.data);
+        } catch (error) {
+            console.error(err);
+            toast.error(err?.response?.data?.message || "Something went wrong");
+        }
+    }
+
+    useEffect(() => {
+        getCategories();
+    }, [])
 
     // Auto-sum variant stock
     useEffect(() => {
@@ -316,9 +337,37 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                     </Field>
                                 </Col>
                                 <Col md={4}>
-                                    <Field label="Category *" error={errors.category?.message}>
-                                        <Form.Control className={`cp-input ${errors.category ? "is-invalid" : ""}`} placeholder="e.g. Fashion, Electronics"
-                                            {...register("category", { required: "Category is required" })} />
+                                    <Field label="Category" error={errors.category?.message}>
+                                        <Select
+                                            options={categories?.map((ele) => ({
+                                                value: ele.name,
+                                                label: ele.name,
+                                            }))}
+                                            placeholder="Search or select category..."
+                                            isSearchable
+                                            isClearable
+                                            onChange={(selected) => {
+                                                setValue("category", selected?.value || "", {
+                                                    shouldValidate: true,
+                                                });
+                                            }}
+                                            value={
+                                                categories
+                                                    ?.map((ele) => ({
+                                                        value: ele.name,
+                                                        label: ele.name,
+                                                    }))
+                                                    .find((option) => option.value === watch("category")) || null
+                                            }
+                                            classNamePrefix="category-select"
+                                        />
+
+                                        <input
+                                            type="hidden"
+                                            {...register("category", {
+                                                required: "Please select a category",
+                                            })}
+                                        />
                                     </Field>
                                 </Col>
                                 <Col md={3}>
@@ -398,7 +447,7 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                 </Col> */}
                                 <Col sm={6} md={4}>
                                     <Field label={hasVariants ? "Total Stock Quantity (Auto)" : "Stock Quantity *"} error={errors.stock?.message}>
-                                        <Form.Control className={`cp-input ${errors.stock ? "is-invalid" : ""}`} type="number" min="0" 
+                                        <Form.Control className={`cp-input ${errors.stock ? "is-invalid" : ""}`} type="number" min="0"
                                             placeholder={hasVariants ? "Auto-calculated" : "100"}
                                             disabled={hasVariants}
                                             {...register("stock", { required: !hasVariants && "Stock required", min: { value: 0, message: "Cannot be negative" } })} />
@@ -575,9 +624,9 @@ export default function EditProductModal({ show, handleClose, product, setRefres
 
                         {/* ══ SECTION 7 — TAGS & CUSTOMIZATION ══ */}
                         <div className="cp-card">
-                            <SectionTitle icon="🏷️">Tags & Options</SectionTitle>
+                            <SectionTitle icon="🏷️"> Options</SectionTitle>
 
-                            <label className="cp-label mb-2">Product Tags</label>
+                            {/* <label className="cp-label mb-2">Product Tags</label>
                                     <div className="d-flex flex-wrap gap-2 mb-3">
                                         {PRESET_TAGS.map(t => (
                                             <div key={t} text={tags.includes(t) ? "" : ""}
@@ -594,7 +643,7 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                     onChange={e => setTagInput(e.target.value)}
                                     onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag())} />
                                 <Button type="button" className="cp-btn-primary" style={{ whiteSpace: "nowrap" }} onClick={() => addTag()}>Add Tag</Button>
-                            </div>
+                            </div> */}
 
                             {tags.length > 0 && (
                                 <div className="d-flex flex-wrap gap-2 mb-4">

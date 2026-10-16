@@ -29,8 +29,8 @@ const API_FIELDS_MAP = {
         const imageList =
             Array.isArray(p.image_url) ? p.image_url.filter(Boolean) :
                 Array.isArray(p.images) ? p.images.filter(Boolean) :
-                    typeof p.image_url === "string" && p.image_url.trim() ? [p.image_url.trim()] :
-                        typeof p.img === "string" && p.img.trim() ? [p.img.trim()] :
+                    typeof p.image_url === "string" && p.image_url.trim()?.split(',')[0].replace(/[{}"\\]/g, "") ? [p.image_url.trim()?.split(',')[0].replace(/[{}"\\]/g, "")] :
+                        typeof p.img === "string" && p.img.trim()?.split(',')[0].replace(/[{}"\\]/g, "") ? [p.img.trim()?.split(',')[0].replace(/[{}"\\]/g, "")] :
                             [];
 
         const variants = (Array.isArray(p.variants) ? p.variants : []).map(v => ({

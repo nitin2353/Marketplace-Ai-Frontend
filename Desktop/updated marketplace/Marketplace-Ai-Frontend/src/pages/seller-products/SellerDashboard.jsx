@@ -379,15 +379,28 @@ const SellerProducts = () => {
                                             <Card.Body className="p-3">
                                                 <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
                                                     <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.04em" }}>{product.brand}</span>
-                                                    {product.category && <Badge className="eco-badge-tag" style={{ background: "#f1f4ff", color: "#5068f0" }}>{product.category}</Badge>}
+                                                    {/* {product.category && <Badge className="eco-badge-tag" style={{ background: "#f1f4ff", color: "#5068f0" }}>{product.category}</Badge>}
                                                     {product.tag.map((t, idx) => {
                                                         return idx < 1 ? <Badge key={t} className="eco-badge-tag">{t.trim()}</Badge> : null;
-                                                    })}
+                                                    })} */}
                                                     {product.is_customizable && <Badge className="eco-badge-tag">✏️ Custom</Badge>}
                                                 </div>
 
-                                                <div className="fw-bold mb-2 d-flex justify-content-between" style={{ fontSize: "0.92rem", color: "#1a1a2e", lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                                                <h3 className="fw-bold mb-2 d-flex justify-content-between" style={{
+                                                    fontSize: "0.95rem",
+                                                    fontWeight: 600,
+                                                    color: "var(--text-main)",
+                                                    margin: "4px 0 8px",
+                                                    overflow: "hidden",
+                                                    display: "-webkit-box",
+                                                    WebkitLineClamp: 2,
+                                                    WebkitBoxOrient: "vertical",
+                                                    lineHeight: 1.4,
+                                                    height: "2.8em",
+                                                    fontFamily: "var(--font-heading)"
+                                                }}>
                                                     {product.title}
+
                                                     {
                                                         product.status === "false" && (
                                                             <span className="inactive-overlay text-danger d-flex align-items-center justify-content-end fw-bold">
@@ -395,7 +408,7 @@ const SellerProducts = () => {
                                                             </span>
                                                         )
                                                     }
-                                                </div>
+                                                </h3>
                                                 <div className="d-flex align-items-center gap-2 mb-2">
                                                     <span className="fw-black" style={{ fontSize: "1.1rem", color: "#ff6b35" }}>₹{product.base_price.toLocaleString()}</span>
                                                     {product.old_price && <span style={{ fontSize: "0.78rem", color: "#9ca3af", textDecoration: "line-through" }}>₹{product.old_price.toLocaleString()}</span>}

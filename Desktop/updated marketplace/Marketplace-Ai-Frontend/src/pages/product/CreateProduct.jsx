@@ -1,13 +1,15 @@
-﻿import { useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Container, Row, Col, Card, Form, Button, InputGroup, Badge, Stack, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import productApi from "../../api/product.api";
+import globalApi from "../../api/globalApi.jsx";
 import toast from "react-hot-toast";
 import "./CreateProduct.css";
 import SellerSidebar from "../../components/SellerSidebar.jsx";
 import "../../style/Dashboard.css"
 import SellerNavbar from "../../components/SellerNavbar.jsx";
+import Select from "react-select";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const PRESET_TAGS = ["New Arrival", "Trending", "Best Seller", "Limited Edition", "Eco Friendly", "Premium", "Sale"];
@@ -75,8 +77,8 @@ export default function CreateProduct() {
     const [isCod, setIsCod] = useState(true);
     const [isFreeDelivery, setIsFreeDelivery] = useState(false);
     const [taxInclusive, setTaxInclusive] = useState(false);
-
-    const { register, handleSubmit, watch, formState: { errors } } = useForm({
+    const [categories, setCategories] = useState([]);
+    const { register,setValue, handleSubmit, watch, formState: { errors } } = useForm({
         defaultValues: {
             title: "", description: "", brand: "", category: "",
             base_price: "", old_price: "", stock: "",
@@ -93,6 +95,21 @@ export default function CreateProduct() {
         },
         mode: "onChange",
     });
+
+    const getCategories = async () => {
+        try {
+            let res = await globalApi?.getCategories();
+            setCategories(res.data);
+        } catch (error) {
+            console.error(err);
+            toast.error(err?.response?.data?.message || "Something went wrong");
+        }
+    }
+
+    useEffect(() => {
+        getCategories();
+    }, [])
+
 
     const basePriceVal = watch("base_price");
     const oldPriceVal = watch("old_price");
@@ -274,8 +291,36 @@ export default function CreateProduct() {
                                         </Col>
                                         <Col md={4}>
                                             <Field label="Category" error={errors.category?.message}>
-                                                <Form.Control className={`cp-input ${errors.category ? "is-invalid" : ""}`} placeholder="e.g. Fashion, Electronics"
-                                                    {...register("category")} />
+                                                <Select
+                                                    options={categories?.map((ele) => ({
+                                                        value: ele.name,
+                                                        label: ele.name,
+                                                    }))}
+                                                    placeholder="Search or select category..."
+                                                    isSearchable
+                                                    isClearable
+                                                    onChange={(selected) => {
+                                                        setValue("category", selected?.value || "", {
+                                                            shouldValidate: true,
+                                                        });
+                                                    }}
+                                                    value={
+                                                        categories
+                                                            ?.map((ele) => ({
+                                                                value: ele.name,
+                                                                label: ele.name,
+                                                            }))
+                                                            .find((option) => option.value === watch("category")) || null
+                                                    }
+                                                    classNamePrefix="category-select"
+                                                />
+
+                                                <input
+                                                    type="hidden"
+                                                    {...register("category", {
+                                                        required: "Please select a category",
+                                                    })}
+                                                />
                                             </Field>
                                         </Col>
                                         <Col md={3}>
@@ -536,9 +581,9 @@ export default function CreateProduct() {
                                 STEP 7 — TAGS & CUSTOMIZATION
                             ══════════════════════════════════════════════════ */}
                                 <div className="cp-card">
-                                    <SectionTitle icon="🏷️">Step {hasVariants ? "7" : "6"} — Tags & Options</SectionTitle>
+                                    <SectionTitle icon="🏷️">Step {hasVariants ? "7" : "6"} — Options</SectionTitle>
 
-                                    <label className="cp-label mb-2">Product Tags</label>
+                                    {/* <label className="cp-label mb-2">Product Tags</label>
                                     <div className="d-flex flex-wrap gap-2 mb-3">
                                         {PRESET_TAGS.map(t => (
                                             <div key={t} text={tags.includes(t) ? "" : ""}
@@ -548,22 +593,22 @@ export default function CreateProduct() {
                                                 {t}
                                             </div>
                                         ))}
-                                    </div>
+                                    </div> */}
 
-                                    <div className="d-flex gap-2 mb-3" style={{ maxWidth: 380 }}>
+                                    {/* <div className="d-flex gap-2 mb-3" style={{ maxWidth: 380 }}>
                                         <Form.Control className="cp-input" placeholder="Custom tag…" value={tagInput}
                                             onChange={e => setTagInput(e.target.value)}
                                             onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag())} />
                                         <Button type="button" className="cp-btn-primary" style={{ whiteSpace: "nowrap" }} onClick={() => addTag()}>Add Tag</Button>
-                                    </div>
+                                    </div> */}
 
-                                    {tags.length > 0 && (
+                                    {/* {tags.length > 0 && (
                                         <div className="d-flex flex-wrap gap-2 mb-4">
                                             {tags.map(t => (
                                                 <div key={t} className="cp-tag-pill">{t}<button type="button" onClick={() => removeTag(t)}>✕</button></div>
                                             ))}
                                         </div>
-                                    )}
+                                    )} */}
 
                                     <Row className="g-3 mt-1">
                                         <Col sm={6}>

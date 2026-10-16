@@ -275,7 +275,7 @@ export default function ProductDashboard() {
     const [view, setView] = useState("grid");
     const [page, setPage] = useState(1);
     const [showFilters, setShowFilters] = useState(false);
-    const [priceMax, setPriceMax] = useState(200000);
+    const [priceMax, setPriceMax] = useState(20000);
     const [minRating, setMinRating] = useState(0);
     const [activeTags, setActiveTags] = useState([]);
     const [cartModal, setCartModal] = useState(null);
@@ -447,8 +447,8 @@ export default function ProductDashboard() {
 
     const dataMaxPrice = useMemo(() => {
         return (rawProducts && rawProducts.length > 0)
-            ? Math.max(...rawProducts.map(p => Number(p.price || 0)), 200000)
-            : 200000;
+            ? Math.max(...rawProducts.map(p => Number(p.price || 0)), 20000)
+            : 20000;
     }, [rawProducts]);
 
     // Quick category chips come from the real product data
@@ -464,7 +464,7 @@ export default function ProductDashboard() {
 
     useEffect(() => {
         // Search / section / filters active → grid view, otherwise landing sections
-        const activeFiltersCount = (activeTags?.length || 0) + (minRating > 0 ? 1 : 0) + (priceMax < (dataMaxPrice || 200000) ? 1 : 0);
+        const activeFiltersCount = (activeTags?.length || 0) + (minRating > 0 ? 1 : 0) + (priceMax < (dataMaxPrice || 20000) ? 1 : 0);
         const hasActiveFilters = activeFiltersCount > 0 || sortBy !== "relevance";
 
         if (search || navSection !== "all" || hasActiveFilters) {
