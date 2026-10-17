@@ -4,8 +4,10 @@ import QRCode from "qrcode";
 import ShippingLabel from "../components/ShippingLabel.jsx";
 import { MdQrCodeScanner } from "react-icons/md";
 import JWTService from "../config/jwt.config";
+import { API_BASE_URL } from "../helper/Constraints.jsx";
 
-const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:5173`;
+// const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:5173`;
+// const API_BASE_URL = API_BASE_URL;
 
 const genQR = async (url) => {
     try {
