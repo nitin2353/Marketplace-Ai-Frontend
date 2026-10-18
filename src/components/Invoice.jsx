@@ -4,7 +4,6 @@ import {
 } from "@react-pdf/renderer";
 import s from '../style/InvoiceStyle'
 import logo from "../assets/logo.png";
-import signature from "../assets/icon.png";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
 const ORANGE = "#000000ff";

@@ -72,8 +72,6 @@ const InvoicePage = () => {
             const invNo = invoiceNo(data);
             const verifyUrl = `${API_BASE_URL}/order/invoice/${p1}/${p2}`;
 
-            console.log("verifyUrl", verifyUrl)
-
             const qr = await generateQrDataUrl(verifyUrl);
             setQrUrl(qr);
 
@@ -122,6 +120,7 @@ const InvoicePage = () => {
             <div style={styles.viewerWrap}>
                 {pdfReady ? (
                     <PDFViewer style={styles.viewer} showToolbar={false}>
+                        {alert('done')}
                         <Invoice order={order} qrDataUrl={qrUrl} />
                     </PDFViewer>
                 ) : (
