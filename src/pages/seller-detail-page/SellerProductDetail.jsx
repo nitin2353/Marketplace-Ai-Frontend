@@ -696,7 +696,7 @@ export default function SellerProductDetail() {
                                                             <Col xs={4} key={lbl}>
                                                                 <div className="spd-ship-chip">
                                                                     <span className="spd-ship-lbl">{lbl}</span>
-                                                                    <span className="spd-ship-val">{val}</span>
+                                                                    <span className="spd-ship-val" >{val}</span>
                                                                 </div>
                                                             </Col>
                                                         ))}
