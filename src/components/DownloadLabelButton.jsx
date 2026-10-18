@@ -4,10 +4,10 @@ import QRCode from "qrcode";
 import ShippingLabel from "../components/ShippingLabel.jsx";
 import { MdQrCodeScanner } from "react-icons/md";
 import JWTService from "../config/jwt.config";
-import { API_BASE_URL } from "../helper/Constraints.jsx";
+import { FRONTEND_BASE_URL } from "../helper/Constraints.jsx";
 
-// const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:5173`;
-// const API_BASE_URL = API_BASE_URL;
+
+console.log('FRONTEND_BASE_URL', FRONTEND_BASE_URL)
 
 const genQR = async (url) => {
     try {
@@ -74,7 +74,7 @@ export default function DownloadLabelButton({ order = {}, parcelConfig }) {
                     throw new Error("User ID not found in token");
                 }
 
-                const invoiceUrl = `${API_BASE_URL}/order/invoice/${orderId}/${userId}`;
+                const invoiceUrl = `${FRONTEND_BASE_URL}/order/invoice/${orderId}/${userId}`;
                 const [tracking, invoice] = await Promise.all([
                     genQR(invoiceUrl),
                     genQR(invoiceUrl),
