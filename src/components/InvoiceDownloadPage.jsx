@@ -1,12 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-    PDFDownloadLink,
-    PDFViewer,
-} from '@react-pdf/renderer';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 import QRCode from 'qrcode';
-
+import InvoiceHtmlPreview from './InvoiceHtmlPreview';
 import Invoice, { invoiceNo } from './Invoice';
 import { FRONTEND_BASE_URL } from '../helper/Constraints';
 import AiMarketPlaceApi from '../api/AiMarketPlaceApi';
@@ -169,29 +166,20 @@ const InvoiceDownloadPage = () => {
             </div>
 
             {/* Responsive PDF preview */}
+
+            {/* Responsive HTML Invoice Preview */}
             <div
                 style={{
                     width: '100%',
-                    height: 'calc(100vh - 90px)',
-                    minHeight: 500,
-                    overflow: 'hidden',
+                    padding: '12px',
+                    boxSizing: 'border-box',
+                    background: '#f1f1f1',
+                    minHeight: '100vh',
                 }}
             >
-                <PDFViewer
-                    key={id}
-                    width="100%"
-                    height="100%"
-                    showToolbar={true}
-                    style={{
-                        display: 'block',
-                        width: '100%',
-                        height: '100%',
-                        border: 'none',
-                    }}
-                >
-                    {invoiceDocument}
-                </PDFViewer>
+                <InvoiceHtmlPreview order={order} />
             </div>
+
         </div>
     );
 };
