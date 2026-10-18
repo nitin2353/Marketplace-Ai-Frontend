@@ -1,13 +1,17 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+import {
+    PDFDownloadLink,
+    PDFViewer,
+} from '@react-pdf/renderer';
 import QRCode from 'qrcode';
+
 import Invoice, { invoiceNo } from './Invoice';
-import orderApi from '../api/order.api';
-import { API_BASE_URL } from '../helper/Constraints';
+import { FRONTEND_BASE_URL } from '../helper/Constraints';
 import AiMarketPlaceApi from '../api/AiMarketPlaceApi';
 
-const BASE_URL = `http://192.168.6.179:5173`; 
+const BASE_URL = FRONTEND_BASE_URL;
 
 const InvoiceDownloadPage = () => {
     const { id } = useParams();
@@ -24,11 +28,18 @@ const InvoiceDownloadPage = () => {
             try {
                 setLoading(true);
                 setError('');
-                const {data} = await AiMarketPlaceApi.getOrderById(id);
-                
+
+                const { data } =
+                    await AiMarketPlaceApi.getOrderById(id);
+
                 const orderData = data?.data;
 
-                const qrUrl = `${BASE_URL}/invoice/${invoiceNo(orderData)}`;
+                if (!orderData) {
+                    throw new Error('Order not found');
+                }
+
+                const qrUrl =
+                    `${BASE_URL}/invoice/${invoiceNo(orderData)}`;
 
                 const qr = await QRCode.toDataURL(qrUrl, {
                     width: 180,
@@ -45,8 +56,11 @@ const InvoiceDownloadPage = () => {
                 }
             } catch (err) {
                 console.error('Invoice fetch error:', err);
+
                 if (mounted) {
-                    setError(err.message || 'Something went wrong');
+                    setError(
+                        err.message || 'Unable to load invoice'
+                    );
                 }
             } finally {
                 if (mounted) {
@@ -59,7 +73,7 @@ const InvoiceDownloadPage = () => {
             fetchOrder();
         } else {
             setLoading(false);
-            setError('Order id is missing in params');
+            setError('Order ID is missing');
         }
 
         return () => {
@@ -68,28 +82,116 @@ const InvoiceDownloadPage = () => {
     }, [id]);
 
     if (loading) {
-        return <div>Loading invoice...</div>;
+        return (
+            <div style={{ padding: 24, color: '#fff' }}>
+                Loading invoice...
+            </div>
+        );
     }
 
     if (error) {
-        return <div style={{ color: 'red' }}>{error}</div>;
+        return (
+            <div style={{ padding: 24, color: 'red' }}>
+                {error}
+            </div>
+        );
     }
 
-    // if (!order) {
-    //     return <div>No order found</div>;
-    // }
+    if (!order) {
+        return <div>Order not found.</div>;
+    }
+
+    const invoiceDocument = (
+        <Invoice order={order} qrDataUrl={qrDataUrl} />
+    );
 
     return (
-        <div style={{ padding: '20px' }}>
-            <h2>Invoice Ready</h2>
-            <p>Order No: {order?.order_number}</p>
+        <div
+            style={{
+                minHeight: '100vh',
+                background: '#252525',
+                color: '#fff',
+            }}
+        >
+            {/* Header */}
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: 12,
+                    padding: '16px',
+                    background: '#111',
+                }}
+            >
+                <div>
+                    <strong style={{ letterSpacing: 2 }}>
+                        SHOPEASE
+                    </strong>
+                    <div style={{ fontSize: 12, color: '#aaa' }}>
+                        INVOICE VIEWER
+                    </div>
+                </div>
 
-            <PDFDownloadLink
-                document={<Invoice order={order} qrDataUrl={qrDataUrl} />}
-                fileName={`${order?.order_number || 'invoice'}.pdf`}
-            >   
-                Click to Download Invoice
-            </PDFDownloadLink>
+                <PDFDownloadLink
+                    document={invoiceDocument}
+                    fileName={`${order.order_number || 'invoice'}.pdf`}
+                    style={{
+                        background: '#ff6835',
+                        color: '#fff',
+                        textDecoration: 'none',
+                        padding: '12px 18px',
+                        borderRadius: 8,
+                        fontWeight: 600,
+                    }}
+                >
+                    {({ loading: pdfLoading }) =>
+                        pdfLoading
+                            ? 'Preparing PDF...'
+                            : 'Download PDF'
+                    }
+                </PDFDownloadLink>
+
+                <button
+                    onClick={() => window.print()}
+                    style={{
+                        padding: '12px 18px',
+                        border: '1px solid #555',
+                        borderRadius: 8,
+                        background: '#222',
+                        color: '#fff',
+                        cursor: 'pointer',
+                    }}
+                >
+                    Print
+                </button>
+            </div>
+
+            {/* Responsive PDF preview */}
+            <div
+                style={{
+                    width: '100%',
+                    height: 'calc(100vh - 90px)',
+                    minHeight: 500,
+                    overflow: 'hidden',
+                }}
+            >
+                <PDFViewer
+                    key={id}
+                    width="100%"
+                    height="100%"
+                    showToolbar={true}
+                    style={{
+                        display: 'block',
+                        width: '100%',
+                        height: '100%',
+                        border: 'none',
+                    }}
+                >
+                    {invoiceDocument}
+                </PDFViewer>
+            </div>
         </div>
     );
 };
