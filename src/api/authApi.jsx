@@ -1,6 +1,6 @@
 import apiConfig from "../config/axios-config";
 
-// ------------------ AUTH ------------------
+// ------------------ AUTH ------------ ------
 
 const signupCustomer = async (data) => {
   try {

@@ -228,24 +228,21 @@ export default function SellerProductDetail() {
     return (
         <div className="spd-page">
             <Container fluid className="p-0">
-                <SellerNavbar pageTitle="Product Detail" />
 
-                <Row className="g-0" style={{ minHeight: "100vh" }}>
+                <Row className="g-0" style={{ minHeight: "100vh" }} >
 
-                    {/* ── SIDEBAR ── */}
-                    <Col lg={3} xl={2}>
-                        <SellerSidebar stats={sidebarStats} />
-                    </Col>
+                    <SellerSidebar stats={sidebarStats} />
 
                     {/* ── MAIN CONTENT ── */}
-                    <Col lg={9} xl={10} style={{ overflowY: "auto", paddingBottom: 80 }}>
+                    <Col xs={12} className="pd-main" style={{ overflowY: "auto", paddingBottom: 80 }}>
+                        <SellerNavbar pageTitle="Product Detail" />
                         {product && (
                             <div className="p-3 p-md-4">
 
                                 {/* ── TOP ACTION BAR (Desktop) ── */}
                                 <div className="spd-top-actions mb-4">
                                     <div>
-                                        <h2 className="spd-page-title">{product.title}</h2>
+                                        <h2 className="spd-page-title ">{product.title}</h2>
                                         <p className="spd-page-sub">
                                             {product.brand && <><span className="spd-chip">{product.brand}</span></>}
                                             {product.category && <span className="spd-chip">{product.category}</span>}

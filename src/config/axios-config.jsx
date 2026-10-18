@@ -5,7 +5,7 @@ import { navigateTo } from "./navigate.helper";
 import JWTService from './jwt.config';
 
 const api = axios.create({
-  baseURL: API_BASE_URL || '',
+  baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -28,7 +28,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       JWTService.clearTokenDetails();
-      navigateTo('/login');
+      navigateTo('/auth/login');
     }
     return Promise.reject(error);
   }

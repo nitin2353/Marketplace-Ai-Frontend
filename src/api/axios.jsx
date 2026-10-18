@@ -1,7 +1,8 @@
 import apiConfig from '../config/axios-config';
+import { API_BASE_URL } from '../helper/Constraints';
 
 const API = apiConfig.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || "https://marketplace-ai-backend-lffk.onrender.com/api/v1"
+    baseURL: API_BASE_URL
 });
 
 // 🔐 Token attach (auto)
