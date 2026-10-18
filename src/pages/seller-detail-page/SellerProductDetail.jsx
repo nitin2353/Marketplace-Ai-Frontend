@@ -715,9 +715,9 @@ export default function SellerProductDetail() {
 
             {/* ── Mobile Sticky Action Bar ── */}
             <div className="spd-sticky-bar d-lg-none">
-                <button className="spd-action-btn ghost flex-fill" style={{ justifyContent: "center" }} onClick={() => navigate(`/product/${id}`)}>👁️ View</button>
+                {/* <button className="spd-action-btn ghost flex-fill" style={{ justifyContent: "center" }} onClick={() => navigate(`/product/${id}`)}>👁️ View</button> */}
                 <button className="spd-action-btn primary flex-fill" style={{ justifyContent: "center" }} onClick={() => setShowEdit(true)}>✏️ Edit</button>
-                <button className="spd-action-btn danger" style={{ justifyContent: "center" }} onClick={() => setDeleteModal(true)}>🗑️</button>
+                <button className="spd-action-btn" style={{ justifyContent: "center" }} onClick={() => setDeleteModal(true)}>Delete 🗑️</button>
             </div>
 
             {/* ── Edit Product Modal ── */}
