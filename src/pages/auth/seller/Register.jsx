@@ -527,7 +527,7 @@ export default function SellerRegister() {
 
                       <SignatureUpload register={register} watch={watch} />
 
-                      <div className="sr-note">🎁 Register now &amp; sell commission-free for 3 months!</div>
+                      {/* <div className="sr-note">🎁 Register now &amp; sell commission-free for 3 months!</div> */}
                     </>
                   )}
 

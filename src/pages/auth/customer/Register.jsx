@@ -24,7 +24,7 @@ const STRENGTH_COLOR = { danger: "#dc3545", warning: "#f59e0b", success: "#16a34
 
 const FEATURES = [
     { icon: "🚚", title: "Free Delivery", desc: "On orders above ₹499" },
-    { icon: "↩️", title: "Easy 30-Day Returns", desc: "No questions asked" },
+    // { icon: "↩️", title: "Easy 30-Day Returns", desc: "No questions asked" },
     { icon: "🔐", title: "100% Secure Payments", desc: "PCI DSS compliant" },
     { icon: "🎁", title: "Exclusive Member Deals", desc: "Up to 80% off every day" },
 ];
@@ -84,7 +84,7 @@ export default function Register() {
         }
     };
 
-    const handleLogin = () => navigate("/customer/login");
+    const handleLogin = () => navigate("/auth/login");
 
     // ── SUCCESS STATE ──
     if (submitted) {
@@ -167,7 +167,7 @@ export default function Register() {
 
                                 <div className="eco-offer">
                                     <span className="eco-offer-icon">🎁</span>
-                                    Sign up &amp; get ₹200 cashback on your first order!
+                                    Sign up &amp; get 10% OFF on your first order!
                                 </div>
 
                                 {/* First + Last Name */}
@@ -332,31 +332,6 @@ export default function Register() {
                                 <Button type="submit" className="eco-btn-main w-100 text-white mb-3" disabled={loading}>
                                     {loading ? "⏳ Creating your account..." : "🚀 Create my account — it's free!"}
                                 </Button>
-
-                                <div className="eco-divider my-3"><span>or continue with</span></div>
-
-                                {/* Social Auth */}
-                                <Row className="g-2 mb-4">
-                                    <Col xs={6}>
-                                        <Button type="button" className="eco-social-btn w-100 d-flex align-items-center justify-content-center gap-2" variant="outline-secondary">
-                                            <svg width="17" height="17" viewBox="0 0 48 48">
-                                                <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.5 30.3 0 24 0 14.7 0 6.7 5.4 2.7 13.3l7.9 6.1C12.5 13.2 17.8 9.5 24 9.5z" />
-                                                <path fill="#34A853" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.5 2.8-2.1 5.1-4.5 6.7l7.1 5.5c4.1-3.8 6.5-9.4 6.5-16.2z" />
-                                                <path fill="#FBBC05" d="M10.6 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.7-4.6l-7.9-6.1A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l8-6.2z" />
-                                                <path fill="#4285F4" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.1-5.5c-2.1 1.4-4.8 2.3-8.8 2.3-6.2 0-11.5-3.7-13.4-9.4l-8 6.2C6.7 42.6 14.7 48 24 48z" />
-                                            </svg>
-                                            Google
-                                        </Button>
-                                    </Col>
-                                    <Col xs={6}>
-                                        <Button type="button" className="eco-social-btn w-100 d-flex align-items-center justify-content-center gap-2" variant="outline-secondary">
-                                            <svg width="17" height="17" viewBox="0 0 24 24" fill="#1877F2">
-                                                <path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.88v2.27h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z" />
-                                            </svg>
-                                            Facebook
-                                        </Button>
-                                    </Col>
-                                </Row>
 
                                 <div className="eco-trust d-flex justify-content-center gap-3 flex-wrap">
                                     {["🔒 SSL Encrypted", "✅ Verified Platform", "🏆 2Cr+ Customers"].map((b) => (
