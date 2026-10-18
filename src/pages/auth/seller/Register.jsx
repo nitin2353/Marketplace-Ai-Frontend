@@ -163,7 +163,7 @@ const STRENGTH_COLOR = { danger: "#dc3545", warning: "#f59e0b", success: "#16a34
 
 // ── Step field names (used for per-step trigger) ─────────────────────────────
 const STEP_FIELDS = {
-  1: ["name", "email", "password", "phone", "gender", "dob"],
+  1: ["name", "email", "password", "phone", "gender", "dob", "seller_signature_image"],
   2: ["business_name", "business_type", "category", "experience", "store_description", "website", "bio"],
   3: ["country", "state", "city", "pincode", "address_line_1"],
   4: ["account_number", "ifsc", "account_holder", "upi_id", "pan", "gstin", "bank_name", "account_type"],
@@ -208,31 +208,72 @@ function StepIndicator({ current }) {
 }
 
 /** Signature upload with preview */
-function SignatureUpload({ register, watch }) {
+
+function SignatureUpload({ register, watch, error }) {
   const file = watch("seller_signature_image")?.[0];
   const [preview, setPreview] = useState(null);
 
   useEffect(() => {
-    if (!file) { setPreview(null); return; }
+    if (!file) {
+      setPreview(null);
+      return;
+    }
+
     const url = URL.createObjectURL(file);
     setPreview(url);
+
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
   return (
     <Form.Group className="mb-3">
-      <Form.Label className="sr-label">Signature image</Form.Label>
+      <Form.Label className="sr-label">
+        Signature image *
+      </Form.Label>
+
       <label className="sr-drop">
-        <input type="file" accept="image/*" hidden {...register("seller_signature_image")} />
-        <div className="sr-drop-icon">{preview ? <img src={preview} alt="Signature preview" /> : "✍️"}</div>
+        <input
+          type="file"
+          accept="image/png,image/jpeg"
+          hidden
+          {...register("seller_signature_image", {
+            required: "Please upload your signature",
+            validate: {
+              fileSize: (files) =>
+                !files?.[0] ||
+                files[0].size <= 2 * 1024 * 1024 ||
+                "Signature must be 2 MB or smaller",
+              fileType: (files) =>
+                !files?.[0] ||
+                ["image/png", "image/jpeg"].includes(files[0].type) ||
+                "Only JPG and PNG files are allowed",
+            },
+          })}
+        />
+
+        <div className="sr-drop-icon">
+          {preview ? (
+            <img src={preview} alt="Signature preview" />
+          ) : (
+            "✍️"
+          )}
+        </div>
+
         <div>
-          <div className="sr-drop-title">{file ? "Change signature" : "Click to upload your signature"}</div>
-          <div className="sr-drop-sub">{file ? file.name : "JPG or PNG image"}</div>
+          <div className="sr-drop-title">
+            {file ? "Change signature" : "Upload your signature *"}
+          </div>
+          <div className="sr-drop-sub">
+            {file ? file.name : "JPG or PNG · Maximum 2 MB"}
+          </div>
         </div>
       </label>
+
+      {error && <div className="sr-err">{error.message}</div>}
     </Form.Group>
   );
 }
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  MAIN COMPONENT
@@ -525,7 +566,11 @@ export default function SellerRegister() {
                         </Col>
                       </Row>
 
-                      <SignatureUpload register={register} watch={watch} />
+                      <SignatureUpload
+                        register={register}
+                        watch={watch}
+                        error={errors.seller_signature_image}
+                      />
 
                       {/* <div className="sr-note">🎁 Register now &amp; sell commission-free for 3 months!</div> */}
                     </>
