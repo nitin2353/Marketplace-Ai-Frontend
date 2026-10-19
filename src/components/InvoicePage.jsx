@@ -1,215 +1,291 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
-import { BlobProvider } from "@react-pdf/renderer";
-import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
-import Invoice, { invoiceNo } from './Invoice'; // apna path adjust karo
-import orderApi from '../api/order.api'
-import styles from '../style/InvoicePage';
 
-// ─── QR helper (qrcode.react ya koi bhi library) ───────────────────────────
-// Agar aapke paas qrcode library nahi hai to:  npm install qrcode
-import QRCode from 'qrcode';
-import AiMarketPlaceApi from '../api/AiMarketPlaceApi';
-import JWTService from '../config/jwt.config';
-import { API_BASE_URL } from '../helper/Constraints';
+import React, { useEffect, useState, useCallback } from "react";
+import { useParams } from "react-router-dom";
+import { BlobProvider, PDFDownloadLink } from "@react-pdf/renderer";
+import Invoice, { invoiceNo } from "./Invoice";
+import styles from "../style/InvoicePage";
+import QRCode from "qrcode";
+import AiMarketPlaceApi from "../api/AiMarketPlaceApi";
+import { API_BASE_URL } from "../helper/Constraints";
 
 const generateQrDataUrl = async (text) => {
-    try {
-        return await QRCode.toDataURL(text, {
-            width: 144,
-            margin: 1,
-            color: { dark: '#111111', light: '#ffffff' },
-        });
-    } catch {
-        return null;
-    }
+  try {
+    return await QRCode.toDataURL(text, {
+      width: 144,
+      margin: 1,
+      color: { dark: "#111111", light: "#ffffff" },
+    });
+  } catch (error) {
+    console.error("QR generation failed:", error);
+    return null;
+  }
 };
 
-// ─── Tiny reusable UI pieces ────────────────────────────────────────────────
 const Spinner = () => (
-    <div style={styles.spinnerWrap}>
-        <div style={styles.spinner} />
-    </div>
+  <div style={styles.spinnerWrap}>
+    <div style={styles.spinner} />
+  </div>
 );
 
 const ErrorBox = ({ message, onRetry }) => (
-    <div style={styles.errorBox}>
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3549ffff" strokeWidth="1.5">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="12" />
-            <circle cx="12" cy="16" r="0.5" fill="#3549ffff" />
-        </svg>
-        <p style={styles.errorText}>{message}</p>
-        {onRetry && (
-            <button style={styles.retryBtn} onClick={onRetry}>
-                Try Again
-            </button>
-        )}
-    </div>
+  <div style={styles.errorBox}>
+    <p style={styles.errorText}>{message}</p>
+    {onRetry && (
+      <button style={styles.retryBtn} onClick={onRetry}>
+        Try Again
+      </button>
+    )}
+  </div>
 );
-
 
 const InvoicePage = () => {
-    const { id } = useParams();
+  const { id, sellerId } = useParams();
 
-    const [order, setOrder] = useState(null);
-    const [qrUrl, setQrUrl] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [pdfReady, setPdfReady] = useState(false);
-    const parms = window.location.href
+  const [order, setOrder] = useState(null);
+  const [qrUrl, setQrUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    const fetchOrder = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        setPdfReady(false);
+  const fetchOrder = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-        const p1 = parms?.split('invoice/')[1]?.split('/')[0]
-        const p2 = parms?.split('invoice/')[1]?.split('/')[1]
+    try {
+      // Supports routes such as /invoice/:id/:sellerId
+      // If your route uses different parameter names,
+      // update these values to match your route definition.
+      const urlParts = window.location.pathname
+        .split("/")
+        .filter(Boolean);
 
-        try {
-            const { data } = await AiMarketPlaceApi.getOrderById(p1, p2);
-            setOrder(data);
-            const invNo = invoiceNo(data);
-            const verifyUrl = `${API_BASE_URL}/order/invoice/${p1}/${p2}`;
+      const invoiceIndex = urlParts.lastIndexOf("invoice");
+      const firstId = id || urlParts[invoiceIndex + 1];
+      const secondId =
+        sellerId || urlParts[invoiceIndex + 2];
 
-            const qr = await generateQrDataUrl(verifyUrl);
-            setQrUrl(qr);
+      if (!firstId || !secondId) {
+        throw new Error("Invoice URL is missing required IDs.");
+      }
 
-            // Small delay so PDF renderer mounts cleanly
-            setTimeout(() => setPdfReady(true), 100);
-        } catch (err) {
-            setError(err?.message || 'Error loading order');
-        } finally {
-            setLoading(false);
-        }
-    }, [id]);
+      const { data } = await AiMarketPlaceApi.getOrderById(
+        firstId,
+        secondId
+      );
 
-    useEffect(() => { fetchOrder(); }, [fetchOrder]);
+      setOrder(data);
 
-    // ── Derived ──
-    const fileName = order ? `${invoiceNo(order)}.pdf` : 'invoice.pdf';
+      const verifyUrl =
+        `${API_BASE_URL}/order/invoice/${firstId}/${secondId}`;
 
-    // ── Render states ──
-    if (loading) {
-        return (
-            <div style={styles.page}>
-                <TopBar fileName={null} order={null} />
-                <div style={styles.center}>
-                    <Spinner />
-                    <p style={styles.loadingText}>Loading...</p>
-                </div>
-            </div>
-        );
+      const qr = await generateQrDataUrl(verifyUrl);
+      setQrUrl(qr);
+    } catch (err) {
+      console.error("Invoice loading failed:", err);
+      setError(
+        err?.response?.data?.message ||
+        err?.message ||
+        "Error loading order."
+      );
+    } finally {
+      setLoading(false);
     }
+  }, [id, sellerId]);
 
-    if (error) {
-        return (
-            <div style={styles.page}>
-                <TopBar fileName={null} order={null} />
-                <div style={styles.center}>
-                    <ErrorBox message={error} onRetry={fetchOrder} />
-                </div>
-            </div>
-        );
-    }
+  useEffect(() => {
+    fetchOrder();
+  }, [fetchOrder]);
 
+  if (loading) {
     return (
-        <div style={styles.page}>
-            {/* <TopBar
-                fileName={fileName}
-                order={order}
-                qrUrl={qrUrl}
-            /> */}
-
-                    <PDFViewer >
-                       <Invoice order={order} qrDataUrl={qrUrl} />
-                    </PDFViewer>
-            {/* <div style={styles.viewerWrap}>
-                {pdfReady ? (
-                ) : (
-                    <div style={styles.center}>
-                        <Spinner />
-                        <p style={styles.loadingText}>
-                            PDF Generating...
-                        </p>
-                    </div>
-                )}
-            </div> */}
+      <div style={styles.page}>
+        <div style={styles.center}>
+          <Spinner />
+          <p style={styles.loadingText}>Loading invoice...</p>
         </div>
+      </div>
     );
+  }
+
+  if (error || !order) {
+    return (
+      <div style={styles.page}>
+        <div style={styles.center}>
+          <ErrorBox
+            message={error || "Order data is unavailable."}
+            onRetry={fetchOrder}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const fileName = `${invoiceNo(order)}.pdf`;
+
+  return (
+    <div style={pageStyles.page}>
+      <header style={pageStyles.toolbar}>
+        <div>
+          <strong style={pageStyles.brand}>SHOPEASE</strong>
+          <div style={pageStyles.subtitle}>Invoice Preview</div>
+        </div>
+
+        <div style={pageStyles.actions}>
+          <PDFDownloadLink
+            document={<Invoice order={order} qrDataUrl={qrUrl} />}
+            fileName={fileName}
+            style={pageStyles.download}
+          >
+            {({ loading: generating }) =>
+              generating ? "Preparing..." : "Download PDF"
+            }
+          </PDFDownloadLink>
+        </div>
+      </header>
+
+      <div style={pageStyles.viewer}>
+        <BlobProvider
+          document={<Invoice order={order} qrDataUrl={qrUrl} />}
+        >
+          {({ url, loading: generating, error: pdfError }) => {
+            if (generating) {
+              return (
+                <div style={styles.center}>
+                  <Spinner />
+                  <p style={styles.loadingText}>
+                    Generating PDF...
+                  </p>
+                </div>
+              );
+            }
+
+            if (pdfError || !url) {
+              return (
+                <div style={styles.center}>
+                  <ErrorBox
+                    message="Unable to generate PDF. Please try again."
+                  />
+                </div>
+              );
+            }
+
+            return (
+              <div style={pageStyles.preview}>
+                <div style={pageStyles.mobileActions}>
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={pageStyles.openButton}
+                  >
+                    Open PDF
+                  </a>
+
+                  <a
+                    href={url}
+                    download={fileName}
+                    style={pageStyles.download}
+                  >
+                    Download
+                  </a>
+                </div>
+
+                <iframe
+                  src={url}
+                  title="ShopEase Invoice"
+                  style={pageStyles.iframe}
+                />
+              </div>
+            );
+          }}
+        </BlobProvider>
+      </div>
+    </div>
+  );
 };
 
-// ─── Top action bar ─────────────────────────────────────────────────────────
-const TopBar = ({ fileName, order, qrUrl }) => (
-    <header style={styles.topBar}>
-        {/* Left – branding */}
-        <div style={styles.topLeft}>
-            <div style={styles.logo}>SHOPEASE</div>
-            <span style={styles.topSub}>Invoice Viewer</span>
-        </div>
-
-        {/* Right – actions */}
-        <div style={styles.topActions}>
-            {order && (
-                <PDFDownloadLink
-                    document={<Invoice order={order} qrDataUrl={qrUrl} />}
-                    fileName={fileName}
-                    style={styles.downloadBtn}
-                >
-                    {({ loading: l }) =>
-                        l ? 'Preparing…' : (
-                            <>
-                                <DownloadIcon />
-                                Download PDF
-                            </>
-                        )
-                    }
-                </PDFDownloadLink>
-            )}
-
-            <button style={styles.printBtn} onClick={() => window.print()}>
-                <PrintIcon />
-                Print
-            </button>
-        </div>
-    </header>
-);
-
-// ─── Tiny SVG icons ─────────────────────────────────────────────────────────
-const DownloadIcon = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" strokeWidth="2" style={{ marginRight: 6 }}>
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-        <polyline points="7 10 12 15 17 10" />
-        <line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
-);
-
-const PrintIcon = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" strokeWidth="2" style={{ marginRight: 6 }}>
-        <polyline points="6 9 6 2 18 2 18 9" />
-        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-        <rect x="6" y="14" width="12" height="8" />
-    </svg>
-);
-
-
-// CSS animation inject (spinner ke liye)
-if (typeof document !== 'undefined') {
-    const styleTag = document.getElementById('invoice-page-styles') || (() => {
-        const t = document.createElement('style');
-        t.id = 'invoice-page-styles';
-        document.head.appendChild(t);
-        return t;
-    })();
-    styleTag.textContent = `
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @media print {
-            header { display: none !important; }
-        }
-    `;
-}
+const pageStyles = {
+  page: {
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    height: "100dvh",
+    minHeight: "500px",
+    overflow: "hidden",
+    background: "#f1f5f9",
+    fontFamily: "Arial, sans-serif",
+  },
+  toolbar: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: "12px",
+    padding: "14px 20px",
+    background: "#ffffff",
+    borderBottom: "1px solid #e5e7eb",
+  },
+  brand: {
+    fontSize: "18px",
+    color: "#111827",
+  },
+  subtitle: {
+    marginTop: "4px",
+    fontSize: "13px",
+    color: "#6b7280",
+  },
+  actions: {
+    display: "flex",
+    gap: "8px",
+  },
+  download: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "10px 14px",
+    borderRadius: "7px",
+    background: "#111827",
+    color: "#ffffff",
+    textDecoration: "none",
+    fontSize: "14px",
+    fontWeight: 600,
+  },
+  viewer: {
+    flex: 1,
+    minHeight: 0,
+    padding: "12px",
+  },
+  preview: {
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    height: "100%",
+    gap: "8px",
+  },
+  mobileActions: {
+    display: "flex",
+    gap: "8px",
+    flexWrap: "wrap",
+  },
+  openButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "10px 14px",
+    borderRadius: "7px",
+    background: "#2563eb",
+    color: "#ffffff",
+    textDecoration: "none",
+    fontSize: "14px",
+    fontWeight: 600,
+  },
+  iframe: {
+    flex: 1,
+    width: "100%",
+    minHeight: "300px",
+    border: "none",
+    borderRadius: "8px",
+    background: "#ffffff",
+  },
+};
 
 export default InvoicePage;
