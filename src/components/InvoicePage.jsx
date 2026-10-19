@@ -116,7 +116,7 @@ const InvoicePage = () => {
 
     return (
          <iframe
-                        src="/Nitin's%20Resume.pdf"
+                        src="../../public/Nitin's%20Resume.pdf"
                         title="Resume Preview"
                         style={{
                             width: "100%",
