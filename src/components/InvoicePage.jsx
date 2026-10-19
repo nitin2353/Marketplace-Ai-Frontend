@@ -122,45 +122,11 @@ const InvoicePage = () => {
                 qrUrl={qrUrl}
             /> */}
 
-            <div style={styles.viewerWrap}>
+                    <PDFViewer >
+                       <Invoice order={order} qrDataUrl={qrUrl} />
+                    </PDFViewer>
+            {/* <div style={styles.viewerWrap}>
                 {pdfReady ? (
-                    <BlobProvider
-                        document={
-                            <Invoice
-                                order={order}
-                                qrDataUrl={qrUrl}
-                            />
-                        }
-                    >
-                        {({ url, loading, error }) => {
-                            if (loading) {
-                                return (
-                                    <div style={styles.center}>
-                                        <Spinner />
-                                        <p style={styles.loadingText}>
-                                            PDF Generating...
-                                        </p>
-                                    </div>
-                                );
-                            }
-
-                            if (error) {
-                                return <p>Failed to generate PDF.</p>;
-                            }
-
-                            return (
-                                <iframe
-                                    src={url}
-                                    title="Invoice Preview"
-                                    style={{
-                                        width: "100%",
-                                        height: "100%",
-                                        border: "none",
-                                    }}
-                                />
-                            );
-                        }}
-                    </BlobProvider>
                 ) : (
                     <div style={styles.center}>
                         <Spinner />
@@ -169,7 +135,7 @@ const InvoicePage = () => {
                         </p>
                     </div>
                 )}
-            </div>
+            </div> */}
         </div>
     );
 };

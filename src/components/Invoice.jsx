@@ -201,15 +201,12 @@ const Invoice = ({ order = {}, qrDataUrl = null }) => {
     const seller = order.seller_info?.info || {};
     const selAdr = order.seller_info?.address || null;
     const invNo = invoiceNo(order);
-
     const oC = oStatusColor(order.order_status);
     const pC = pStatusColor(order.payment_status);
-
     const sellerName = seller.business_name || seller.name || "ShopEase Seller";
     const isCOD = order.payment_method === "cod";
     const isPaid = order.payment_status === "paid";
     const isCancelled = order.order_status === "cancelled";
-
     const subtotal = Number(order.subtotal) || 0;
     const deliveryCharge = Number(order.delivery_charge) || 0;
     const discountAmount = Number(order.discount_amount) || 0;
@@ -225,7 +222,7 @@ const Invoice = ({ order = {}, qrDataUrl = null }) => {
                 style={s.page}
                 wrap={false}
             >
-                
+
                 {/* ─── HEADER ────────────────────────────────────────────── */}
                 <View style={s.header}>
                     <View style={{ justifyContent: "space-between" }}>
