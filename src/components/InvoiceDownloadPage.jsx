@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import QRCode from 'qrcode';
-import InvoiceHtmlPreview from './InvoiceHtmlPreview';
 import Invoice, { invoiceNo } from './Invoice';
 import { FRONTEND_BASE_URL } from '../helper/Constraints';
 import AiMarketPlaceApi from '../api/AiMarketPlaceApi';
@@ -177,7 +176,7 @@ const InvoiceDownloadPage = () => {
                     minHeight: '100vh',
                 }}
             >
-                <InvoiceHtmlPreview order={order} />
+                <Invoice order={order} />
             </div>
 
         </div>

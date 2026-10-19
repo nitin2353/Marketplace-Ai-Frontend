@@ -209,7 +209,6 @@ const Invoice = ({ order = {}, qrDataUrl = null }) => {
     const isCOD = order.payment_method === "cod";
     const isPaid = order.payment_status === "paid";
     const isCancelled = order.order_status === "cancelled";
-    const hasNotes = order.notes?.trim() || addr.instructions?.trim();
 
     const subtotal = Number(order.subtotal) || 0;
     const deliveryCharge = Number(order.delivery_charge) || 0;
@@ -226,7 +225,7 @@ const Invoice = ({ order = {}, qrDataUrl = null }) => {
                 style={s.page}
                 wrap={false}
             >
-
+                
                 {/* ─── HEADER ────────────────────────────────────────────── */}
                 <View style={s.header}>
                     <View style={{ justifyContent: "space-between" }}>
