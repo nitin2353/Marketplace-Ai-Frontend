@@ -59,36 +59,36 @@ const InvoicePage = () => {
     const [pdfReady, setPdfReady] = useState(false);
     const parms = window.location.href
 
-    const fetchOrder = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        setPdfReady(false);
+    // const fetchOrder = useCallback(async () => {
+    //     setLoading(true);
+    //     setError(null);
+    //     setPdfReady(false);
 
-        const p1 = parms?.split('invoice/')[1]?.split('/')[0]
-        const p2 = parms?.split('invoice/')[1]?.split('/')[1]
+    //     const p1 = parms?.split('invoice/')[1]?.split('/')[0]
+    //     const p2 = parms?.split('invoice/')[1]?.split('/')[1]
 
-        try {
-            const { data } = await AiMarketPlaceApi.getOrderById(p1, p2);
-            setOrder(data);
-            const invNo = invoiceNo(data);
-            const verifyUrl = `${API_BASE_URL}/order/invoice/${p1}/${p2}`;
+    //     try {
+    //         const { data } = await AiMarketPlaceApi.getOrderById(p1, p2);
+    //         setOrder(data);
+    //         const invNo = invoiceNo(data);
+    //         const verifyUrl = `${API_BASE_URL}/order/invoice/${p1}/${p2}`;
 
-            const qr = await generateQrDataUrl(verifyUrl);
-            setQrUrl(qr);
+    //         const qr = await generateQrDataUrl(verifyUrl);
+    //         setQrUrl(qr);
 
-            // Small delay so PDF renderer mounts cleanly
-            setTimeout(() => setPdfReady(true), 100);
-        } catch (err) {
-            setError(err?.message || 'Error loading order');
-        } finally {
-            setLoading(false);
-        }
-    }, [id]);
+    //         // Small delay so PDF renderer mounts cleanly
+    //         setTimeout(() => setPdfReady(true), 100);
+    //     } catch (err) {
+    //         setError(err?.message || 'Error loading order');
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // }, [id]);
 
-    useEffect(() => { fetchOrder(); }, [fetchOrder]);
+    // useEffect(() => { fetchOrder(); }, [fetchOrder]);
 
     // ── Derived ──
-    const fileName = order ? `${invoiceNo(order)}.pdf` : 'invoice.pdf';
+    // const fileName = order ? `${invoiceNo(order)}.pdf` : 'invoice.pdf';
 
     // ── Render states ──
     // if (loading) {
@@ -122,8 +122,6 @@ const InvoicePage = () => {
                 qrUrl={qrUrl}
             /> */}
 
-            <div style={styles.viewerWrap}>
-                {/* {pdfReady ? ( */}
                     <iframe
                         src="/Nitin's%20Resume.pdf"
                         title="Resume Preview"
@@ -133,6 +131,8 @@ const InvoicePage = () => {
                             border: "none",
                         }}
                     />
+            <div style={styles.viewerWrap}>
+                {/* {pdfReady ? ( */}
                 {/* ) : (
                     <div style={styles.center}>
                         <Spinner />
