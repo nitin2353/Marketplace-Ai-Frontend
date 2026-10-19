@@ -59,60 +59,60 @@ const InvoicePage = () => {
     const [pdfReady, setPdfReady] = useState(false);
     const parms = window.location.href
 
-    // const fetchOrder = useCallback(async () => {
-    //     setLoading(true);
-    //     setError(null);
-    //     setPdfReady(false);
+    const fetchOrder = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        setPdfReady(false);
 
-    //     const p1 = parms?.split('invoice/')[1]?.split('/')[0]
-    //     const p2 = parms?.split('invoice/')[1]?.split('/')[1]
+        const p1 = parms?.split('invoice/')[1]?.split('/')[0]
+        const p2 = parms?.split('invoice/')[1]?.split('/')[1]
 
-    //     try {
-    //         const { data } = await AiMarketPlaceApi.getOrderById(p1, p2);
-    //         setOrder(data);
-    //         const invNo = invoiceNo(data);
-    //         const verifyUrl = `${API_BASE_URL}/order/invoice/${p1}/${p2}`;
+        try {
+            const { data } = await AiMarketPlaceApi.getOrderById(p1, p2);
+            setOrder(data);
+            const invNo = invoiceNo(data);
+            const verifyUrl = `${API_BASE_URL}/order/invoice/${p1}/${p2}`;
 
-    //         const qr = await generateQrDataUrl(verifyUrl);
-    //         setQrUrl(qr);
+            const qr = await generateQrDataUrl(verifyUrl);
+            setQrUrl(qr);
 
-    //         // Small delay so PDF renderer mounts cleanly
-    //         setTimeout(() => setPdfReady(true), 100);
-    //     } catch (err) {
-    //         setError(err?.message || 'Error loading order');
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // }, [id]);
+            // Small delay so PDF renderer mounts cleanly
+            setTimeout(() => setPdfReady(true), 100);
+        } catch (err) {
+            setError(err?.message || 'Error loading order');
+        } finally {
+            setLoading(false);
+        }
+    }, [id]);
 
-    // useEffect(() => { fetchOrder(); }, [fetchOrder]);
+    useEffect(() => { fetchOrder(); }, [fetchOrder]);
 
     // ── Derived ──
-    // const fileName = order ? `${invoiceNo(order)}.pdf` : 'invoice.pdf';
+    const fileName = order ? `${invoiceNo(order)}.pdf` : 'invoice.pdf';
 
     // ── Render states ──
-    // if (loading) {
-    //     return (
-    //         <div style={styles.page}>
-    //             <TopBar fileName={null} order={null} />
-    //             <div style={styles.center}>
-    //                 <Spinner />
-    //                 <p style={styles.loadingText}>Loading...</p>
-    //             </div>
-    //         </div>
-    //     );
-    // }
+    if (loading) {
+        return (
+            <div style={styles.page}>
+                <TopBar fileName={null} order={null} />
+                <div style={styles.center}>
+                    <Spinner />
+                    <p style={styles.loadingText}>Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
-    // if (error) {
-    //     return (
-    //         <div style={styles.page}>
-    //             <TopBar fileName={null} order={null} />
-    //             <div style={styles.center}>
-    //                 <ErrorBox message={error} onRetry={fetchOrder} />
-    //             </div>
-    //         </div>
-    //     );
-    // }
+    if (error) {
+        return (
+            <div style={styles.page}>
+                <TopBar fileName={null} order={null} />
+                <div style={styles.center}>
+                    <ErrorBox message={error} onRetry={fetchOrder} />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div style={styles.page}>
@@ -122,25 +122,53 @@ const InvoicePage = () => {
                 qrUrl={qrUrl}
             /> */}
 
-                    <iframe
-                        src="/Nitin's%20Resume.pdf"
-                        title="Resume Preview"
-                        style={{
-                            width: "100%",
-                            height: "100%",
-                            border: "none",
-                        }}
-                    />
             <div style={styles.viewerWrap}>
-                {/* {pdfReady ? ( */}
-                {/* ) : (
+                {pdfReady ? (
+                    <BlobProvider
+                        document={
+                            <Invoice
+                                order={order}
+                                qrDataUrl={qrUrl}
+                            />
+                        }
+                    >
+                        {({ url, loading, error }) => {
+                            if (loading) {
+                                return (
+                                    <div style={styles.center}>
+                                        <Spinner />
+                                        <p style={styles.loadingText}>
+                                            PDF Generating...
+                                        </p>
+                                    </div>
+                                );
+                            }
+
+                            if (error) {
+                                return <p>Failed to generate PDF.</p>;
+                            }
+
+                            return (
+                                <iframe
+                                    src={url}
+                                    title="Invoice Preview"
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        border: "none",
+                                    }}
+                                />
+                            );
+                        }}
+                    </BlobProvider>
+                ) : (
                     <div style={styles.center}>
                         <Spinner />
                         <p style={styles.loadingText}>
                             PDF Generating...
                         </p>
                     </div>
-                )} */}
+                )}
             </div>
         </div>
     );
