@@ -40,7 +40,7 @@ const ErrorBox = ({ message, onRetry }) => (
 
 const InvoicePage = () => {
   const { id, sellerId } = useParams();
-
+ const parms = window.location.href
   const [order, setOrder] = useState(null);
   const [qrUrl, setQrUrl] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -67,9 +67,12 @@ const InvoicePage = () => {
         throw new Error("Invoice URL is missing required IDs.");
       }
 
+        const p1 = parms?.split('invoice/')[1]?.split('/')[0]
+        const p2 = parms?.split('invoice/')[1]?.split('/')[1]
+
       const { data } = await AiMarketPlaceApi.getOrderById(
-        firstId,
-        secondId
+        p1,
+        p2
       );
 
       setOrder(data);
