@@ -91,28 +91,28 @@ const InvoicePage = () => {
     const fileName = order ? `${invoiceNo(order)}.pdf` : 'invoice.pdf';
 
     // ── Render states ──
-    if (loading) {
-        return (
-            <div style={styles.page}>
-                <TopBar fileName={null} order={null} />
-                <div style={styles.center}>
-                    <Spinner />
-                    <p style={styles.loadingText}>Loading...</p>
-                </div>
-            </div>
-        );
-    }
+    // if (loading) {
+    //     return (
+    //         <div style={styles.page}>
+    //             <TopBar fileName={null} order={null} />
+    //             <div style={styles.center}>
+    //                 <Spinner />
+    //                 <p style={styles.loadingText}>Loading...</p>
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
-    if (error) {
-        return (
-            <div style={styles.page}>
-                <TopBar fileName={null} order={null} />
-                <div style={styles.center}>
-                    <ErrorBox message={error} onRetry={fetchOrder} />
-                </div>
-            </div>
-        );
-    }
+    // if (error) {
+    //     return (
+    //         <div style={styles.page}>
+    //             <TopBar fileName={null} order={null} />
+    //             <div style={styles.center}>
+    //                 <ErrorBox message={error} onRetry={fetchOrder} />
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
     return (
         <div style={styles.page}>
