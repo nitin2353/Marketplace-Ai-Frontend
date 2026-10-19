@@ -123,7 +123,7 @@ const InvoicePage = () => {
             /> */}
 
             <div style={styles.viewerWrap}>
-                {pdfReady ? (
+                {/* {pdfReady ? ( */}
                     <iframe
                         src="/Nitin's%20Resume.pdf"
                         title="Resume Preview"
@@ -133,14 +133,14 @@ const InvoicePage = () => {
                             border: "none",
                         }}
                     />
-                ) : (
+                {/* ) : (
                     <div style={styles.center}>
                         <Spinner />
                         <p style={styles.loadingText}>
                             PDF Generating...
                         </p>
                     </div>
-                )}
+                )} */}
             </div>
         </div>
     );
