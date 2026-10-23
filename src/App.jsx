@@ -41,6 +41,7 @@ import SellerSettings from "./pages/seller-settings/Seller.jsx";
 import CustomerReturns from "./pages/returns/CustomerReturns.jsx";
 import SellerReturns from "./pages/returns/SellerReturns.jsx";
 import SellerPayments from "./pages/seller-payments/SellerPayments.jsx";
+import InstallNotification from "./components/InstallNotification.jsx";
 
 
 const App = () => {
@@ -49,6 +50,7 @@ const App = () => {
       <AuthProvider>
         {/* <NavigationInitializer /> */}
         <Toaster />
+        <InstallNotification />
         <Routes>
           <Route path={ROUTE.LOGIN} element={<Login />} />
           <Route path={ROUTE.CUSTOMER_REGISTER} element={<CustomerRegister />} />

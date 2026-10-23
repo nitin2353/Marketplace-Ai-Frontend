@@ -201,6 +201,12 @@ export default function ProductDetail() {
   };
 
   const handleAddToCart = useCallback(async () => {
+
+    if (!JWTService.isTokenAvailable()) {
+      navigate("/auth/login");
+      return;
+    }
+
     if (!product) return;
     if (!product.variants?.length) {
       if (Number(product.stock) === 0) {
@@ -249,6 +255,12 @@ export default function ProductDetail() {
   }, [product, activeVariant, qty, refresh]);
 
   const handleBuyNow = useCallback(async () => {
+
+    if (!JWTService.isTokenAvailable()) {
+      navigate("/auth/login");
+      return;
+    }
+
     if (!product) return;
     if (product.variants?.length && !activeVariant) {
       toast.error("Select color and size.");
@@ -487,7 +499,7 @@ export default function ProductDetail() {
                     )
                 }
                 <span style={{ fontSize: "20px", marginBottom: "50px" }}>
-                 {JWTService.isTokenAvailable() ? ( " | ") : ""}
+                  {JWTService.isTokenAvailable() ? (" | ") : ""}
                 </span>
                 <span>
                   <span className="fw-bold">
@@ -517,11 +529,11 @@ export default function ProductDetail() {
               {/* Actions */}
               <div className="d-none d-md-flex gap-3 mb-5">
                 <Button variant="primary" className="flex-fill rounded-pill fw-bold py-3 shadow" style={{ height: 56 }}
-                  onClick={() => { JWTService.isTokenAvailable() ? handleAddToCart() : navigate("/auth/login") }}>
+                  onClick={() => { handleAddToCart() }}>
                   <FiShoppingCart className="me-2" /> {"Add to Cart"}
                 </Button>
                 <Button variant="outline-primary" className="flex-fill rounded-pill fw-bold py-3 shadow-sm" style={{ height: 56, borderWidth: 2 }}
-                  onClick={() => { JWTService.isTokenAvailable() ? handleBuyNow() : navigate("/auth/login") }} disabled={displayStock === 0}>
+                  onClick={() => { handleBuyNow() }} disabled={displayStock === 0}>
                   <FiZap className="me-2" /> Buy Now
                 </Button>
                 {product.is_customizable && (

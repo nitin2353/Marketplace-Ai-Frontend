@@ -22,11 +22,78 @@ const WELCOME_COUPON = "WELCOME10";
 const WELCOME_KEY = "pd_welcome_seen";
 const CART_ROUTE = "/cart"; // 👈 apne cart page ka route yahan set karein
 
+
 const HERO_SLIDES = [
-    { id: 1, tag: "🔥 Mega Sale", title: "Up to 60% OFF on top brands", sub: "Limited-time deals on bestsellers. Grab them before they sell out.", cta: "Shop the sale", action: "sale", emoji: "🛍️" },
-    { id: 2, tag: "✨ Just landed", title: "New arrivals, fresh every day", sub: "Be the first to try the latest products added to our store.", cta: "See what's new", action: "new", emoji: "🆕" },
-    { id: 3, tag: "⭐ Customer favourites", title: "Top-rated picks you'll love", sub: "Products rated 4.5 stars and above by real shoppers.", cta: "View top rated", action: "toprated", emoji: "🏆" },
+    {
+        id: 1,
+        tag: "🔥 Mega Sale",
+        cta: "Shop the sale",
+        action: "sale",
+        emoji: "🛍️",
+    },
+    {
+        id: 2,
+        tag: "✨ Just landed",
+        cta: "See what's new",
+        action: "new",
+        emoji: "🆕",
+    },
+    {
+        id: 3,
+        tag: "⭐ Customer favourites",
+        cta: "View top rated",
+        action: "toprated",
+        emoji: "🏆",
+    },
 ];
+
+// Calculate the real discount from the original and current prices.
+// If the original price is unavailable, use the API discount field.
+const getDiscountPercent = (product) => {
+    if (!product) return 0;
+
+    const currentPrice = Number(product.price);
+    const originalPrice = Number(
+        product.original_price ??
+        product.originalPrice ??
+        product.mrp ??
+        product.compare_at_price
+    );
+
+    if (
+        Number.isFinite(currentPrice) &&
+        currentPrice >= 0 &&
+        Number.isFinite(originalPrice) &&
+        originalPrice > currentPrice
+    ) {
+        return Math.round(
+            ((originalPrice - currentPrice) / originalPrice) * 100
+        );
+    }
+
+    const discount = Number(product.discount);
+
+    return Number.isFinite(discount)
+        ? Math.max(0, Math.min(100, discount))
+        : 0;
+};
+
+const getProductDate = (product) => {
+    const date = new Date(
+        product?.created_at ?? product?.createdAt ?? ""
+    );
+
+    return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+};
+
+const getProductRating = (product) => {
+    const rating = Number(product?.rating);
+    return Number.isFinite(rating) ? rating : 0;
+};
+
+const getProductTitle = (product) =>
+    product?.title || product?.name || "Featured product";
+
 
 const TRUST_ITEMS = [
     { icon: "🚚", title: "Free delivery", text: "On orders above ₹499" },
@@ -41,11 +108,19 @@ const TRUST_ITEMS = [
 
 
 const NAV_RULES = {
-    trending: p => p.sold > 500 || p.tags.includes("Trending"),
-    new: p => p.tags.includes("New Arrival"),
-    sale: p => p.discount > 0,
-    toprated: p => p.rating >= 4.5,
+    trending: (p) =>
+        Number(p.sold || 0) > 500 ||
+        (Array.isArray(p.tags) && p.tags.includes("Trending")),
+
+    new: (p) =>
+        Boolean(p.created_at || p.createdAt) ||
+        (Array.isArray(p.tags) && p.tags.includes("New Arrival")),
+
+    sale: (p) => getDiscountPercent(p) > 0,
+
+    toprated: (p) => getProductRating(p) >= 4.5,
 };
+
 
 /* ───────────────────────── small helpers ───────────────────────── */
 
@@ -68,18 +143,42 @@ const pad = n => String(n).padStart(2, "0");
 
 /* ───────────────────────── Hero banner ───────────────────────── */
 
+
 function HeroBanner({ products, onCta }) {
     const [idx, setIdx] = useState(0);
     const [paused, setPaused] = useState(false);
 
     useEffect(() => {
         if (paused) return;
-        const t = setInterval(() => setIdx(i => (i + 1) % HERO_SLIDES.length), 5000);
-        return () => clearInterval(t);
+
+        const timer = setInterval(() => {
+            setIdx((current) => (current + 1) % HERO_SLIDES.length);
+        }, 5000);
+
+        return () => clearInterval(timer);
     }, [paused]);
 
     const slide = HERO_SLIDES[idx];
     const product = products[idx];
+
+    const discount = getDiscountPercent(product);
+    const rating = getProductRating(product);
+
+    const title = !product
+        ? "Discover products you'll love"
+        : idx === 0
+            ? `${discount}% OFF on ${getProductTitle(product).slice(0, 20)+'..'}`
+            : idx === 1
+                ? `New arrival: ${getProductTitle(product).slice(0, 20)+'..'}`
+                : `${getProductTitle(product).slice(0, 20)+'..'} — ${rating.toFixed(1)} ★`;
+
+    const subtitle = !product
+        ? "Explore our latest products and offers."
+        : idx === 0
+            ? `Special offer! Buy now for ${FMT(product.price)}.`
+            : idx === 1
+                ? `Recently. Explore our latest products.`
+                : `Customer rating: ${rating.toFixed(1)} out of 5.`;
 
     return (
         <section
@@ -90,28 +189,60 @@ function HeroBanner({ products, onCta }) {
         >
             <div className="lp-hero-slide" key={slide.id}>
                 <div className="lp-hero-text">
-                    <span className="lp-hero-tag">{slide.tag}</span>
-                    <h1>{slide.title}</h1>
-                    <p>{slide.sub}</p>
+                    <span className="lp-hero-tag">
+                        {idx === 0 && product
+                            ? `🔥 ${discount}% OFF`
+                            : slide.tag}
+                    </span>
+
+                    <h1>{title}</h1>
+                    <p>{subtitle}</p>
+
                     <div className="lp-hero-cta">
-                        <button className="lp-btn-light" onClick={() => onCta(slide.action)}>{slide.cta}</button>
-                        <button className="lp-btn-ghost" onClick={() => onCta("all")}>Browse all</button>
+                        <button
+                            className="lp-btn-light"
+                            onClick={() => onCta(slide.action)}
+                        >
+                            {slide.cta}
+                        </button>
+
+                        <button
+                            className="lp-btn-ghost"
+                            onClick={() => onCta("all")}
+                        >
+                            Browse all
+                        </button>
                     </div>
                 </div>
+
                 <div className="lp-hero-visual">
-                    {product?.img
-                        ? <img src={product.img} alt={product.title} />
-                        : <span className="lp-hero-emoji">{slide.emoji}</span>}
+                    {product?.img ? (
+                        <img
+                            src={product.img}
+                            alt={getProductTitle(product)}
+                        />
+                    ) : (
+                        <span className="lp-hero-emoji">
+                            {slide.emoji}
+                        </span>
+                    )}
                 </div>
             </div>
+
             <div className="lp-hero-dots">
-                {HERO_SLIDES.map((s, i) => (
-                    <button key={s.id} className={i === idx ? "on" : ""} onClick={() => setIdx(i)} aria-label={`Slide ${i + 1}`} />
+                {HERO_SLIDES.map((item, index) => (
+                    <button
+                        key={item.id}
+                        className={index === idx ? "on" : ""}
+                        onClick={() => setIdx(index)}
+                        aria-label={`Slide ${index + 1}`}
+                    />
                 ))}
             </div>
         </section>
     );
 }
+
 
 /* ───────────────────────── Flash sale strip (own timer so page doesn't re-render) ───────────────────────── */
 
@@ -435,14 +566,44 @@ export default function ProductDashboard() {
                 if (activeTags.length && !activeTags.some(t => p.tags.includes(t))) return false;
                 return true;
             })
+
             .sort((a, b) => {
+                // Sale: highest discount first.
+                if (navSection === "sale") {
+                    return (
+                        getDiscountPercent(b) - getDiscountPercent(a) ||
+                        Number(b.sold || 0) - Number(a.sold || 0)
+                    );
+                }
+
+                // New arrivals: newest creation date first.
+                if (navSection === "new") {
+                    return getProductDate(b) - getProductDate(a);
+                }
+
+                // Top rated: highest rating first.
+                if (navSection === "toprated") {
+                    return (
+                        getProductRating(b) - getProductRating(a) ||
+                        Number(b.sold || 0) - Number(a.sold || 0)
+                    );
+                }
+
                 if (sortBy === "price_lo") return a.price - b.price;
                 if (sortBy === "price_hi") return b.price - a.price;
-                if (sortBy === "rating") return b.rating - a.rating;
-                if (sortBy === "newest") return new Date(b.created_at) - new Date(a.created_at);
-                if (sortBy === "popular") return b.sold - a.sold;
+                if (sortBy === "rating") {
+                    return getProductRating(b) - getProductRating(a);
+                }
+                if (sortBy === "newest") {
+                    return getProductDate(b) - getProductDate(a);
+                }
+                if (sortBy === "popular") {
+                    return Number(b.sold || 0) - Number(a.sold || 0);
+                }
+
                 return 0;
             });
+
     }, [rawProducts, navSection, wishlist, search, priceMax, minRating, activeTags, sortBy]);
 
     const dataMaxPrice = useMemo(() => {
@@ -457,10 +618,41 @@ export default function ProductDashboard() {
     }, [rawProducts]);
 
     // Products used as visuals in the hero banner
-    const heroProducts = useMemo(
-        () => rawProducts.filter(p => p.img && Number(p.stock) > 0).slice(0, HERO_SLIDES.length),
-        [rawProducts]
-    );
+
+    const heroProducts = useMemo(() => {
+        const availableProducts = rawProducts.filter(
+            (product) => Number(product.stock) > 0
+        );
+
+        // Highest actual discount first.
+        const saleProduct = [...availableProducts]
+            .filter((product) => getDiscountPercent(product) > 0)
+            .sort(
+                (a, b) => getDiscountPercent(b) - getDiscountPercent(a)
+            )[0];
+
+        // Latest created product first.
+        const newestProduct = [...availableProducts]
+            .filter((product) => getProductDate(product) > 0)
+            .sort(
+                (a, b) => getProductDate(b) - getProductDate(a)
+            )[0];
+
+        // Highest rating first; break ties using sales.
+        const topRatedProduct = [...availableProducts]
+            .filter((product) => getProductRating(product) > 0)
+            .sort(
+                (a, b) =>
+                    getProductRating(b) - getProductRating(a) ||
+                    Number(b.sold || 0) - Number(a.sold || 0)
+            )[0];
+
+        return [
+            saleProduct,
+            newestProduct,
+            topRatedProduct,
+        ];
+    }, [rawProducts]);
 
     useEffect(() => {
         // Search / section / filters active → grid view, otherwise landing sections
@@ -479,13 +671,29 @@ export default function ProductDashboard() {
     };
 
     // Used by hero buttons, flash strip and welcome popup
+
     const goSection = (key) => {
         setSearch("");
         setNavSection(key);
         setPage(1);
-        if (key === "all") scrollToContent();
-        else window.scrollTo({ top: 0, behavior: "smooth" });
+
+        if (key === "new") {
+            setSortBy("newest");
+        } else if (key === "toprated") {
+            setSortBy("rating");
+        } else if (key === "trending") {
+            setSortBy("popular");
+        } else {
+            setSortBy("relevance");
+        }
+
+        if (key === "all") {
+            scrollToContent();
+        } else {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
     };
+
 
     const pickCategory = (cat) => {
         setNavSection("all");
