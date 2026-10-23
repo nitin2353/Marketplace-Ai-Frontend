@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "../styles/installNotification.css";
+import "../../src/styles/installnotification.css";
 
 const DISMISS_KEY = "installNotificationDismissedAt";
 const SNOOZE_DAYS = 7;      // after "Not now" / close, wait this long before asking again
