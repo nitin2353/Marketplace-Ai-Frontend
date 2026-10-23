@@ -2,9 +2,17 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import chatApi from '../../api/chat.api';
 import JWTService from '../../config/jwt.config';
+import { io } from "socket.io-client";
 import toast from 'react-hot-toast';
 import { IoSend, IoAttach, IoChatbubblesOutline, IoTrashOutline, IoClose, IoDocumentTextOutline, IoDownloadOutline } from 'react-icons/io5';
 import './Chat.css';
+import { API_BASE_URL } from '../../helper/Constraints';
+
+const SOCKET_URL =
+    import.meta.env.VITE_SOCKET_URL ||
+    (import.meta.env.VITE_API_BASE_URL ||
+        API_BASE_URL
+    ).replace(/\/api\/v1\/?$/, "");
 
 const ChatPage = () => {
     const { conversationId } = useParams();
@@ -21,6 +29,12 @@ const ChatPage = () => {
     const user = JWTService.decodeTokenDetails();
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
+    const socketRef = useRef(null);
+    const activeConversationIdRef = useRef(conversationId);
+
+    useEffect(() => {
+        activeConversationIdRef.current = conversationId;
+    }, [conversationId]);
 
     //Ai integration from here
     const [aiWarning, setAiWarning] = useState(null);
@@ -52,10 +66,18 @@ const ChatPage = () => {
         const res = await chatApi.sendMessage(conversationId, formData);
 
         if (res.status) {
-            setMessages((prev) => [
-                ...prev,
-                { ...res.data, sender_name: user.name },
-            ]);
+            setMessages((prev) => {
+                const alreadyExists = prev.some(
+                    (message) => String(message.id) === String(res.data.id)
+                );
+
+                if (alreadyExists) return prev;
+
+                return [
+                    ...prev,
+                    { ...res.data, sender_name: user?.name },
+                ];
+            });
 
             setNewMessage("");
             removeSelectedFile();
@@ -300,6 +322,163 @@ const ChatPage = () => {
         const date = new Date(dateStr);
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
+
+
+    // Real-time chat connection
+    useEffect(() => {
+        const token = JWTService.getTokenDetails();
+
+        console.log("[Chat] Socket URL:", SOCKET_URL);
+        console.log("[Chat] Token exists:", !!token);
+
+        if (!token) return;
+
+        const socket = io(SOCKET_URL, {
+            transports: ["websocket"],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+            auth: { token },
+        });
+
+        socketRef.current = socket;
+
+        socket.on("connect", () => {
+            console.log("[Chat] Connected:", socket.id);
+
+            const currentConversationId = activeConversationIdRef.current;
+
+            console.log("[Chat] Conversation ID:", currentConversationId);
+            console.log("[Chat] Conversation ID type:", typeof currentConversationId);
+
+            if (currentConversationId) {
+                socket.emit(
+                    "chat:join",
+                    { conversationId: currentConversationId },
+                    (response) => {
+                        console.log("[Chat] Join response:", response);
+                    }
+                );
+            }
+        });
+
+        socket.on("connect_error", (error) => {
+            console.error("[Chat] CONNECTION ERROR:", error.message);
+        });
+
+        socket.on("disconnect", (reason) => {
+            console.log("[Chat] DISCONNECTED:", reason);
+        });
+
+        // Diagnostic: show every event received from the server.
+        socket.onAny((eventName, ...args) => {
+            console.log("[Chat] EVENT RECEIVED:", eventName, args);
+        });
+
+        socket.on("chat:new_message", (payload) => {
+            console.log("[Chat] Incoming message:", payload);
+
+            const message =
+                payload?.message ||
+                payload?.data?.message ||
+                payload?.data ||
+                payload;
+
+            const incomingConversationId =
+                payload?.conversationId ??
+                message?.conversation_id ??
+                message?.conversationId;
+
+            if (!message?.id) {
+                console.error("[Chat] Message ID missing:", payload);
+                return;
+            }
+
+            if (!incomingConversationId) {
+                console.error("[Chat] Conversation ID missing:", payload);
+                return;
+            }
+
+            // Update the currently open conversation only.
+            if (
+                String(incomingConversationId) ===
+                String(activeConversationIdRef.current)
+            ) {
+                setMessages((previous) => {
+                    const alreadyExists = previous.some(
+                        (item) => String(item.id) === String(message.id)
+                    );
+
+                    if (alreadyExists) return previous;
+
+                    return [
+                        ...previous,
+                        {
+                            ...message,
+                            sender_name: message.sender_name || "User",
+                        },
+                    ];
+                });
+            }
+
+            // Update the conversation preview in the sidebar.
+            setConversations((previous) =>
+                previous.map((conversation) =>
+                    String(conversation.id) === String(incomingConversationId)
+                        ? {
+                            ...conversation,
+                            last_message:
+                                message.message || "Sent an attachment",
+                            updated_at:
+                                message.created_at || new Date().toISOString(),
+                        }
+                        : conversation
+                )
+            );
+        });
+
+        return () => {
+            socket.off();
+            socket.disconnect();
+
+            if (socketRef.current === socket) {
+                socketRef.current = null;
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        const socket = socketRef.current;
+
+        if (!conversationId) {
+            console.warn("[Chat] No conversation ID in the route");
+            return;
+        }
+
+        console.log("[Chat] Trying to join:", conversationId);
+
+        if (!socket?.connected) {
+            console.warn("[Chat] Socket not connected yet");
+            return;
+        }
+
+        socket.emit(
+            "chat:join",
+            { conversationId },
+            (response) => {
+                console.log("[Chat] Join response:", response);
+
+                if (!response?.status) {
+                    console.error(
+                        "[Chat] Room join failed:",
+                        response?.message
+                    );
+                }
+            }
+        );
+    }, [conversationId]);
+
+
 
     return (
         <div className="chat-page-wrapper" >

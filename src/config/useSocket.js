@@ -1,41 +1,95 @@
-// ── useSocket.js  —  Custom React hook for Socket.io ─────────────────────
-// Place in: src/hooks/useSocket.js
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || "http://localhost:5000";
+const SOCKET_URL =
+    import.meta.env.VITE_SOCKET_URL ||
+    "http://localhost:3000";
 
-export const useSocket = () => {
-  const socketRef = useRef(null);
-  const [connected, setConnected] = useState(false);
+export const useSocket = (token) => {
+    const socketRef = useRef(null);
+    const [connected, setConnected] = useState(false);
 
-  useEffect(() => {
-    socketRef.current = io(SOCKET_URL, {
-      transports: ["websocket"],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
+    useEffect(() => {
+        if (!token) {
+            setConnected(false);
+            return;
+        }
 
-    socketRef.current.on("connect", () => {
-      console.log("[Socket] Connected:", socketRef.current.id);
-      setConnected(true);
-    });
+        const socket = io(SOCKET_URL, {
+            autoConnect: false,
+            transports: ["websocket"],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+            auth: {
+                token: token.startsWith("Bearer ")
+                    ? token.slice(7)
+                    : token,
+            },
+        });
 
-    socketRef.current.on("disconnect", () => {
-      console.log("[Socket] Disconnected");
-      setConnected(false);
-    });
+        socketRef.current = socket;
 
-    return () => {
-      socketRef.current?.disconnect();
+        const handleConnect = () => {
+            console.log("[Socket] Connected:", socket.id);
+            setConnected(true);
+        };
+
+        const handleDisconnect = (reason) => {
+            console.log("[Socket] Disconnected:", reason);
+            setConnected(false);
+        };
+
+        const handleConnectError = (error) => {
+            console.error("[Socket] Connection error:", error.message);
+            setConnected(false);
+        };
+
+        socket.on("connect", handleConnect);
+        socket.on("disconnect", handleDisconnect);
+        socket.on("connect_error", handleConnectError);
+
+        socket.connect();
+
+        return () => {
+            socket.off("connect", handleConnect);
+            socket.off("disconnect", handleDisconnect);
+            socket.off("connect_error", handleConnectError);
+            socket.disconnect();
+
+            if (socketRef.current === socket) {
+                socketRef.current = null;
+            }
+        };
+    }, [token]);
+
+    const emit = useCallback((event, data, callback) => {
+        if (!socketRef.current?.connected) {
+            console.warn("[Socket] Not connected");
+            return;
+        }
+
+        socketRef.current.emit(event, data, callback);
+    }, []);
+
+    const on = useCallback((event, callback) => {
+        socketRef.current?.on(event, callback);
+
+        return () => {
+            socketRef.current?.off(event, callback);
+        };
+    }, []);
+
+    const off = useCallback((event, callback) => {
+        socketRef.current?.off(event, callback);
+    }, []);
+
+    return {
+        socket: socketRef.current,
+        connected,
+        emit,
+        on,
+        off,
     };
-  }, []);
-
-  const emit   = useCallback((event, data) => socketRef.current?.emit(event, data), []);
-  const on     = useCallback((event, cb)   => { socketRef.current?.on(event, cb); }, []);
-  const off    = useCallback((event, cb)   => { socketRef.current?.off(event, cb); }, []);
-
-  return { socket: socketRef.current, connected, emit, on, off };
 };
