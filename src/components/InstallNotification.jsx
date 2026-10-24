@@ -62,7 +62,7 @@ const ShareIcon = () => (
 export default function InstallNotification({ appName = "AI Marketplace", appIcon = "📱" }) {
     const [prompt, setPrompt] = useState(deferredPrompt);
     const [ios] = useState(isIOS);
-    const [visible, setVisible] = useState(true);
+    const [visible, setVisible] = useState(false);
     const [installing, setInstalling] = useState(false);
     const [showSteps, setShowSteps] = useState(false);
 
