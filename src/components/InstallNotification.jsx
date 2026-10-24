@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "../styles/installnotification.css";
+import "./installnotification.css";
 
 const DISMISS_KEY = "installNotificationDismissedAt";
 const SNOOZE_DAYS = 7;      // after "Not now" / close, wait this long before asking again
@@ -79,10 +79,23 @@ export default function InstallNotification({ appName = "AI Marketplace", appIco
 
     // Show only when the app can actually be installed on this device
     useEffect(() => {
-        if (isStandalone() || isSnoozed()) return;
-        if (!prompt && !ios) return; // browser can't install (e.g. Firefox desktop) → stay hidden
-        const t = setTimeout(() => setVisible(true), SHOW_DELAY);
-        return () => clearTimeout(t);
+        if (isStandalone() || isSnoozed()) {
+            setVisible(false);
+            return;
+        }
+
+        // iOS par manual installation instructions dikha sakte hain.
+        // Other browsers par native install prompt aane ka wait karein.
+        if (!prompt && !ios) {
+            setVisible(false);
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            setVisible(true);
+        }, SHOW_DELAY);
+
+        return () => clearTimeout(timer);
     }, [prompt, ios]);
 
     const dismiss = () => {
