@@ -3,7 +3,7 @@ import "./installnotification.css";
 
 const DISMISS_KEY = "installNotificationDismissedAt";
 const SNOOZE_DAYS = 7;      // after "Not now" / close, wait this long before asking again
-const SHOW_DELAY = 2000;    // small delay so the popup doesn't flash during page load
+const SHOW_DELAY = 10000;    // small delay so the popup doesn't flash during page load
 
 /* ───────────────────────── Capture the install event early ─────────────────────────
    `beforeinstallprompt` can fire before React mounts, so we listen at module level
