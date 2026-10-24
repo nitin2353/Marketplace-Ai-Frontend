@@ -62,7 +62,7 @@ const ShareIcon = () => (
 export default function InstallNotification({ appName = "AI Marketplace", appIcon = "📱" }) {
     const [prompt, setPrompt] = useState(deferredPrompt);
     const [ios] = useState(isIOS);
-    const [visible, setVisible] = useState(false);
+    const [visible, setVisible] = useState(true);
     const [installing, setInstalling] = useState(false);
     const [showSteps, setShowSteps] = useState(false);
 
@@ -99,22 +99,34 @@ export default function InstallNotification({ appName = "AI Marketplace", appIco
     }, [visible]);
 
     const handleInstall = async () => {
-        // iOS Safari has no install API — show the manual steps instead
         if (ios) {
             setShowSteps((s) => !s);
             return;
         }
-        if (!prompt) return;
+
+        if (!prompt) {
+            alert(
+                "Install prompt is not available. Open Chrome's menu and look for 'Install app'."
+            );
+            return;
+        }
 
         setInstalling(true);
+
         try {
             prompt.prompt();
-            const { outcome } = await prompt.userChoice;
-            if (outcome === "dismissed") snooze();
-        } catch (err) {
-            console.error("Install failed:", err);
+
+            const result = await prompt.userChoice;
+
+            if (result.outcome === "accepted") {
+                console.log("User accepted installation.");
+            } else {
+                console.log("User cancelled installation.");
+            }
+        } catch (error) {
+            console.error("PWA installation error:", error);
+            alert(`Installation failed: ${error.message}`);
         } finally {
-            // The event can only be used once
             deferredPrompt = null;
             setPrompt(null);
             setInstalling(false);
