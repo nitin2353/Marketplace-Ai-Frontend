@@ -7,8 +7,6 @@ import JWTService from "../config/jwt.config";
 import { FRONTEND_BASE_URL } from "../helper/Constraints.jsx";
 
 
-console.log('FRONTEND_BASE_URL', FRONTEND_BASE_URL)
-
 const genQR = async (url) => {
     try {
         return await QRCode.toDataURL(url, {
