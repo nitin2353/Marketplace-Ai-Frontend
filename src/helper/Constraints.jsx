@@ -5,7 +5,6 @@ import { FaProductHunt } from "react-icons/fa6";
 import { GrUpdate } from "react-icons/gr";
 
 const API_BASE_URL = `https://marketplace-ai-backend-lffk.onrender.com/api/v1`;
-// const FRONTEND_BASE_URL =  `https://marketplace-ai-frontend-k0sxva7sy-nitin2353s-projects.vercel.app`;
 const FRONTEND_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}`;
 
 const SIDEBAR_MENUS = [

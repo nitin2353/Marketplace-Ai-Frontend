@@ -50,7 +50,7 @@ const App = () => {
         <Toaster />
         <InstallNotification />
         <Routes>
-          <Route path={ROUTE.LOGIN} element={<Login />} />
+          <Route path={ROUTE.LOGIN} module="login" element={ <ProtectedRoute guestOnly> <Login /> </ProtectedRoute> } />
           <Route path={ROUTE.CUSTOMER_REGISTER} element={<CustomerRegister />} />
           <Route path={ROUTE.SELLER_REGISTER} element={<SellerRegister />} />
           <Route path={ROUTE.ADMIN_LOGIN} element={<AdminLogin />} />

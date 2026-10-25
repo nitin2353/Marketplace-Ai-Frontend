@@ -6,22 +6,21 @@ export default function ProtectedRoute({
     role,
     allowedRoles,
     denyRoles = [],
+    guestOnly = false,
 }) {
     const token = localStorage.getItem("token");
 
-    // Allow public access when no role is required
-    // Check token
+    // No token
     if (!token) {
         if (role === "admin") {
             return <Navigate to="/admin/login" replace />;
         }
 
-        // If a specific role or allowed roles are required
         if (role || allowedRoles?.length > 0) {
             return <Navigate to="/auth/login" replace />;
         }
 
-        // Allow public access
+        // Public pages and login page
         return children;
     }
 
@@ -37,23 +36,27 @@ export default function ProtectedRoute({
         if (role) {
             return (
                 <Navigate
-                    to={role === "admin" ? "/admin/login" : "/auth/login"}
+                    to={role.toLowerCase() === "admin"
+                        ? "/admin/login"
+                        : "/auth/login"}
                     replace
                 />
             );
         }
 
-        // Invalid token is treated as logged out for public pages
         return children;
     }
 
+    // Invalid token role
     if (!decodedToken?.role) {
         localStorage.removeItem("token");
 
         if (role) {
             return (
                 <Navigate
-                    to={role === "admin" ? "/admin/login" : "/auth/login"}
+                    to={role.toLowerCase() === "admin"
+                        ? "/admin/login"
+                        : "/auth/login"}
                     replace
                 />
             );
@@ -64,20 +67,39 @@ export default function ProtectedRoute({
 
     const userRole = decodedToken.role.toLowerCase();
 
+    // Redirect authenticated users away from login page
+    if (guestOnly) {
+        switch (userRole) {
+            case "seller":
+                return <Navigate to="/seller/dashboard" replace />;
+
+            case "customer":
+                return <Navigate to="/" replace />;
+
+            default:
+                return children;
+        }
+    }
+
     // Block specific roles
     if (denyRoles.map((r) => r.toLowerCase()).includes(userRole)) {
         return <Navigate to="/auth/login" replace />;
     }
 
-    if (allowedRoles && !allowedRoles.includes(userRole)) {
+    // Check allowed roles
+    if (
+        allowedRoles &&
+        !allowedRoles.map((r) => r.toLowerCase()).includes(userRole)
+    ) {
         return <Navigate to="/auth/login" replace />;
     }
-
 
     // Check required role
     if (role && userRole !== role.toLowerCase()) {
         const loginPath =
-            role === "admin" ? "/admin/login" : "/auth/login";
+            role.toLowerCase() === "admin"
+                ? "/admin/login"
+                : "/auth/login";
 
         return <Navigate to={loginPath} replace />;
     }

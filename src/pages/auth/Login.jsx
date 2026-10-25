@@ -7,7 +7,6 @@ import authApi from "../../api/authApi";
 import toast from "react-hot-toast";
 import JWTService from "../../config/jwt.config";
 import ConfirmModal from "../../components/ConfirmModal";
-import { FRONTEND_BASE_URL } from "../../helper/Constraints";
 
 // Styles (same CSS variables as the rest of the app, so the palette is unchanged)
 const injectStyle = () => {
@@ -181,15 +180,7 @@ export default function Login() {
   const [cooldown, setCooldown] = useState(0);
 
   const navigate = useNavigate();
-  const location = useLocation();
 
-
-  useEffect(() => {
-    if(JWTService.isTokenAvailable() && JWTService.getTokenDetails().role){
-      navigate(FRONTEND_BASE_URL+`${role == 'customer' ? '/' : 'seller/dashboard'}`)
-    }
-    else{return}
-  },[])
 
   const {
     register,
