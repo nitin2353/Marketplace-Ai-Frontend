@@ -349,8 +349,8 @@ const SellerPayments = () => {
             label: "Settlement",
             key: "settlement_status",
             render: (val) => (
-                <Badge bg={val === 'paid' ? 'success' : 'warning'} className="px-2 py-1">
-                    {val === 'paid' ? 'Settled' : 'Pending'}
+                <Badge bg={val === '"eligible"' ? 'success' : 'warning'} className="px-2 py-1">
+                    {val.toUpperCase()}
                 </Badge>
             )
         },
@@ -412,7 +412,7 @@ const SellerPayments = () => {
                         <div className="p-3 p-md-4">
                             {/* Summary Cards */}
                             <Row className="g-3 mb-4">
-                                <Col md={4}>
+                                <Col md={3}>
                                     <Card className="border-0 shadow-sm h-100 overflow-hidden" style={{ borderRadius: '15px' }}>
                                         <Card.Body className="p-4">
                                             <div className="d-flex justify-content-between align-items-start mb-3">
@@ -428,21 +428,21 @@ const SellerPayments = () => {
                                         </Card.Body>
                                     </Card>
                                 </Col>
-                                <Col md={4}>
+                                <Col md={3}>
                                     <Card className="border-0 shadow-sm h-100 overflow-hidden" style={{ borderRadius: '15px' }}>
                                         <Card.Body className="p-4">
                                             <div className="d-flex justify-content-between align-items-start mb-3">
                                                 <div className="p-3 bg-success bg-opacity-10 rounded-3 text-success">
                                                     <FaCheckCircle size={24} />
                                                 </div>
-                                                <div className="text-success small fw-bold">Settled</div>
+                                                <div className="text-success small fw-bold">Due</div>
                                             </div>
                                             <h6 className="text-muted mb-1 text-uppercase fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>Available Balance</h6>
                                             <h3 className="fw-bold mb-0">₹{Number(summary?.available_balance || 0).toLocaleString()}</h3>
                                         </Card.Body>
                                     </Card>
                                 </Col>
-                                <Col md={4}>
+                                <Col md={3}>
                                     <Card className="border-0 shadow-sm h-100 overflow-hidden" style={{ borderRadius: '15px' }}>
                                         <Card.Body className="p-4">
                                             <div className="d-flex justify-content-between align-items-start mb-3">
@@ -453,6 +453,20 @@ const SellerPayments = () => {
                                             </div>
                                             <h6 className="text-muted mb-1 text-uppercase fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>Pending Payouts</h6>
                                             <h3 className="fw-bold mb-0">₹{Number(summary?.pending_balance || 0).toLocaleString()}</h3>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                                <Col md={3}>
+                                    <Card className="border-0 shadow-sm h-100 overflow-hidden" style={{ borderRadius: '15px' }}>
+                                        <Card.Body className="p-4">
+                                            <div className="d-flex justify-content-between align-items-start mb-3">
+                                                <div className="p-3 bg-success bg-opacity-10 rounded-3 text-danger">
+                                                    <FaCheckCircle size={24} />
+                                                </div>
+                                                <div className="text-danger small fw-bold">Settled</div>
+                                            </div>
+                                            <h6 className="text-muted mb-1 text-uppercase fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>Settlement Amount</h6>
+                                            <h3 className="fw-bold mb-0">₹{Number(summary?.settlement_amount || 0).toLocaleString()}</h3>
                                         </Card.Body>
                                     </Card>
                                 </Col>

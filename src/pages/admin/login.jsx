@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Container, Row, Col, Card, Form, Button, InputGroup, Alert } from "react-bootstrap";
 import { useForm } from "react-hook-form";
-import authApi from "../../../api/authApi";
+import authApi from "../../api/authApi";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 // Inject same styles
 const injectStyle = () => {
@@ -30,6 +31,7 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -45,9 +47,14 @@ export default function AdminLogin() {
     try {
       const res = await authApi?.userLogin(payload)
       if (res.success) {
-        localStorage.setItem('token', res.token)
-        localStorage.setItem('role', res.token.role)
-        toast.success(res.message || "You Are Successfully LoggedIn");
+        if (res?.data.role == 'admin') {
+          localStorage.setItem('token', res?.data.token)
+          localStorage.setItem('role', res?.data.role)
+          toast.success(res.message || "You Are Successfully LoggedIn");
+          navigate('/admin/dashboard')
+        }else{
+           toast.error("Only Admin is Authorized");
+        }
       }
     } catch (err) {
       console.error("Login error:", err);
@@ -106,24 +113,13 @@ export default function AdminLogin() {
                   </InputGroup>
                 </Form.Group>
 
-                <div className="d-flex justify-content-between mb-3">
-                  <Form.Check label="Remember me" />
-                  <span style={{ cursor: "pointer", color: "#2a48cc" }} onClick={() => setForgot(true)}>
-                    Forgot Password?
-                  </span>
-                </div>
-
                 <Button
                   type="submit"
-                  className="al-hero-btn-main w-100 text-white mb-3"
+                  className="al-hero-btn-main w-100 text-white mb-3 mt-4"
                   disabled={loading}
                 >
                   {loading ? "⏳ Logging in..." : "Login"}
                 </Button>
-
-                <div className="text-center mt-3 text-muted">
-                  Don't have an account? <span style={{ color: "#2a48cc", cursor: "pointer" }} onClick={() => handleNewUser()}>Register</span>
-                </div>
               </>
             ) : (
               <>

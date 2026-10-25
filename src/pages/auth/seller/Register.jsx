@@ -572,7 +572,7 @@ export default function SellerRegister() {
                         error={errors.seller_signature_image}
                       />
 
-                      {/* <div className="sr-note">🎁 Register now &amp; sell commission-free for 3 months!</div> */}
+                      <div className="sr-note">🎁 Register now &amp; sell commission-free for 3 months!</div>
                     </>
                   )}
 

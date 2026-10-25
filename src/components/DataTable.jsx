@@ -81,19 +81,36 @@ const DataTable = ({
             ).values()
         );
 
-        let data = q
-            ? uniqueData.filter((item) => {
-                const id = getValue(item, "id") ?? "";
-                const buyer = getValue(item, "buyer") ?? "";
-                const status = item.status ?? "";
+        // let data = q
+        //     ? uniqueData.filter((item) => {
+        //         const id = getValue(item, "id") ?? "";
+        //         const buyer = getValue(item, "buyer") ?? "";
+        //         const status = item.status ?? "";
 
-                return (
-                    String(id).toLowerCase().includes(q) ||
-                    String(buyer).toLowerCase().includes(q) ||
-                    String(status).toLowerCase().includes(q)
-                );
-            })
+        //         return (
+        //             String(id).toLowerCase().includes(q) ||
+        //             String(buyer).toLowerCase().includes(q) ||
+        //             String(status).toLowerCase().includes(q)
+        //         );
+        //     })
+        //     : [...uniqueData];
+
+        let data = q
+            ? uniqueData.filter((item) =>
+                Object.values(item).some((value) =>
+                    String(value ?? "").toLowerCase().includes(q)
+                )
+            )
             : [...uniqueData];
+
+
+        // let data = q
+        //     ? uniqueData.filter((item) => {
+        //         return Object.values(item).some((value) =>
+        //             String(value ?? "").toLowerCase().includes(q)
+        //         );
+        //     })
+        //     : [...uniqueData];
 
         // ✅ sort copied data only
         data = [...data].sort((a, b) => {
@@ -187,7 +204,7 @@ const DataTable = ({
                 </Row>}
 
             {filteredAndSorted.length === 0 ? (
-                <div className="text-muted d-flex justify-content-center"><p>No orders found.</p></div>
+                <div className="text-muted d-flex justify-content-center"><p>Not found.</p></div>
             ) : (
                 <>
                     <div className="table-responsive pt-2 pb-2" style={{ borderTop: "1px solid #cfc8c8", borderBottom: "1px solid #cfc8c8" }}>
@@ -273,7 +290,7 @@ const DataTable = ({
                     <Row className="align-items-center mt-3">
                         <Col xs={12} md={6}>
                             <small className="text-muted">
-                                Showing {startItem}–{endItem} of {filteredAndSorted.length} orders
+                                Showing {startItem}–{endItem} of {filteredAndSorted.length} Items
                             </small>
                         </Col>
 

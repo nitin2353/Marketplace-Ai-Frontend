@@ -18,7 +18,7 @@ const NAV_ITEMS = [
     { key: "store", icon: "🏪", label: "Store Info" },
     { key: "security", icon: "🔒", label: "Security" },
     // { key: "notifications", icon: "🔔", label: "Notifications" },
-    { key: "payments", icon: "💳", label: "Payments" },
+    { key: "payments", icon: "💳", label: "Payment Info" },
     { key: "logout", icon: "🚪", label: "Logout" },
 ];
 

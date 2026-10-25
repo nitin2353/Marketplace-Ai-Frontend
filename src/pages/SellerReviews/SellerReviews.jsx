@@ -6,12 +6,11 @@ import JWTService from "../../config/jwt.config";    // apna path adjust karo
 import SellerSidebar from "../../components/SellerSidebar.jsx";
 import SellerNavbar from "../../components/SellerNavbar.jsx";
 import "./SellerReviews.css";
-import "../../style/Dashboard.css"
+// import "../../style/Dashboard.css"
 import { useNavigate } from "react-router-dom";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const PER_PAGE = 10;
-const SIDEBAR_W = 280;
 const AVATAR_COLORS = ["#3b82f6", "#1d4ed8", "#22c55e", "#10b981", "#8b5cf6", "#ec4899", "#14b8a6", "#f59e0b"];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
