@@ -69,7 +69,6 @@ const SellerPayments = () => {
     const handleViewDetail = async (id) => {
         try {
             const res = await paymentApi.getSellerTransactionById(id);
-            console.log("res.data", res.data)
             setSelectedTransaction(res.data);
             setShowDetailModal(true);
         } catch (err) {

@@ -79,7 +79,6 @@ export function useRazorpay() {
             },
         };
 
-        console.log("RAZORPAY OPTIONS:", options);
 
         const rzp = new window.Razorpay(options);
 

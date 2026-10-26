@@ -23,7 +23,6 @@ export default function StepReview({
     return (
         <div>
             <p className="co-section-title">📋 Review Your Order</p>
-            {console.log("address", address)}
             {/* ── Address ── */}
             <div className="co-review-block">
                 <div className="d-flex justify-content-between align-items-center mb-3">

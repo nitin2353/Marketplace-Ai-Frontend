@@ -290,10 +290,8 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
                                 const imgSrc = Array.isArray(item.product_image_url)
                                     ? item.product_image_url[0]
                                     : item.product_image_url;
-                                console.log("url", imgSrc.replace('{"', '').replace('"}', '').trim()?.split(',')[0].replace('"', ""))
                                 return (
                                     <div key={item.id} className="so-item-row">
-                                        {console.log("item", item)}
                                         <img
                                             src={imgSrc.replace('{"', '').replace('"}', '').trim()?.split(',')[0].replace('"', "")}
                                             alt={item.product_title || "Product"}

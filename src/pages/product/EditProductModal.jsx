@@ -260,7 +260,6 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                 existingImages: JSON.stringify(existingImages),
                 deletedImages: JSON.stringify(deletedImages),
             };
-            console.log("fields", fields)
             Object.entries(fields).forEach(([k, v]) => fd.append(k, v ?? ""));
             newImages.forEach(file => fd.append("images", file));
 

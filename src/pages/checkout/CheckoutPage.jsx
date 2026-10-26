@@ -30,7 +30,6 @@ const calcTotals = (cart, discount) => {
     const couponSave = (subtotal * discount / 100);
     const delivery = subtotal >= 499 ? 0 : 49;
     const tax_amount = cart.reduce((s, i) => s + (Number(i.product_price) * i.qty) * (Number(i.tax_percentage || 0) / 100), 0);
-    console.log(tax_amount);
     const total = subtotal - couponSave + delivery + tax_amount;
     return { subtotal, saved, couponSave, delivery, tax_amount, total };
 };
@@ -197,11 +196,6 @@ export default function CheckoutPage() {
         const couponDiscount = COUPONS[code];
 
         if (couponDiscount !== undefined) {
-            console.log(
-                "Applying coupon:", code,
-                "for discount:", couponDiscount
-            );
-
             setDiscount(couponDiscount);
             setCouponMsg({
                 type: "success",
@@ -268,7 +262,6 @@ export default function CheckoutPage() {
                 notes: selectedAddr?.instructions || null,
             };
 
-            console.log("COD Order Payload:", payload);
 
             const res = await orderApi.createOrder(payload);
 
@@ -310,7 +303,6 @@ export default function CheckoutPage() {
             if (!paymentOrderRes?.success) {
                 throw new Error(paymentOrderRes?.message || "Failed to create Razorpay order.");
             }
-            console.log("Razorpay Order Response:", paymentOrderRes);
             const paymentOrderData = paymentOrderRes.data;
             // STEP 2: Open Razorpay checkout
             await initiatePayment({
@@ -327,7 +319,6 @@ export default function CheckoutPage() {
                 },
                 onSuccess: async (paymentData) => {
                     try {
-                        console.log("Payment successful:", paymentData);
 
                         // STEP 3: Verify payment and create final order
                         const verifyPayload = {
@@ -346,7 +337,6 @@ export default function CheckoutPage() {
                             cart_items: buildCartPayload(),
                         };
 
-                        console.log("Verify And Create Order Payload:", verifyPayload);
 
                         const verifyRes = await paymentApi.verifyAndCreateOrder(verifyPayload);
 

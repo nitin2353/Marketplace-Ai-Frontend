@@ -9,7 +9,7 @@ import userSettingsApi from "../../api/userSettings.api";
 import { API_BASE_URL } from "../../helper/Constraints";
 import "./Sellersettings.css";
 import "../../style/Dashboard.css"
-import {LogoutTab} from '../../helper/GlobalHelper';
+import { LogoutTab } from '../../helper/GlobalHelper';
 
 const IMG_BASE = API_BASE_URL.replace("/api/v1", "/uploads/profiles/");
 
@@ -92,7 +92,7 @@ function ProfileTab({ seller, onSave, saving }) {
     const [avatarFile, setAvatarFile] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState(null);
     const fileRef = useRef();
-
+    console.log('seller', seller)
     useEffect(() => {
         if (!seller) return;
         setForm({
@@ -103,7 +103,7 @@ function ProfileTab({ seller, onSave, saving }) {
             bio: seller.bio || "",
             website: seller.website || "",
             dob: seller.dob || "",
-            gender: seller.gender || "",
+            gender: seller.gender.toLowerCase() || "",
         });
         setAvatarPreview(seller.avatar || seller.profile_picture || null);
     }, [seller]);
@@ -148,7 +148,7 @@ function ProfileTab({ seller, onSave, saving }) {
                             </Col>
                             <Col md={6}>
                                 <Field label="Email Address">
-                                    <input className="ss-input" type="email" value={form.email} onChange={set("email")} placeholder="you@example.com" />
+                                    <input className="ss-input" type="email" disabled value={form.email} onChange={set("email")} placeholder="you@example.com" />
                                 </Field>
                             </Col>
                             <Col md={6}>
@@ -239,13 +239,13 @@ function StoreTab({ seller, onSave, saving }) {
                             </Col>
                             <Col md={6}>
                                 <Field label="Business Type">
-                                    <select className="ss-select" value={form.business_type} onChange={set("business_type")}>
+                                    <select className="ss-select" value={form.business_type.toLowerCase()} onChange={set("business_type")}>
                                         <option value="">Select type</option>
-                                        <option value="individual">Individual / Sole Proprietor</option>
+                                        <option value="individual">Individual</option>
+                                        <option value="company">Company</option>
+                                        <option value="freelancer">Freelancer</option>
                                         <option value="partnership">Partnership</option>
-                                        <option value="pvt_ltd">Private Limited</option>
                                         <option value="llp">LLP</option>
-                                        <option value="other">Other</option>
                                     </select>
                                 </Field>
                             </Col>
@@ -268,7 +268,7 @@ function StoreTab({ seller, onSave, saving }) {
                                         className={`ss-input ${form.gstin.toUpperCase() && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(form.gstin.toUpperCase()) ? 'is-invalid' : ''}`}
                                         value={form.gstin.toUpperCase()}
                                         onChange={set("gstin")}
-                                        placeholder="22AAAAA0000A1Z5"
+                                        placeholder="GSTIN"
                                         maxLength={15}
                                         style={{ textTransform: "uppercase" }}
                                     />
@@ -280,7 +280,7 @@ function StoreTab({ seller, onSave, saving }) {
                                         className={`ss-input ${form.pan.toUpperCase() && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(form.pan.toUpperCase()) ? 'is-invalid' : ''}`}
                                         value={form.pan.toUpperCase()}
                                         onChange={set("pan")}
-                                        placeholder="ABCDE1234F"
+                                        placeholder="Enter PAN NUMBER"
                                         maxLength={10}
                                         style={{ textTransform: "uppercase" }}
                                     />
@@ -770,7 +770,7 @@ function PaymentsTab({ seller, onSave, saving }) {
                                         className="ss-input"
                                         value={form.bank_name}
                                         onChange={handleChange("bank_name")}
-                                        placeholder="State Bank of India"
+                                        placeholder="Enter Bank Name"
                                         disabled={saving}
                                     />
                                 </Field>
@@ -829,7 +829,7 @@ function PaymentsTab({ seller, onSave, saving }) {
                                             }`}
                                         value={form.ifsc.toUpperCase()}
                                         onChange={handleChange("ifsc")}
-                                        placeholder="SBIN0001234"
+                                        placeholder="Enter IFSC Code"
                                         maxLength={11}
                                         disabled={saving}
                                     />
@@ -846,6 +846,7 @@ function PaymentsTab({ seller, onSave, saving }) {
                                     >
                                         <option value="savings">Savings</option>
                                         <option value="current">Current</option>
+                                        <option value="Business">Business</option>
                                     </select>
                                 </Field>
                             </Col>

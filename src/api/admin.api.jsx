@@ -23,6 +23,21 @@ export const getSellerDetails = async (id, signal) => {
     }
 };
 
+export const updateSellerStatusApi = async (sellerId, status) => {
+    try {
+        const response = await apiConfig.patch(
+            `/admin/sellers/${encodeURIComponent(sellerId)}/status`,
+            { status }
+        );
+
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || {
+            message: "Unable to update seller status.",
+        };
+    }
+};
+
 export const updatePaymentStatusApi = async (paymentId, status) => {
     try {
         const response = await apiConfig.patch(

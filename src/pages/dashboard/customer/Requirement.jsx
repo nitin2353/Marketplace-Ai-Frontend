@@ -12,7 +12,6 @@ export default function Requirement() {
         });
 
         alert("Requirement Created 🔥");
-        console.log(res.data);
     };
 
     return (

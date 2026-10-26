@@ -31,7 +31,6 @@ const Profile = ({ loading, setLoading, userProfile }) => {
         try {
             const result = await authApi.updateUser(userProfile.id, payload);
             const detail = JWTService.decodeTokenDetails()
-            console.log("result", result.data.user)
             if(detail.email != result?.data.user.email){
                 navigate('/auth/login')
             }

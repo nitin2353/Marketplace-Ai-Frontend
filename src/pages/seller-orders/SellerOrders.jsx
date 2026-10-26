@@ -747,7 +747,6 @@ export default function SellerOrders() {
                                                         #{order.order_number}
                                                     </p>
                                                     <p className="so-order-date mb-0">
-                                                        {console.log("order.created_time" ,FMT_DATE_TIME(order.created_time))}
                                                         {FMT_DATE_TIME(order.created_time)}
                                                     </p>
                                                 </td>

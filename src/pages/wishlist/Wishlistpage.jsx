@@ -53,7 +53,6 @@ export default function WishlistPage() {
                         : [];
 
             setItems(raw.map(GlobalHelper.API_FIELDS_MAP['wishlist']));
-            console.log("API_FIELDS_MAP", raw.map(GlobalHelper.API_FIELDS_MAP['wishlist']))
         } catch (err) {
             console.error("Wishlist fetch error:", err);
             setError("Failed to load wishlist. Please try again.");

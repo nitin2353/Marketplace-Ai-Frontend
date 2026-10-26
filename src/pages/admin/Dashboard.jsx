@@ -15,7 +15,9 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTable from "../../components/DataTable";
-import { apiRequest } from "../../api/admin.api";
+import { apiRequest, updateSellerStatusApi } from "../../api/admin.api";
+import JWTService from "../../config/jwt.config";
+import toast from "react-hot-toast";
 
 
 const formatCurrency = (value) =>
@@ -216,18 +218,10 @@ const Dashboard = () => {
         try {
             setError("");
             setSuccessMessage("");
-
             const sellerId = seller.seller_id || seller.id;
 
-            await apiRequest(
-                `/sellers/${encodeURIComponent(sellerId)}/status`,
-                {
-                    method: "PATCH",
-                    body: JSON.stringify({
-                        status: newStatus.toLowerCase(),
-                    }),
-                }
-            );
+            await updateSellerStatusApi(sellerId, newStatus.toLowerCase())
+               
 
             setSellers((previous) =>
                 previous.map((item) =>
@@ -267,23 +261,6 @@ const Dashboard = () => {
             setError("");
             setSuccessMessage("");
 
-            /*
-             * IMPORTANT:
-             * This endpoint must be implemented in your backend.
-             * It should save the payment to the database and update
-             * the seller's payment tracking fields.
-             *
-             * Expected response:
-             * {
-             *   success: true,
-             *   data: {
-             *     total_paid_amount,
-             *     last_paid_date,
-             *     payment_status,
-             *     next_payment_due_date
-             *   }
-             * }
-             */
             const response = await apiRequest(
                 `/sellers/${encodeURIComponent(sellerId)}/payment`,
                 {
@@ -417,109 +394,7 @@ const Dashboard = () => {
             key: "available_balance",
             label: "Available Balance",
             render: (value) => formatCurrency(value),
-        },
-        {
-            key: "total_paid_amount",
-            label: "Total Paid Amount",
-            render: (value) => formatCurrency(value),
-        },
-        {
-            key: "last_paid_date",
-            label: "Last Paid Date",
-            render: (value) => formatDate(value),
-        },
-        {
-            key: "total_platform_fee",
-            label: "Platform Fee",
-            render: (value) => formatCurrency(value),
-        },
-        {
-            key: "total_orders",
-            label: "Total Orders",
-            render: (value) => Number(value || 0),
-        },
-        {
-            key: "paid_orders",
-            label: "Paid Orders",
-            render: (value) => Number(value || 0),
-        },
-        {
-            key: "pending_orders",
-            label: "Pending Orders",
-            render: (value) => Number(value || 0),
-        },
-        {
-            key: "total_payment_records",
-            label: "Payment Records",
-            render: (value) => Number(value || 0),
-        },
-        {
-            key: "pending_balance",
-            label: "Pending Balance",
-            render: (value) => formatCurrency(value),
-        },
-        {
-            key: "refunded_amount",
-            label: "Refunded Amount",
-            render: (value) => formatCurrency(value),
-        },
-        {
-            key: "successful_payment_records",
-            label: "Successful Payments",
-            render: (value) => Number(value || 0),
-        },
-        {
-            key: "pending_payment_records",
-            label: "Pending Payments",
-            render: (value) => Number(value || 0),
-        },
-        {
-            key: "eligible_settlements",
-            label: "Eligible Settlements",
-            render: (value) => Number(value || 0),
-        },
-        {
-            key: "settled_payment_records",
-            label: "Settled Payments",
-            render: (value) => Number(value || 0),
-        },
-        {
-            key: "cancelled_payment_records",
-            label: "Cancelled Payments",
-            render: (value) => Number(value || 0),
-        },
-        {
-            key: "refunded_payment_records",
-            label: "Refunded Payments",
-            render: (value) => Number(value || 0),
-        },
-        {
-            key: "payment_status",
-            label: "Payment Status",
-            render: (value) => (
-                <Badge bg={getStatusColor(value)}>
-                    {value || "Pending"}
-                </Badge>
-            ),
-        },
-        {
-            key: "next_payment_due_date",
-            label: "Next Payment Due",
-            render: (value) => formatDate(value),
-        },
-        {
-            key: "payment_action",
-            label: "Payment Action",
-            render: (_, row) => (
-                <Button
-                    size="sm"
-                    variant="primary"
-                    onClick={() => openPaymentModal(row)}
-                >
-                    Record Payment
-                </Button>
-            ),
-        },
+        }
     ];
 
     return (
@@ -533,6 +408,7 @@ const Dashboard = () => {
                                 Overview of sales, discounts, earnings and seller payments.
                             </p>
                         </div>
+                            <Button className="float-end" onClick={() => {JWTService.clearTokenDetails(); toast.success("Logout Successfully"); navigate('/admin/login')}}>Logout</Button>
                     </div>
 
                     <div className="row g-3">

@@ -394,7 +394,6 @@ const Toolbar = ({
                             border: "1px solid var(--border-light)"
                         }}
                     >
-                        {console.log('suggestions', suggestions)}
                         {suggestions.map((item, index) => (
                             <ListGroup.Item
                                 key={index}

@@ -27,8 +27,15 @@ export default function ProtectedRoute({
     // Decode token
     let decodedToken;
 
+
     try {
         decodedToken = JWTService.decodeTokenDetails(token);
+
+        console.log("location.href",location.pathname)
+        if(decodedToken.role == 'admin' && location.pathname == '/auth/login'){
+            return <Navigate to="/admin/login" replace />
+        }
+
     } catch (error) {
         console.error("Token decoding failed:", error);
         localStorage.removeItem("token");

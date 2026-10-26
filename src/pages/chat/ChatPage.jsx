@@ -260,7 +260,6 @@ const ChatPage = () => {
         try {
             if (newMessage.trim()) {
                 const moderation = await moderateMessageWithAI(newMessage.trim());
-                console.log("AI Moderation Result:", moderation);
                 setAiWarning(true);
                 if (moderation?.blocked) {
                     toast.error(
@@ -344,12 +343,8 @@ const ChatPage = () => {
         socketRef.current = socket;
 
         socket.on("connect", () => {
-            console.log("[Chat] Connected:", socket.id);
 
             const currentConversationId = activeConversationIdRef.current;
-
-            console.log("[Chat] Conversation ID:", currentConversationId);
-            console.log("[Chat] Conversation ID type:", typeof currentConversationId);
 
             if (currentConversationId) {
                 socket.emit(

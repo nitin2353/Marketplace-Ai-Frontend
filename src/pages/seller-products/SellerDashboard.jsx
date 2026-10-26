@@ -178,7 +178,6 @@ const SellerProducts = () => {
             setShowEditModal(false)
             setLoading(true);
             const { data } = await productApi.getAllProducts();
-            console.log(data)
             if (data) {
                 const formatted = data.data.map(p => ({
                     ...p,

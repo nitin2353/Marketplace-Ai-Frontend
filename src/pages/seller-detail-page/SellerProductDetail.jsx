@@ -415,7 +415,6 @@ export default function SellerProductDetail() {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {console.log("product.variants", product.variants)}
                                                             {product.variants.map((v, i) => {
                                                                 const disc = v.old_price && Number(v.old_price) > Number(v.price)
                                                                     ? Math.round(((Number(v.old_price) - Number(v.price)) / Number(v.old_price)) * 100)

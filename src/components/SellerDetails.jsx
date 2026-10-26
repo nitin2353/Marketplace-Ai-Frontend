@@ -662,7 +662,6 @@ const SellerDetails = () => {
                                     }
                                     disabled={savingPayment}
                                 >
-                                    {console.log('updatedPaymentStatus', updatedPaymentStatus)}
                                     <option value="pending" disabled={updatedPaymentStatus == 'success' ? true : false}>Pending</option>
                                     <option value="success">Success / Paid</option>
                                 </Form.Select>

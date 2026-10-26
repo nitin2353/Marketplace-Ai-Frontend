@@ -334,7 +334,6 @@ const ShippingParcelLabel = ({
      * Confirm that your courier supports parcel-wise COD
      * before using these amounts for actual collection.
      */
-    console.log('shipment', shipment)
     const codCollectAmount = isCOD
         ? toNumber(shipment?.parcel_net_amount)
         : 0;

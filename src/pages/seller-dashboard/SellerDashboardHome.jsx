@@ -326,14 +326,12 @@ export default function SellerDashboardHome() {
       }
     });
 
-    console.log("map", map);
 
     return Object.values(map)
       .sort((a, b) => b.value - a.value)
       .slice(0, 5);
   }, [processedProducts]);
 
-  console.log("map", categoryData)
 
   // ── Stock Health ──
   const stockData = [
@@ -585,7 +583,6 @@ export default function SellerDashboardHome() {
                   <div className="sdh-card">
                     <div className="sdh-card-title">🥧 Revenue by Category</div>
                     <div className="sdh-card-sub">Top {categoryData.length} categories</div>
-                    {console.log("categoryData", categoryData)}
                     {categoryData.length > 0 ? (
                       <>
                         <div className="sdh-chart-wrap" style={{ height: 180 }}>
@@ -728,7 +725,6 @@ export default function SellerDashboardHome() {
                         {processedProducts.reduce((s, p) => s + (p.reviews || 0), 0).toLocaleString()} total reviews
                       </div>
                     </div>
-                    {console.log("ratingDist", ratingDist)}
                     {ratingDist.map(({ star, count, pct }) => (
                       <div key={star} className="sdh-rating-row">
                         <span className="sdh-rating-label">{star}★</span>

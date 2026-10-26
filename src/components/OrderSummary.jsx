@@ -30,7 +30,6 @@ export default function OrderSummary({
             <div style={{ marginBottom: 16 }}>
                 {cart.map((item) => (
                     <div key={item.id} className="co-order-item">
-                        {console.log('item.img', cart)}
                         <img
                             src={item.image_url?.split(',')[0].replace(/[{}"\\]/g, "")}
                             alt={item.title}
