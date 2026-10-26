@@ -313,7 +313,7 @@ export default function Register() {
                                         type="checkbox"
                                         label={
                                             <span>
-                                                I agree to ShopEase's <a href="#">Terms of Service</a> &amp; <a href="#">Privacy Policy</a>
+                                                I agree to ShopEase's <a href="/en/policy">Terms of Service</a> &amp; <a href="/en/policy">Privacy Policy</a>
                                             </span>
                                         }
                                         {...register("agreed", { required: "You must accept Terms & Conditions" })}

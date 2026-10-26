@@ -730,7 +730,7 @@ export default function SellerProductDetail() {
                 <Modal.Body className="p-4 text-center" style={{ fontFamily: "Nunito" }}>
                     <div style={{ fontSize: "3rem", marginBottom: 12 }}>🗑️</div>
                     <h4 style={{ fontWeight: 900, color: "var(--text)", marginBottom: 8 }}>Delete Product?</h4>
-                    <p style={{ color: "var(--muted)", fontSize: ".88rem", marginBottom: 6 }}>You are about to permanently delete:</p>
+                    <p style={{ color: "var(--muted)", fontSize: ".88rem", marginBottom: 6 }}>This product will be Inactive</p>
                     <p style={{ color: "var(--p)", fontWeight: 900, fontSize: ".95rem", marginBottom: 24 }}>"{product?.title}"</p>
                     <div className="d-flex gap-3">
                         <button

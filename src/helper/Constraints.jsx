@@ -7,6 +7,9 @@ import { GrUpdate } from "react-icons/gr";
 const API_BASE_URL = `http://localhost:3000/api/v1`; 
 const FRONTEND_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}`;
 
+const BUSINESS_EMAIL = 'nv5327260@gmail.com'
+
+
 const SIDEBAR_MENUS = [
   {
     icon: "🏪",
@@ -71,11 +74,17 @@ const SETTINGS_TABS = [
     description: "Manage your delivery addresses"
   },
   {
+    icon: "❔",
+    label: "Help",
+    id: "help",
+    description: "Terms&Conditions"
+  },
+  {
     icon: "🚪",
     label: "Logout",
     id: "logout",
     description: "Logout your account"
-  },
+  }
   // {
   //   icon: "🔄",
   //   label: "Returns & Replacements",
@@ -169,5 +178,6 @@ export {
   SETTINGS_TABS,
   PAYMENT_METHOD_META,
   SELLER_NAV_ITEMS,
-  FRONTEND_BASE_URL
+  FRONTEND_BASE_URL,
+  BUSINESS_EMAIL
 };

@@ -10,6 +10,7 @@ import { API_BASE_URL } from "../../helper/Constraints";
 import "./Sellersettings.css";
 import "../../style/Dashboard.css"
 import { LogoutTab } from '../../helper/GlobalHelper';
+import { useNavigate } from "react-router-dom";
 
 const IMG_BASE = API_BASE_URL.replace("/api/v1", "/uploads/profiles/");
 
@@ -19,6 +20,7 @@ const NAV_ITEMS = [
     { key: "security", icon: "🔒", label: "Security" },
     // { key: "notifications", icon: "🔔", label: "Notifications" },
     { key: "payments", icon: "💳", label: "Payment Info" },
+    { key: "help", icon: "❔", label: "Help" },
     { key: "logout", icon: "🚪", label: "Logout" },
 ];
 
@@ -155,7 +157,7 @@ function ProfileTab({ seller, onSave, saving }) {
                                 <Field label="Mobile Number">
                                     <InputGroup>
                                         {/* <InputGroup.Text className="ss-addon ss-addon-l">+91</InputGroup.Text> */}
-                                        <input className="ss-input" type="tel" value={form.mobile} onChange={set("mobile")} placeholder="9876543210" />
+                                        <input className="ss-input" type="tel" value={form.mobile} onChange={set("mobile")} pattern="[0-9]{10}" placeholder="0000000000"  />
                                     </InputGroup>
                                 </Field>
                             </Col>
@@ -752,6 +754,9 @@ function PaymentsTab({ seller, onSave, saving }) {
         form.confirm_account &&
         form.account_number !== form.confirm_account;
 
+
+   
+
     return (
         <form onSubmit={handleSubmit}>
             <Stack gap={4}>
@@ -939,6 +944,8 @@ export default function SellerSettings() {
         } finally { setSaving(false); }
     }, [sellerId, fetchSeller, activeTab]);
 
+     const navigate = useNavigate();
+
     return (
         <Container fluid className="sr-page p-0">
             <div className="d-flex">
@@ -987,6 +994,7 @@ export default function SellerSettings() {
                                         {activeTab === "store" && <StoreTab seller={seller} onSave={handleSave} saving={saving} />}
                                         {activeTab === "security" && <SecurityTab />}
                                         {/* {activeTab === "notifications" && <NotificationsTab seller={seller} />} */}
+                                        {activeTab === "help" && navigate('/en/policy')}
                                         {activeTab === "payments" && <PaymentsTab seller={seller} onSave={handleSave} saving={saving} />}
                                         {activeTab === "logout" && <LogoutTab />}
                                     </>

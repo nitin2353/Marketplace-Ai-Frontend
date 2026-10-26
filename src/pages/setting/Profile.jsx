@@ -31,7 +31,7 @@ const Profile = ({ loading, setLoading, userProfile }) => {
         try {
             const result = await authApi.updateUser(userProfile.id, payload);
             const detail = JWTService.decodeTokenDetails()
-            if(detail.email != result?.data.user.email){
+            if (detail.email != result?.data.user.email) {
                 navigate('/auth/login')
             }
             toast.success("Profile updated successfully!");
@@ -93,6 +93,7 @@ const Profile = ({ loading, setLoading, userProfile }) => {
                                 <Form.Label className="fw-bold">Email  <span className='text-danger'>*</span></Form.Label>
                                 <Form.Control
                                     required
+                                    disabled
                                     type="email"
                                     {...register("email", { required: "Required" })}
                                     className="pd-form-control"
@@ -107,16 +108,26 @@ const Profile = ({ loading, setLoading, userProfile }) => {
                         {/* Phone */}
                         <Col md={6}>
                             <Form.Group controlId="phone">
-                                <Form.Label className="fw-bold">Phone <span className='text-danger'>*</span></Form.Label>
+                                <Form.Label className="fw-bold">
+                                    Phone <span className="text-danger">*</span>
+                                </Form.Label>
+
                                 <Form.Control
                                     type="tel"
-                                    {...register("phone", { required: "Required" })}
+                                    {...register("phone", {
+                                        required: "Phone number is required",
+                                        pattern: {
+                                            value: /^\+?[0-9]{10}$/,
+                                            message: "Enter a valid phone number",
+                                        },
+                                    })}
                                     className="pd-form-control"
                                     placeholder="Enter phone number"
-                                    pattern="[0-9+\s\-]{7,15}"
+                                    isInvalid={!!errors.phone}
                                 />
+
                                 <Form.Control.Feedback type="invalid">
-                                    Please enter a valid phone number.
+                                    {errors.phone?.message}
                                 </Form.Control.Feedback>
                             </Form.Group>
                         </Col>

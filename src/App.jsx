@@ -41,6 +41,8 @@ import SellerPayments from "./pages/seller-payments/SellerPayments.jsx";
 import InstallNotification from "./components/InstallNotification.jsx";
 import AdminDashboard from "./pages/admin/Dashboard.jsx"
 import SellerDetails from "./components/SellerDetails.jsx";
+import TermsAndConditions from "./components/TermsAndConditions";
+
 
 
 const App = () => {
@@ -85,6 +87,8 @@ const App = () => {
           <Route path={ROUTE.CHAT_LIST} element={<ProtectedRoute allowedRoles={["seller", "customer"]}> <CustomizationChatPage /> </ProtectedRoute>} />
           <Route path={ROUTE.CHAT_CONVERSATION} element={<ProtectedRoute allowedRoles={["seller", "customer"]}> <CustomizationChatPage /> </ProtectedRoute>} />
 
+
+          <Route path={ROUTE.POLICY} element={ <TermsAndConditions  /> } />
 
           {/* <Route path={ROUTE.SELLER_RETURNS} element={<ProtectedRoute moduleName="returns"><SellerReturns /></ProtectedRoute>} /> */}
           <Route path="*" element={<NotFound />} />

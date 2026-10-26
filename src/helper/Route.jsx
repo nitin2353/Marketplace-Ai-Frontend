@@ -29,8 +29,8 @@ const ROUTE = {
   SELLER_SETTING: "/seller/settings",
   CUSTOMER_RETURNS: "/dashboard/returns",
   SELLER_RETURNS: "/seller/returns/:id?",
-  SELLER_PAYMENTS: "/seller/payments"
-
+  SELLER_PAYMENTS: "/seller/payments",
+  POLICY: '/en/policy'
 
 };
 

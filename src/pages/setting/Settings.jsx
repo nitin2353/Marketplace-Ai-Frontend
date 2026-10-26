@@ -14,17 +14,35 @@ import StepAddress from "../../components/StepAddress.jsx";
 import addressApi from "../../api/address.api.jsx";
 import { useAuthWrapper } from "../../helper/AuthWrapper.jsx";
 import { LogoutTab } from "../../helper/GlobalHelper.jsx";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import TermsAndConditions from "../../components/TermsAndConditions.jsx";
 
 export default function SettingsPage() {
-    const searchRef = useRef();
-    const location = useLocation();
-    const { from } = location.state || {};
-    const [activeTab, setActiveTab] = useState(from === 'productDefaultAddress' ? 'addresses' : "profile");
+
+    // const [activeTab, setActiveTab] = useState(from === 'productDefaultAddress' ? 'addresses' : "profile");
     const [loading, setLoading] = useState(false);
     const [pageLoading, setPageLoading] = useState(true);
 
     const { refresh } = useAuthWrapper();
+
+
+    const searchRef = useRef();
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    const from = location.state?.from;
+
+    const [activeTab, setActiveTab] = useState(
+        from === "productDefaultAddress" ? "addresses" : "profile"
+    );
+
+    useEffect(() => {
+        if (from === "productDefaultAddress") {
+            setActiveTab("addresses");
+        }
+    }, [from]);
+
+
 
     // Security State
     const [security, setSecurity] = useState({
@@ -70,11 +88,7 @@ export default function SettingsPage() {
     // ── Fetch Initial Data ───────────────────────────────────────────────────
     useEffect(() => {
         fetchAllData();
-    }, []);
-
-    useEffect(() => {
-        fetchAllData();
-    }, [loading, refresh]);
+    }, [refresh]);
 
     const fetchAllData = async () => {
         setPageLoading(true);
@@ -179,38 +193,59 @@ export default function SettingsPage() {
 
 
     const saveAddress = async (newAddress) => {
-        setLoading(true)
+        setLoading(true);
+
         try {
             const res = await addressApi.createAddress(newAddress);
-            if (!res?.success) throw new Error(res?.message || "Failed to save address.");
+
+            if (!res?.success) {
+                throw new Error(res?.message || "Failed to save address.");
+            }
+
             const saved = res.data || newAddress;
-            const updated = [...addresses, saved];
-            setAddresses(updated);
-            localStorage.setItem("user_addresses", JSON.stringify(updated));
-            setLoading(false)
+
+            setAddresses((prev) => {
+                const updated = [...prev, saved];
+                localStorage.setItem(
+                    "user_addresses",
+                    JSON.stringify(updated)
+                );
+                return updated;
+            });
+
+            toast.success("Address saved successfully!");
         } catch (err) {
             toast.error(err.message || "Failed to save address.");
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleLogout = () => {
         localStorage.removeItem("token");
-        navigate("/auth/login");
+        navigate("/auth/login", { replace: true });
     };
-
 
 
 
     return (
         <div className="pd-settings-container">
-            <Toolbar searchRef={searchRef} isSideBar={false} isSearch={false} />
+            <Toolbar
+                searchRef={searchRef}
+                isSideBar={false}
+                isSearch={false}
+            />
 
             <Container fluid className="pd-settings-main">
                 <Row className="g-4">
+
                     {/* Sidebar Navigation */}
                     <Col lg={3} className="mb-4">
                         <Card className="pd-settings-nav-card">
-                            <Nav variant="pills" className="flex-column pd-settings-nav">
+                            <Nav
+                                variant="pills"
+                                className="flex-column pd-settings-nav"
+                            >
                                 {SETTINGS_TABS.map((tab) => (
                                     <Nav.Item key={tab.id}>
                                         <Nav.Link
@@ -226,156 +261,77 @@ export default function SettingsPage() {
                         </Card>
                     </Col>
 
-                    {/* Content Area */}
+                    {/* Content Area: Only one tab renders at a time */}
                     <Col lg={9}>
 
-                        {(activeTab === "profile" && from !== 'productDefaultAddress') && (
-                            <Profile userProfile={userProfile} loading={loading} setLoading={setLoading} />
+                        {/* Profile */}
+                        {activeTab === "profile" && (
+                            <Profile
+                                userProfile={userProfile}
+                                loading={loading}
+                                setLoading={setLoading}
+                            />
                         )}
 
-                        {/* ──────────────────────── Security Tab ──────────────────────────── */}
-                        {(activeTab === "security" && from !== 'productDefaultAddress') && (
-                            <Security userProfile={userProfile} loading={loading} setLoading={setLoading} />
+                        {/* Security */}
+                        {activeTab === "security" && (
+                            <Security
+                                userProfile={userProfile}
+                                loading={loading}
+                                setLoading={setLoading}
+                            />
                         )}
 
-                        {/* ──────────────────────── Notifications Tab ──────────────────────────── */}
-                        {(activeTab === "notifications" && from !== 'productDefaultAddress') && (
+                        {activeTab === "help" && (
+                            navigate('/en/policy')
+                        )}
+
+                        {/* Notifications */}
+                        {activeTab === "notifications" && (
                             <Card className="pd-settings-card">
-                                <Card.Header className="pd-settings-header">
+                                <Card.Header>
                                     <h5>Notification Preferences</h5>
-                                    <p className="text-muted">Control how you receive notifications</p>
+                                    <p className="text-muted mb-0">
+                                        Control how you receive notifications.
+                                    </p>
                                 </Card.Header>
+
                                 <Card.Body>
-                                    <div className="pd-notification-list">
-                                        <div className="pd-notification-item">
-                                            <div className="pd-notification-content">
-                                                <h6>Email Notifications</h6>
-                                                <p className="text-muted">Receive updates via email</p>
-                                            </div>
-                                            <Form.Check
-                                                type="switch"
-                                                id="email_notifications"
-                                                className="pd-switch"
-                                                checked={notifications.email_notifications}
-                                                onChange={() => handleNotificationToggle("email_notifications")}
-                                            />
-                                        </div>
+                                    {[
+                                        ["email_notifications", "Email Notifications"],
+                                        ["sms_notifications", "SMS Notifications"],
+                                        ["order_updates", "Order Updates"],
+                                        ["promotional_emails", "Promotional Emails"],
+                                        ["weekly_digest", "Weekly Digest"],
+                                        ["chat_messages", "Chat Messages"],
+                                        ["review_replies", "Review Replies"],
+                                        ["payment_updates", "Payment Updates"],
+                                    ].map(([key, label]) => (
+                                        <Form.Check
+                                            key={key}
+                                            type="switch"
+                                            id={key}
+                                            label={label}
+                                            className="mb-3"
+                                            checked={Boolean(notifications[key])}
+                                            onChange={() => handleNotificationToggle(key)}
+                                        />
+                                    ))}
 
-                                        <div className="pd-notification-item">
-                                            <div className="pd-notification-content">
-                                                <h6>SMS Notifications</h6>
-                                                <p className="text-muted">Receive updates via SMS</p>
-                                            </div>
-                                            <Form.Check
-                                                type="switch"
-                                                id="sms_notifications"
-                                                className="pd-switch"
-                                                checked={notifications.sms_notifications}
-                                                onChange={() => handleNotificationToggle("sms_notifications")}
-                                            />
-                                        </div>
-
-                                        <div className="pd-notification-item">
-                                            <div className="pd-notification-content">
-                                                <h6>Order Updates</h6>
-                                                <p className="text-muted">Get notified about your orders</p>
-                                            </div>
-                                            <Form.Check
-                                                type="switch"
-                                                id="order_updates"
-                                                className="pd-switch"
-                                                checked={notifications.order_updates}
-                                                onChange={() => handleNotificationToggle("order_updates")}
-                                            />
-                                        </div>
-
-                                        <div className="pd-notification-item">
-                                            <div className="pd-notification-content">
-                                                <h6>Chat Messages</h6>
-                                                <p className="text-muted">Get notified when you receive a message</p>
-                                            </div>
-                                            <Form.Check
-                                                type="switch"
-                                                id="chat_messages"
-                                                className="pd-switch"
-                                                checked={notifications.chat_messages}
-                                                onChange={() => handleNotificationToggle("chat_messages")}
-                                            />
-                                        </div>
-
-                                        <div className="pd-notification-item">
-                                            <div className="pd-notification-content">
-                                                <h6>Review Replies</h6>
-                                                <p className="text-muted">Get notified when a seller replies to your review</p>
-                                            </div>
-                                            <Form.Check
-                                                type="switch"
-                                                id="review_replies"
-                                                className="pd-switch"
-                                                checked={notifications.review_replies}
-                                                onChange={() => handleNotificationToggle("review_replies")}
-                                            />
-                                        </div>
-
-                                        <div className="pd-notification-item">
-                                            <div className="pd-notification-content">
-                                                <h6>Payment Updates</h6>
-                                                <p className="text-muted">Get notified about your payments and refunds</p>
-                                            </div>
-                                            <Form.Check
-                                                type="switch"
-                                                id="payment_updates"
-                                                className="pd-switch"
-                                                checked={notifications.payment_updates}
-                                                onChange={() => handleNotificationToggle("payment_updates")}
-                                            />
-                                        </div>
-
-                                        <div className="pd-notification-item">
-                                            <div className="pd-notification-content">
-                                                <h6>Promotional Emails</h6>
-                                                <p className="text-muted">Receive offers and promotions</p>
-                                            </div>
-                                            <Form.Check
-                                                type="switch"
-                                                id="promotional_emails"
-                                                className="pd-switch"
-                                                checked={notifications.promotional_emails}
-                                                onChange={() => handleNotificationToggle("promotional_emails")}
-                                            />
-                                        </div>
-
-                                        <div className="pd-notification-item">
-                                            <div className="pd-notification-content">
-                                                <h6>Weekly Digest</h6>
-                                                <p className="text-muted">Receive weekly summary</p>
-                                            </div>
-                                            <Form.Check
-                                                type="switch"
-                                                id="weekly_digest"
-                                                className="pd-switch"
-                                                checked={notifications.weekly_digest}
-                                                onChange={() => handleNotificationToggle("weekly_digest")}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="pd-button-group mt-4">
-                                        <Button
-                                            variant="primary"
-                                            className="pd-btn-save"
-                                            onClick={handleNotificationSave}
-                                            disabled={loading}
-                                        >
-                                            <IoSave /> {loading ? "Saving..." : "Save Preferences"}
-                                        </Button>
-                                    </div>
+                                    <Button
+                                        variant="primary"
+                                        onClick={handleNotificationSave}
+                                        disabled={loading}
+                                    >
+                                        <IoSave className="me-1" />
+                                        {loading ? "Saving..." : "Save Preferences"}
+                                    </Button>
                                 </Card.Body>
                             </Card>
                         )}
 
-
-
-                        {(activeTab === "addresses" || from === 'productDefaultAddress') && (
+                        {/* Addresses */}
+                        {activeTab === "addresses" && (
                             <StepAddress
                                 selectedAddr={selectedAddr}
                                 addresses={addresses}
@@ -384,21 +340,11 @@ export default function SettingsPage() {
                             />
                         )}
 
+                        {/* Logout */}
                         {activeTab === "logout" && (
                             <LogoutTab />
                         )}
 
-                        {/* {activeTab === "returns" && (
-                            <Card className="pd-settings-card">
-                                <Card.Header className="pd-settings-header">
-                                    <h5>My Returns & Replacements</h5>
-                                    <p className="text-muted">Track and manage your return requests</p>
-                                </Card.Header>
-                                <Card.Body>
-                                    <CustomerReturnsList />
-                                </Card.Body>
-                            </Card>
-                        )} */}
                     </Col>
                 </Row>
             </Container>

@@ -814,9 +814,9 @@ export default function ProductDashboard() {
                             <button className={`pd-filter-btn ${showFilters ? "active" : ""}`} onClick={() => setShowFilters(f => !f)}>
                                 ⚙️ Filters {showFilters ? "▲" : "▼"}
                             </button>
-                            <select className="pd-select" value={sortBy} onChange={e => { setSortBy(e.target.value); setPage(1); }}>
+                            {/* <select className="pd-select" value={sortBy} onChange={e => { setSortBy(e.target.value); setPage(1); }}>
                                 {GlobalHelper.SORT_OPTIONS.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
-                            </select>
+                            </select> */}
                         </div>
                     </div>
 

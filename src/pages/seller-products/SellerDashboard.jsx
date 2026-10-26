@@ -448,7 +448,7 @@ const SellerProducts = () => {
                 <Modal.Body className="p-4 text-center rounded-5">
                     <div style={{ fontSize: "3rem", marginBottom: 12 }}>🗑️</div>
                     <h4 className="fw-bold mb-2" style={{ color: "#1a1a2e" }}>Delete Product?</h4>
-                    <p className="text-muted mb-1" style={{ fontSize: "0.88rem" }}>You are about to permanently delete:</p>
+                    <p className="text-muted mb-1" style={{ fontSize: "0.88rem" }}>This product will be Inactive</p>
                     <p className="fw-bold mb-4" style={{ color: "#ff6b35", fontSize: "0.95rem" }}>"{deleteModal?.title}"</p>
                     <div className="d-flex gap-3">
                         <Button className="eco-btn-outline flex-fill py-2" onClick={() => setDeleteModal(null)} disabled={deleteLoading}>Cancel</Button>
