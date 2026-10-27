@@ -321,7 +321,7 @@ export default function Login() {
     setCooldown(0);
   };
 
-  const logoSrc = "../../src/assets/logo.png";
+  const logoSrc = "../../../public//Logo.png";
 
   return (
     <Container fluid className="p-0">
@@ -331,7 +331,6 @@ export default function Login() {
         {/* LEFT — brand panel (desktop) */}
         <Col lg={5} className="sl-hero d-none d-lg-flex flex-column justify-content-center align-items-center text-white p-5">
           <div className="sl-hero-inner">
-            <img className="sl-hero-logo" src={logoSrc} alt="Logo" />
             <h1>Welcome back to your store</h1>
             <p>Sign in to pick up right where you left off.</p>
             {FEATURES.map((f) => (
@@ -349,8 +348,8 @@ export default function Login() {
         {/* RIGHT */}
         <Col xs={12} lg={7} className="d-flex flex-column">
           {/* Mobile brand strip */}
-          <div className="sl-mobile-brand d-lg-none">
-            <img src={logoSrc} alt="Logo" />
+          <div className="sl-mobile-brand d-lg-none" >
+            {/* <img src={logoSrc} alt="Logo" /> */}
           </div>
 
           <div className="flex-grow-1 d-flex align-items-center justify-content-center p-3 p-md-4 sl-mobile-pull-wrap">

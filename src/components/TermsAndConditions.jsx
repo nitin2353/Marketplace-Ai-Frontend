@@ -3,7 +3,7 @@ import { BUSINESS_EMAIL } from "../helper/Constraints";
 import GlobalLoader from "./GlobalLoader";
 
 const TermsAndConditions = ({
-    siteName = "ShopEase",
+    siteName = "FlashiBuy",
     userRole = "all",
     lastUpdated = "26 October 2026",
     contactEmail = BUSINESS_EMAIL,

@@ -206,7 +206,7 @@ export default function CreateProduct() {
                 <div className="cp-card text-center p-5" style={{ maxWidth: 440 }}>
                     <div className="cp-success-ring mb-3">✅</div>
                     <h2 className="fw-bold mb-2" style={{ fontFamily: "Nunito", fontSize: "1.8rem", color: "#1a1a2e" }}>Product Listed!</h2>
-                    <p className="text-muted mb-3">Your product has been successfully created and is now live on ShopEase.</p>
+                    <p className="text-muted mb-3">Your product has been successfully created and is now live on FlashiBuy.</p>
                     <Alert variant="warning" className="rounded-4 border-0 fw-bold py-2">🎉 Customers can now discover your product!</Alert>
                     <div className="d-flex gap-2 mt-3">
                         <Button className="cp-btn-primary flex-fill" onClick={() => { setSubmitted(false); setHasVariants(null); setTags([]); setImageFiles([]); setVariants([{ ...DEFAULT_VARIANT }]); }}>+ Add Another</Button>

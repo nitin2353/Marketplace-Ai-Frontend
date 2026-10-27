@@ -123,7 +123,7 @@ const InvoiceDownloadPage = () => {
             >
                 <div>
                     <strong style={{ letterSpacing: 2 }}>
-                        SHOPEASE
+                        FlashiBuy
                     </strong>
                     <div style={{ fontSize: 12, color: '#aaa' }}>
                         INVOICE VIEWER

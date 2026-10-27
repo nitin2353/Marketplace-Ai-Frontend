@@ -61,7 +61,7 @@ const getSellerData = (order = {}, item = {}) => {
                 }`.trim() ||
             seller?.name ||
             item?.seller_name ||
-            "ShopEase Seller",
+            "FlashiBuy Seller",
 
         phone:
             seller?.phone ||
@@ -282,6 +282,7 @@ const generateShipmentLabels = (order = {}) => {
     });
 };
 
+const logo = '../../public/Light-logo.png'
 
 const chunkArray = (array = [], size = 1) => {
     const chunks = [];
@@ -346,7 +347,15 @@ const ShippingParcelLabel = ({
         <View style={s.labelCard} wrap={false}>
             <View style={s.header}>
                 <View>
-                    <Text style={s.brand}>SHOPEASE</Text>
+                    <Image
+                        src={logo}
+                        style={{
+                            ...s.logo,
+                            width: "90px",
+                            height: "auto",
+                        }}
+                    />
+                    {/* <Text style={s.brand}>FlashiBuy</Text> */}
                     <Text style={s.brandSub}>
                         EXPRESS DELIVERY
                     </Text>
@@ -424,7 +433,7 @@ const ShippingParcelLabel = ({
                             <View style={s.productInfo}>
                                 <Text style={s.productName}>
                                     {safeText(
-                                        shipment?.product_title,
+                                        shipment?.product_title?.slice(0, 90),
                                         "Product"
                                     )}
                                 </Text>
@@ -594,7 +603,7 @@ const ShippingParcelLabel = ({
                 </Text>
 
                 <Text style={s.footerText}>
-                    Courier: ShopEase Express
+                    Courier: FlashiBuy Express
                 </Text>
             </View>
         </View>

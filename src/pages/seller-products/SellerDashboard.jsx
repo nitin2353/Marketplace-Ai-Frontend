@@ -246,7 +246,7 @@ const SellerProducts = () => {
 
                         {/* Mobile header */}
                         <div className="d-lg-none mb-3 d-flex align-items-center justify-content-between">
-                            <div className="fw-black" style={{ fontSize: "1.4rem", color: "#ff6b35", fontWeight: 900 }}>🛍️ ShopEase</div>
+                            <div className="fw-black" style={{ fontSize: "1.4rem", color: "#ff6b35", fontWeight: 900 }}>🛍️ FlashiBuy</div>
                             <Badge bg="warning" text="dark" className="rounded-pill fw-bold">Seller</Badge>
                         </div>
 

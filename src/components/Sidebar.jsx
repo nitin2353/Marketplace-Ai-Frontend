@@ -44,8 +44,8 @@ export default function Sidebar({ cart, sidebarOpen, navSection, wishlist, IoLog
                 borderRight: "1px solid var(--border-light)",
                 boxShadow: "var(--shadow-lg)"
             }}>
-                <div className="pd-sidebar-logo" style={{
-                    padding: "24px 20px",
+                <div className="" style={{
+                    // padding: "0px 0px",
                     borderBottom: "1px solid var(--border-light)"
                 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -57,9 +57,9 @@ export default function Sidebar({ cart, sidebarOpen, navSection, wishlist, IoLog
                             alignItems: "center",
                             gap: "8px"
                         }}>
-                            <img src="/src/assets/logo.png" style={{ maxWidth: "180px", height: "auto" }} alt="Marketplace" />
+                            <img src="../../public/Logo.png" style={{ maxWidth: "190px", height: "auto" }} alt="FlashiBuy" />
                         </div>
-                        <button onClick={() => setSidebar(false)} className="d-lg-none" style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "1.5rem", cursor: "pointer" }}>
+                        <button onClick={() => setSidebar(false)} className="d-lg-none mb-5" style={{ marginRight: "13px", marginTop: '-38px',background: "none", border: "none", color: "var(--text-muted)",  fontSize: "1.5rem", cursor: "pointer" }}>
                             <IoCloseOutline />
                         </button>
                     </div>

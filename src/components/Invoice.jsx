@@ -3,7 +3,7 @@ import {
     Document, Page, Text, View, Image, StyleSheet,
 } from "@react-pdf/renderer";
 import s from '../style/InvoiceStyle'
-import logo from "../assets/logo.png";
+import logo from "../../public/Light-logo.png";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
 const ORANGE = "#000000ff";
@@ -203,7 +203,7 @@ const Invoice = ({ order = {}, qrDataUrl = null }) => {
     const invNo = invoiceNo(order);
     const oC = oStatusColor(order.order_status);
     const pC = pStatusColor(order.payment_status);
-    const sellerName = seller.business_name || seller.name || "ShopEase Seller";
+    const sellerName = seller.business_name || seller.name || "FlashiBuy Seller";
     const isCOD = order.payment_method === "cod";
     const isPaid = order.payment_status === "paid";
     const isCancelled = order.order_status === "cancelled";
@@ -216,7 +216,7 @@ const Invoice = ({ order = {}, qrDataUrl = null }) => {
     const billHeight = getBillHeight(items, order);
 
     return (
-        <Document title={invNo} author="ShopEase" subject={`Invoice – ${order.order_number}`}>
+        <Document title={invNo} author="FlashiBuy" subject={`Invoice – ${order.order_number}`}>
             <Page
                 size={{ width: BILL_WIDTH, height: billHeight }}
                 style={s.page}
@@ -477,9 +477,9 @@ const Invoice = ({ order = {}, qrDataUrl = null }) => {
                         {invNo} · {fmtDT(new Date())}
                     </Text>
 
-                    <Text style={s.footerBrand}>SHOPEASE</Text>
+                    <Text style={s.footerBrand}>FlashiBuy</Text>
 
-                    <Text style={s.footerR}>shopease.in</Text>
+                    <Text style={s.footerR}>FlashiBuy.in</Text>
                 </View>
 
             </Page>

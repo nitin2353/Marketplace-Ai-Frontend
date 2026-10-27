@@ -310,7 +310,7 @@ export default function CheckoutPage() {
                 amount: paymentOrderData.total_amount + 999,
                 currency: paymentOrderData.currency,
                 order_id: paymentOrderData.razorpay_order_id,
-                name: "ShopEase",
+                name: "FlashiBuy",
                 description: `Order of ${cart.length} item(s)`,
                 prefill: {
                     name: selectedAddr?.name,

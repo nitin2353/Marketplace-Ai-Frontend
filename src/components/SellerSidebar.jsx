@@ -36,7 +36,7 @@ export default function SellerSidebar({ stats = [] }) {
                 }}
             >
                 {/* Logo Section */}
-                <div style={{ padding: "24px 20px", borderBottom: "1px solid var(--border-light)" }}>
+                <div style={{ padding: "0px 0px", borderBottom: "1px solid var(--border-light)" }}>
                     <div className="d-flex justify-content-between align-items-center">
                         <div
                             style={{
@@ -52,7 +52,7 @@ export default function SellerSidebar({ stats = [] }) {
                             onClick={() => handleNavigate("/seller/dashboard")}
                         >
                             
-                            <img src="../../src/assets/logo.png" width="100%" alt="" />
+                            <img src="../../../public/logo.png" width="100%" alt="" />
                         </div>
                         <button
                             className="d-lg-none btn btn-light btn-sm rounded-circle"

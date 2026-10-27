@@ -404,7 +404,7 @@ export default function SellerRegister() {
         {/* ── LEFT HERO ── */}
         <Col lg={4} className="sr-hero d-none d-lg-flex flex-column justify-content-between p-5">
           <div>
-            <div className="text-white mb-1" style={{ fontSize: "2.2rem", fontWeight: 900 }}>🛍️ ShopEase</div>
+            <div className="text-white mb-1" style={{ fontSize: "2.2rem", fontWeight: 900 }}>🛍️ FlashiBuy</div>
             <div className="text-white fw-bold mb-1" style={{ fontSize: "1.05rem", opacity: 0.95 }}>Seller registration</div>
             <div style={{ color: "rgba(255,255,255,0.78)", fontSize: "0.87rem", marginBottom: 28, fontWeight: 600 }}>
               Join 5 lakh+ sellers already growing with us
@@ -455,7 +455,7 @@ export default function SellerRegister() {
 
         {/* ── RIGHT FORM PANEL ── */}
         <Col xs={12} lg={8} className="d-flex flex-column">
-          <div className="sr-mobile-brand d-lg-none">🛍️ ShopEase Seller</div>
+          <div className="sr-mobile-brand d-lg-none">🛍️ FlashiBuy Seller</div>
 
           <div className="flex-grow-1 d-flex align-items-start justify-content-center p-3 p-md-4 p-lg-5 sr-pull">
             <div style={{ width: "100%", maxWidth: 640 }}>

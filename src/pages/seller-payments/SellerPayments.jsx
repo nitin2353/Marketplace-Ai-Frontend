@@ -680,7 +680,7 @@ const SellerPayments = () => {
 
                 <Modal.Body className="p-4">
                     {selectedTransaction && (
-                        <div ref={receiptRef} className="receipt-print-area">
+                        <div ref={receiptRef} className="receipt-print-area">   
                             <div className="receipt-header">
                                 <h3>ShopEase</h3>
                                 <hr />
