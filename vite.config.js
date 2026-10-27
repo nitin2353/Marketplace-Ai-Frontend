@@ -18,8 +18,8 @@ export default defineConfig({
       },
 
       manifest: {
-        name: "AI Marketplace",
-        short_name: "AI Market",
+        name: "FlashiBuy",
+        short_name: "FlashiBuy",
         description: "Your online AI Marketplace",
         theme_color: "#2563eb",
         background_color: "#ffffff",
@@ -28,13 +28,13 @@ export default defineConfig({
         scope: "/",
         icons: [
           {
-            src: "/Logo.png",
+            src: "/logo-image.png",
             sizes: "192x192",
             type: "image/png",
             purpose: "any",
           },
           {
-            src: "/Logo.png",
+            src: "/logo-image.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any",
