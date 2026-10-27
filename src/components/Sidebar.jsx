@@ -57,7 +57,7 @@ export default function Sidebar({ cart, sidebarOpen, navSection, wishlist, IoLog
                             alignItems: "center",
                             gap: "8px"
                         }}>
-                            <img src="../../public/Logo.png" style={{ maxWidth: "190px", height: "auto" }} alt="FlashiBuy" />
+                            <img src="/Logo.png" style={{ maxWidth: "190px", height: "auto" }} alt="FlashiBuy" />
                         </div>
                         <button onClick={() => setSidebar(false)} className="d-lg-none mb-5" style={{ marginRight: "13px", marginTop: '-38px',background: "none", border: "none", color: "var(--text-muted)",  fontSize: "1.5rem", cursor: "pointer" }}>
                             <IoCloseOutline />

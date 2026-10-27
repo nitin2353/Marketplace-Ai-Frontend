@@ -321,7 +321,7 @@ export default function Login() {
     setCooldown(0);
   };
 
-  const logoSrc = "../../../public//Logo.png";
+  const logoSrc = "/Logo.png";
 
   return (
     <Container fluid className="p-0">

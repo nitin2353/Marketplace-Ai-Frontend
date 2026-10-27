@@ -282,7 +282,7 @@ const generateShipmentLabels = (order = {}) => {
     });
 };
 
-const logo = '../../public/Light-logo.png'
+const logo = '/Light-logo.png'
 
 const chunkArray = (array = [], size = 1) => {
     const chunks = [];

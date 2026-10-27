@@ -3,7 +3,7 @@ import {
     Document, Page, Text, View, Image, StyleSheet,
 } from "@react-pdf/renderer";
 import s from '../style/InvoiceStyle'
-import logo from "../../public/Light-logo.png";
+import logo from "/Light-logo.png";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
 const ORANGE = "#000000ff";
