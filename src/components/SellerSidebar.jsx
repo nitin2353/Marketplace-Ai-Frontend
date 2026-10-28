@@ -36,35 +36,60 @@ export default function SellerSidebar({ stats = [] }) {
                 }}
             >
                 {/* Logo Section */}
-                <div style={{ padding: "0px 0px", borderBottom: "1px solid var(--border-light)" }}>
+
+                <div
+                    style={{
+                        padding: "12px 16px",
+                        borderBottom: "1px solid var(--border-light)",
+                    }}
+                >
                     <div className="d-flex justify-content-between align-items-center">
                         <div
+                            onClick={() => handleNavigate("/seller/dashboard")}
                             style={{
-                                fontFamily: "var(--font-heading)",
-                                fontSize: "1.6rem",
-                                fontWeight: 800,
-                                color: "var(--primary)",
-                                cursor: "pointer",
                                 display: "flex",
                                 alignItems: "center",
-                                gap: "10px"
+                                justifyContent: "flex-start",
+                                cursor: "pointer",
+                                minWidth: 0,
+                                flex: 1,
                             }}
-                            onClick={() => handleNavigate("/seller/dashboard")}
                         >
-                            
-                            <img src="/Logo.png" width="100%" alt="" />
+                            <img
+                                src="/Logo.png"
+                                alt="FlashiBuy Logo"
+                                style={{
+                                    width: "180px",
+                                    height: "auto",
+                                    objectFit: "contain",
+                                    objectPosition: "left center",
+                                    display: "block",
+                                }}
+                            />
                         </div>
+
                         <button
+                            type="button"
                             className="d-lg-none btn btn-light btn-sm rounded-circle"
                             onClick={() => setIsOpen(false)}
-                            style={{ width: "32px", height: "32px" }}
+                            aria-label="Close sidebar"
+                            style={{
+                                width: "32px",
+                                height: "32px",
+                                minWidth: "32px",
+                                padding: 0,
+                                marginLeft: "12px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "22px",
+                                lineHeight: 1,
+                                flexShrink: 0,
+                            }}
                         >
                             ×
                         </button>
                     </div>
-                    {/* <div style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontWeight: 600, marginTop: "4px", textTransform: "uppercase", letterSpacing: "1px" }}>
-                        Seller Central
-                    </div> */}
                 </div>
 
                 {/* Navigation */}

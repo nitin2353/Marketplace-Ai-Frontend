@@ -44,23 +44,77 @@ export default function Sidebar({ cart, sidebarOpen, navSection, wishlist, IoLog
                 borderRight: "1px solid var(--border-light)",
                 boxShadow: "var(--shadow-lg)"
             }}>
-                <div className="" style={{
-                    // padding: "0px 0px",
-                    borderBottom: "1px solid var(--border-light)"
-                }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <div className="fw-bold" style={{
-                            fontFamily: "var(--font-heading)",
-                            fontSize: "1.5rem",
-                            color: "var(--primary)",
+                <div
+                    style={{
+                        padding: "12px 16px",
+                        borderBottom: "1px solid var(--border-light)",
+                        width: "100%",
+                        boxSizing: "border-box",
+                    }}
+                >
+                    <div
+                        style={{
                             display: "flex",
+                            justifyContent: "space-between",
                             alignItems: "center",
-                            gap: "8px"
-                        }}>
-                            <img src="/Logo.png" style={{ maxWidth: "190px", height: "auto" }} alt="FlashiBuy" />
+                            gap: "12px",
+                            minHeight: "45px",
+                        }}
+                    >
+                        {/* Logo */}
+                        <div
+                            className="fw-bold"
+                            style={{
+                                fontFamily: "var(--font-heading)",
+                                fontSize: "1.5rem",
+                                color: "var(--primary)",
+                                display: "flex",
+                                alignItems: "center",
+                                flex: 1,
+                                minWidth: 0,
+                                cursor: "pointer",
+                            }}
+                        >
+                            <img
+                                src="/Logo.png"
+                                alt="FlashiBuy"
+                                 style={{
+                                    width: "180px",
+                                    height: "auto",
+                                    objectFit: "contain",
+                                    objectPosition: "left center",
+                                    display: "block",
+                                }}
+                            />
                         </div>
-                        <button onClick={() => setSidebar(false)} className="d-lg-none mb-5" style={{ marginRight: "13px", marginTop: '-38px',background: "none", border: "none", color: "var(--text-muted)",  fontSize: "1.5rem", cursor: "pointer" }}>
-                            <IoCloseOutline />
+
+                        {/* Close Button */}
+                        <button
+                            type="button"
+                            onClick={() => setSidebar(false)}
+                            className="d-lg-none"
+                            aria-label="Close sidebar"
+                            style={{
+                                width: "32px",
+                                height: "32px",
+                                minWidth: "32px",
+                                padding: 0,
+                                margin: 0,
+                                background: "transparent",
+                                border: "none",
+                                borderRadius: "50%",
+                                color: "var(--text-muted)",
+                                fontSize: "24px",
+                                fontWeight: 400,
+                                lineHeight: 1,
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                            }}
+                        >
+                            &times;
                         </button>
                     </div>
                 </div>
@@ -113,9 +167,9 @@ export default function Sidebar({ cart, sidebarOpen, navSection, wishlist, IoLog
             </div>
 
             {/* Mobile overlay */}
-            <div 
-                className={`pd-overlay ${sidebarOpen ? "show" : ""}`} 
-                onClick={() => setSidebar(false)} 
+            <div
+                className={`pd-overlay ${sidebarOpen ? "show" : ""}`}
+                onClick={() => setSidebar(false)}
             />
         </>
     );
