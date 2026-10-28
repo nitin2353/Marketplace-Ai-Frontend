@@ -249,7 +249,8 @@ export default function Login() {
       setResetStep(2);
       setCooldown(30);
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to send OTP");
+      console.log('error', error)
+      toast.error(error?.message || "Failed to send OTP");
     } finally {
       setResetLoading(false);
     }

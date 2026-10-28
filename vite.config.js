@@ -10,7 +10,7 @@ export default defineConfig({
       registerType: "autoUpdate",
 
       devOptions: {
-        enabled: true,
+        enabled: false,
       },
 
       workbox: {
@@ -34,7 +34,7 @@ export default defineConfig({
             purpose: "any",
           },
           {
-            src: "/Logo.png",
+            src: "/logo-image.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any",

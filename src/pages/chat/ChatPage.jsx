@@ -544,7 +544,7 @@ const ChatPage = () => {
                     <div className="chat-sidebar-header">
                         <button
                             className="chat-back-btn d-flex"
-                            onClick={() => navigate(-1)}
+                            onClick={() => navigate('/')}
                         >
                             ←
                         </button>
@@ -620,7 +620,7 @@ const ChatPage = () => {
                             {activeConversation?.product_id && (
                                 <div className="product-context">
                                     <img
-                                        src={activeConversation.product_image || "https://placehold.co/40x40"}
+                                        src={activeConversation.product_image?.split(',')[0].replace(/[{}"\\]/g, "") || "https://placehold.co/40x40"}
                                         alt="product"
                                         className="product-context-img"
                                     />

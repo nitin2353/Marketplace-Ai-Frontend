@@ -16,7 +16,8 @@ import SkeletonCard from "../../components/SkeletonCard";
 import AddToCartModal from "../../components/AddToCartModal";
 import { FMT } from "../../helper/GlobalHelper";
 import CategorySection from "../../components/CategorySection";
-
+import orderApi from "../../api/order.api";
+import JWTService from "../../config/jwt.config";
 const PER_PAGE = 12;
 const WELCOME_COUPON = "WELCOME10";
 const WELCOME_KEY = "pd_welcome_seen";
@@ -77,6 +78,7 @@ const getDiscountPercent = (product) => {
         ? Math.max(0, Math.min(100, discount))
         : 0;
 };
+
 
 const getProductDate = (product) => {
     const date = new Date(
@@ -424,18 +426,36 @@ export default function ProductDashboard() {
     const [showCompare, setShowCompare] = useState(false);
     const [addedItem, setAddedItem] = useState(null);
     const [showTop, setShowTop] = useState(false);
+    const [orderCount, setOrderCount] = useState(0);
 
     const { isLike, setIsLike, globalCartLength } = useAuthWrapper()
 
     const searchRef = useRef();
     const contentRef = useRef();
 
+    
     // ── Fetch products from API ────────────────────────────────────────────────
     useEffect(() => {
         fetchProductData();
-        fetchWishlist();
         fetchCategorySections();
+        if(JWTService.isTokenAvailable()){
+            fetchWishlist();
+            fetchOrderCount();
+        }
     }, []);
+
+    
+    const fetchOrderCount = async() =>{
+        const tokenDetail = JWTService?.decodeTokenDetails();
+        try {
+            const {data} = await orderApi?.getCustomerOrders(tokenDetail?.id)
+            setOrderCount(data?.length)
+        } catch (error) {
+            console.error("Failed to fetch Order", error);
+        }
+    }
+
+
 
     const fetchCategorySections = async () => {
         try {
@@ -766,7 +786,7 @@ export default function ProductDashboard() {
                     {showLanding && (
                         <>
                             <HeroBanner products={heroProducts} onCta={goSection} />
-                            <FlashStrip onShop={() => goSection("sale")} onCopy={copyCoupon} />
+                            {(orderCount < 1) && <FlashStrip onShop={() => goSection("sale")} onCopy={copyCoupon} />}
                         </>
                     )}
 

@@ -52,7 +52,7 @@ export default function SellerSidebar({ stats = [] }) {
                             onClick={() => handleNavigate("/seller/dashboard")}
                         >
                             
-                            <img src="/logo.png" width="100%" alt="" />
+                            <img src="/Logo.png" width="100%" alt="" />
                         </div>
                         <button
                             className="d-lg-none btn btn-light btn-sm rounded-circle"

@@ -55,7 +55,7 @@ const Toolbar = ({
     const [showNotif, setShowNotif] = useState(false);
     const [notifyCount, setNotifyCount] = useState(0);
     const [refreshNotify, setRefreshNotify] = useState(false);
-
+    const [isLogin, setIsLogin] = useState(JWTService?.isTokenAvailable());
     const { isLike, refresh, setGlobalCartLength } = useAuthWrapper()
     const userData = JWTService.decodeTokenDetails();
     const entityId = userData?.id || userData?.user_id;
@@ -75,8 +75,8 @@ const Toolbar = ({
 
 
     useEffect(() => {
-        fetchCart()
-        if (entityId) fetchNotificationCount();
+        (isLogin) && fetchCart()
+        if (entityId && refreshNotify && isLogin) fetchNotificationCount();
 
         const handler = (e) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -88,7 +88,7 @@ const Toolbar = ({
     }, [entityId]);
 
     useEffect(() => {
-        if (entityId) fetchNotificationCount();
+        if (entityId && refreshNotify && isLogin) fetchNotificationCount();
     }, [entityId, refreshNotify]);
 
     const fetchNotificationCount = async () => {
@@ -101,7 +101,7 @@ const Toolbar = ({
     };
 
     useEffect(() => {
-        fetchCart()
+        (isLogin) && fetchCart()
     }, [refresh])
 
     const fetchSuggestions = useCallback(async (query) => {

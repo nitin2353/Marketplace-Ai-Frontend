@@ -175,9 +175,9 @@ export default function NotificationPanel({
     const [notifs, setNotifs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [workingId, setWorkingId] = useState(null);
+    const [isLogin, setIsLogin] = useState(JWTService?.isTokenAvailable());
 
     const navigate = useNavigate();
-
     const unread = useMemo(() => notifs.filter((n) => n.unread).length, [notifs]);
 
     const userData = JWTService.decodeTokenDetails();
@@ -217,7 +217,7 @@ export default function NotificationPanel({
     }, []);
 
     useEffect(() => {
-        fetchNotifications();
+        (isLogin) && fetchNotifications();
     }, [fetchNotifications]);
 
     const markRead = async (id, ref_id, ref_type) => {
@@ -321,7 +321,7 @@ export default function NotificationPanel({
             <div style={{ maxHeight: 340, overflowY: "auto" }}>
                 {loading ? (
                     <div style={{ padding: "32px 16px", textAlign: "center", color: "#9ca3af", fontSize: 13 }}>
-                        Loading notifications...
+                        {isLogin ? "Loading notifications..." : "No Notifications"}
                     </div>
                 ) : notifs.length === 0 ? (
                     <div style={{ padding: "32px 16px", textAlign: "center", color: "#9ca3af", fontSize: 13 }}>

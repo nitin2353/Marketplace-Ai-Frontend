@@ -1,6 +1,4 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import uvCapitalApi from "../api/AiMarketPlaceApi";
-import JWTService from "../config/jwt.config";
 
 const AuthWrapper = createContext();
 
