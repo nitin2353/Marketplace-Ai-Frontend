@@ -21,6 +21,7 @@ import { COUPONS } from '../../helper/GlobalHelper'
 
 
 
+
 const STEPS = ["Address", "Payment", "Review", "Done"];
 
 
@@ -81,6 +82,7 @@ export default function CheckoutPage() {
     const [isFirstOrder, setIstFirstOrder] = useState(0);
 
     const { coupon, setCoupon } = useAuthWrapper();
+    
 
 
     const { subtotal, saved, couponSave, delivery, tax_amount, total } = calcTotals(cart, discount);

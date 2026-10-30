@@ -100,7 +100,7 @@ export default function Register() {
                         <span className="eco-offer-icon">🎁</span>
                         ₹200 welcome coupon has been added to your wallet!
                     </div>
-                    <Button className="eco-btn-main w-100 text-white" onClick={() => navigate("/dashboard/")}>
+                    <Button className="eco-btn-main w-100 text-white" onClick={() => navigate("/auth/login")}>
                         Start Shopping →
                     </Button>
                     <div className="mt-3">

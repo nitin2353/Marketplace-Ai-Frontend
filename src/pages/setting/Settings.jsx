@@ -221,10 +221,6 @@ export default function SettingsPage() {
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        navigate("/auth/login", { replace: true });
-    };
 
 
 

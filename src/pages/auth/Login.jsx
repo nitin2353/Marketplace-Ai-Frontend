@@ -212,7 +212,9 @@ export default function Login() {
       if (res.success) {
         // Handle nested data structure if present
         const token = res.data?.token || res.token;
+        const shiprocketToken = res.data?.shiprocketToken || res.shiprocketToken;
         localStorage.setItem("token", token);
+        localStorage.setItem("shiprocketToken", shiprocketToken);
 
         toast.success(res.message || "Logged In Successfully");
 

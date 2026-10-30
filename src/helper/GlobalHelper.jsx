@@ -1,6 +1,7 @@
 import toast from "react-hot-toast";
 import JWTService from "../config/jwt.config";
 import { Row, Col, Stack, InputGroup, Form, Container } from "react-bootstrap";
+import shiprocketApi from "../api/shiprocket.api";
 
 const ALL_TAGS = ["New Arrival", "Trending", "Best Seller", "Limited Edition", "Eco Friendly", "Premium", "Sale", "Exclusive", "Handmade", "Organic", "Featured"];
 
@@ -326,5 +327,18 @@ export const LogoutTab = () => {
 
 
 
+const checkAddressAvilability = async (data) => {
+    try {
+        const {data} = await shiprocketApi?.checkDeliveryAvailability(data);
+        return data;
+    } catch (error) {
+        console.log(error);
+    }
+}
 
-export default { ALL_TAGS, TABLE_HEADERS, SORT_OPTIONS, API_FIELDS_MAP, COUPONS, FORMATED_DATE_TIME, FORMATED_DATE, FORMATED_TIME, METHODS, METHOD_ICONS, FMT, FMT_DATE, FMT_DATE_TIME, TABS, STATUS_META, TIMELINE_STEPS, PAYMENT_METHOD_LABELS, LogoutTab };
+
+
+
+
+
+export default { ALL_TAGS, TABLE_HEADERS, SORT_OPTIONS, API_FIELDS_MAP, COUPONS, FORMATED_DATE_TIME, FORMATED_DATE, FORMATED_TIME, METHODS, METHOD_ICONS, FMT, FMT_DATE, FMT_DATE_TIME, TABS, STATUS_META, TIMELINE_STEPS, PAYMENT_METHOD_LABELS, LogoutTab, checkAddressAvilability };

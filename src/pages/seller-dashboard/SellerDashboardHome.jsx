@@ -17,6 +17,8 @@ import orderApi from "../../api/order.api";
 import toast from "react-hot-toast";
 import { timeAgo, activityMeta } from "../../helper/Constraints";
 import JWTService from "../../config/jwt.config";
+import userSettingsApi from "../../api/userSettings.api.jsx";
+import PickupWarningPopup from "../../components/PickupWarningPopup.jsx";
 
 // ── Formatters ─────────────────────────────────────────────────────────────────
 const fmt = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
@@ -70,7 +72,7 @@ export default function SellerDashboardHome() {
   const [loading, setLoading] = useState(true);
   const [chartLoading, setChartLoading] = useState(true);
   const [period, setPeriod] = useState("monthly");
-
+  const [isPickupServiceable, setIsPickupServiceable] = useState(false);
 
   // ── Real chart data state ──
   const [monthlyChartData, setMonthlyChartData] = useState(
@@ -116,7 +118,7 @@ export default function SellerDashboardHome() {
       ? (processedProducts.reduce((s, p) => s + Number(p.rating), 0) / processedProducts.length).toFixed(1)
       : "0.0";
   }, [processedProducts]);
-  
+
   const outOfStock = useMemo(() => processedProducts.filter(p => p.stock === 0).length, [processedProducts]);
   const lowStock = useMemo(() => processedProducts.filter(p => p.stock > 0 && p.stock <= p.min_stock_alert).length, [processedProducts]);
 
@@ -139,6 +141,7 @@ export default function SellerDashboardHome() {
     (async () => {
       setLoading(true);
       fetchRecentOrders();
+      fetchUser();
       fetchActivity();
       try {
         const { data } = await productApi.getAllProducts();
@@ -245,6 +248,19 @@ export default function SellerDashboardHome() {
       toast.error("Failed to load recent orders");
     }
   };
+
+  const fetchUser = async () => {
+    try {
+      const seller = JWTService.decodeTokenDetails();
+      const res = await userSettingsApi?.getProfile(seller?.id)
+      console.log('res?.data?.pickup_serviceable', res?.data)
+      setIsPickupServiceable(res?.data?.pickup_serviceable)
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load User Data");
+    }
+  }
+
 
   // ── Fetch Activity ──
   const fetchActivity = async () => {
@@ -810,6 +826,10 @@ export default function SellerDashboardHome() {
             </div>
           </Col>
         </Row>
+        <PickupWarningPopup
+          pickupServiceable={isPickupServiceable}
+          // onCheckAgain={handleCheckPickup}
+        />
       </Container>
     </div>
   );

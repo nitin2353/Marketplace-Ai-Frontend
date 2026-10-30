@@ -15,9 +15,18 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = JWTService.getTokenDetails();
+    // const shiprocketToken = JWTService.getShiprocketTokenDetails();
+
+    config.headers = config.headers || {};
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // if (shiprocketToken) {
+    //   config.headers.shiprocketToken = shiprocketToken;
+    // }
+
     return config;
   },
   (error) => Promise.reject(error)

@@ -11,6 +11,7 @@ import "./Sellersettings.css";
 import "../../style/Dashboard.css"
 import { LogoutTab } from '../../helper/GlobalHelper';
 import { useNavigate } from "react-router-dom";
+import shiprocketApi from "../../api/shiprocket.api.jsx";
 
 const IMG_BASE = API_BASE_URL.replace("/api/v1", "/uploads/profiles/");
 
@@ -157,7 +158,7 @@ function ProfileTab({ seller, onSave, saving }) {
                                 <Field label="Mobile Number">
                                     <InputGroup>
                                         {/* <InputGroup.Text className="ss-addon ss-addon-l">+91</InputGroup.Text> */}
-                                        <input className="ss-input" type="tel" value={form.mobile} onChange={set("mobile")} pattern="[0-9]{10}" placeholder="0000000000"  />
+                                        <input className="ss-input" type="tel" value={form.mobile} onChange={set("mobile")} pattern="[0-9]{10}" placeholder="0000000000" />
                                     </InputGroup>
                                 </Field>
                             </Col>
@@ -240,7 +241,7 @@ function StoreTab({ seller, onSave, saving }) {
                                 </Field>
                             </Col>
                             <Col md={6}>
-                                <Field label="Business Type">
+                                <Field label="Business Type *">
                                     <select className="ss-select" value={form.business_type.toLowerCase()} onChange={set("business_type")}>
                                         <option value="">Select type</option>
                                         <option value="individual">Individual</option>
@@ -252,7 +253,7 @@ function StoreTab({ seller, onSave, saving }) {
                                 </Field>
                             </Col>
                             <Col xs={12}>
-                                <Field label="Store Description" hint="Appears on your public store page.">
+                                <Field label="Store Description *" hint="Appears on your public store page.">
                                     <textarea className="ss-textarea" value={form.store_description} onChange={set("store_description")} placeholder="What does your store specialise in?" rows={3} />
                                 </Field>
                             </Col>
@@ -277,13 +278,14 @@ function StoreTab({ seller, onSave, saving }) {
                                 </Field>
                             </Col>
                             <Col md={6}>
-                                <Field label="PAN Number" hint="Permanent Account Number">
+                                <Field label="PAN Number *" hint="Permanent Account Number">
                                     <input
                                         className={`ss-input ${form.pan.toUpperCase() && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(form.pan.toUpperCase()) ? 'is-invalid' : ''}`}
                                         value={form.pan.toUpperCase()}
                                         onChange={set("pan")}
                                         placeholder="Enter PAN NUMBER"
                                         maxLength={10}
+                                        required
                                         style={{ textTransform: "uppercase" }}
                                     />
                                 </Field>
@@ -297,23 +299,23 @@ function StoreTab({ seller, onSave, saving }) {
                     <div className="ss-card-body">
                         <Row className="g-3">
                             <Col xs={12}>
-                                <Field label="Address Line">
-                                    <input className="ss-input" value={form.address_line_1} onChange={set("address_line_1")} placeholder="Street / Area / Locality" />
+                                <Field label="Address Line *">
+                                    <input className="ss-input" required value={form.address_line_1} onChange={set("address_line_1")} placeholder="Street / Area / Locality" />
                                 </Field>
                             </Col>
                             <Col md={4}>
-                                <Field label="City">
-                                    <input className="ss-input" value={form.city} onChange={set("city")} placeholder="Mumbai" />
+                                <Field label="City *">
+                                    <input className="ss-input" required value={form.city} onChange={set("city")} placeholder="Mumbai" />
                                 </Field>
                             </Col>
                             <Col md={4}>
-                                <Field label="State">
-                                    <input className="ss-input" value={form.state} onChange={set("state")} placeholder="Maharashtra" />
+                                <Field label="State *">
+                                    <input className="ss-input" required value={form.state} onChange={set("state")} placeholder="Maharashtra" />
                                 </Field>
                             </Col>
                             <Col md={4}>
-                                <Field label="Pincode">
-                                    <input className="ss-input" value={form.pincode} onChange={set("pincode")} placeholder="400001" maxLength={6} />
+                                <Field label="Pincode *">
+                                    <input className="ss-input" required value={form.pincode} onChange={set("pincode")} placeholder="400001" maxLength={6} />
                                 </Field>
                             </Col>
                         </Row>
@@ -755,7 +757,7 @@ function PaymentsTab({ seller, onSave, saving }) {
         form.account_number !== form.confirm_account;
 
 
-   
+
 
     return (
         <form onSubmit={handleSubmit}>
@@ -926,13 +928,27 @@ export default function SellerSettings() {
 
     // Generic save
     const handleSave = useCallback(async (data) => {
+
+
         setSaving(true);
         try {
             if (activeTab === "profile") {
                 await userSettingsApi.updateProfile(sellerId, data);
             } else if (activeTab === "store") {
+                
                 const json = Object.fromEntries(data.entries());
-                await userSettingsApi.updateStore(sellerId, json);
+                const payload = {
+                    "pickup_postcode": json?.pincode,
+                    "weight": 1,
+                    "delivery_postcode": json?.pincode,
+                    "cod": 0
+                }
+
+                const response = await shiprocketApi?.checkDeliveryAvailability(payload);
+
+                const availability = response?.available;
+                await userSettingsApi.updateStore(sellerId, {...json, "pickup_serviceable" : availability});
+
             } else if (activeTab === "payments") {
                 const json = Object.fromEntries(data.entries());
                 await userSettingsApi.updatePayment(sellerId, json);
@@ -944,7 +960,7 @@ export default function SellerSettings() {
         } finally { setSaving(false); }
     }, [sellerId, fetchSeller, activeTab]);
 
-     const navigate = useNavigate();
+    const navigate = useNavigate();
 
     return (
         <Container fluid className="sr-page p-0">

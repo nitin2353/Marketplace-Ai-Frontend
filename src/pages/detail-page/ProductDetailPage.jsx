@@ -1,10 +1,10 @@
-import { Container, Row, Col, Card, Button, Badge, ProgressBar, ListGroup, Modal } from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Badge, ProgressBar, ListGroup, Modal, InputGroup, Form } from "react-bootstrap";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import productApi from "../../api/product.api";
 import toast from "react-hot-toast";
 import GlobalLoader from "../../components/GlobalLoader";
-import { FaGripLinesVertical } from "react-icons/fa";
+import { FaGripLinesVertical, FaSearchLocation } from "react-icons/fa";
 import Toolbar from "../../components/Toolbar";
 import GlobalHelper from "../../helper/GlobalHelper";
 import wishlistApi from "../../api/wishlist.api";
@@ -24,6 +24,7 @@ import './detail.css';
 import { GrLocation } from "react-icons/gr";
 import addressApi from "../../api/address.api";
 import { FaShop } from "react-icons/fa6";
+import shiprocketApi from "../../api/shiprocket.api";
 
 // ── Skeleton ────────────────────────────────────────────────────────────────
 function DetailSkeleton() {
@@ -84,6 +85,12 @@ export default function ProductDetail() {
   const [reviewPage, setReviewPage] = useState(1);
   const reviewsPerPage = 4;
   const [seller_name, setSellerName] = useState("")
+  const [isDeliveryAvailable, setIsDeliveryAvailable] = useState(true)
+  const [guestPincode, setGuestPincode] = useState("");
+  const [checkingAddress, setCheckingAddress] = useState(false);
+  const [addressChecked, setAddressChecked] = useState(false);
+  const [addressError, setAddressError] = useState("");
+  const [productInfo, setProductInfo] = useState("")
 
   const { refresh, setRefresh } = useAuthWrapper()
   const searchRef = useRef();
@@ -91,23 +98,49 @@ export default function ProductDetail() {
 
   const fetchDefaultAddress = async () => {
     try {
-      const { data } = await addressApi.getAddressesByUserId();
-      setDefaultAddress(data[0])
+      const response = await addressApi.getAddressesByUserId();
+
+      const addresses = Array.isArray(response?.data)
+        ? response.data
+        : response?.data?.data || [];
+
+      const address = addresses[0] || null;
+
+      setDefaultAddress(address);
+
+      if (address?.pincode) {
+        await checkAddress(address.pincode);
+      } else {
+        setAddressChecked(false);
+      }
     } catch (err) {
       console.error("Failed to fetch Default Address:", err);
       toast.error("Failed to load address.");
     }
-  }
+  };
 
 
 
-  useEffect(() => {
-    JWTService.isTokenAvailable() && fetchDefaultAddress();
-    fetchProduct();
-    fetchWishlist()
-    fetchReviews()
-    window.scrollTo(0, 0);
-  }, [id]);
+useEffect(() => {
+  const initializeProductPage = async () => {
+
+    await fetchProduct();
+
+    if (JWTService.isTokenAvailable()) {
+      await fetchDefaultAddress();
+    }
+  };
+
+  initializeProductPage();
+
+  // These can load independently
+  fetchWishlist();
+  fetchReviews();
+
+  window.scrollTo(0, 0);
+}, [id]);
+
+
 
   const addToast = useCallback((msg, icon = "✅") => {
     toast.success(msg)
@@ -128,7 +161,7 @@ export default function ProductDetail() {
       const response = await productApi.getProductById(id);
       const payload = response?.data ?? response;
       const raw = payload?.data?.[0] ?? payload?.data ?? payload?.rows?.[0] ?? payload?.row ?? payload ?? null;
-
+      setProductInfo(product)
       if (raw) {
         const p = GlobalHelper.API_FIELDS_MAP["products"](raw);
         setProduct(p);
@@ -317,6 +350,70 @@ export default function ProductDetail() {
     }
   };
 
+
+
+  const checkAddress = async (pincode = "") => {
+    const deliveryPincode = String(
+      pincode || defaultAddress?.pincode || guestPincode
+    ).trim();
+
+    // Validate Indian PIN code
+    if (!/^[1-9][0-9]{5}$/.test(deliveryPincode)) {
+      toast.error("Please enter a valid 6-digit PIN code.");
+      return;
+    }
+
+    setCheckingAddress(true);
+    setAddressError("");
+    setAddressChecked(false);
+
+
+    try {
+      const payload = {
+        pickup_postcode: "305001",
+        weight: 1,
+        delivery_postcode: deliveryPincode,
+        cod: 0,
+      };
+      const response = await shiprocketApi.checkDeliveryAvailability(payload);
+
+      console.log("Delivery availability response:", response);
+
+      // Handle common API response formats.
+      const result = response;
+      console.log('result', result)
+      const availability = result?.available;
+
+      if (typeof availability !== "boolean") {
+        console.error("Unexpected delivery availability response:", result);
+        setAddressError("Could not verify delivery availability.");
+        toast.error("Could not verify delivery availability.");
+        return;
+      }
+
+      setIsDeliveryAvailable(availability);
+      setAddressChecked(true);
+
+    } catch (error) {
+      console.error("Failed to check delivery availability:", error);
+      setAddressError("Unable to check delivery. Please try again.");
+      toast.error("Unable to check delivery. Please try again.");
+    } finally {
+      setCheckingAddress(false);
+    }
+  };
+
+
+
+
+
+
+
+
+
+
+
+
   const isWished = wishlist.some(w => w.product_id === product?.id);
 
   if (loading) {
@@ -482,24 +579,44 @@ export default function ProductDetail() {
                   </div>
                 </div>
               )}
+              <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 mb-3">
+                {
+                  JWTService.isTokenAvailable && (
+                    <span
+                      className={`badge rounded-0 text-wrap text-start ${!addressChecked
+                        ? "bg-secondary"
+                        : isDeliveryAvailable
+                          ? "bg-success"
+                          : "bg-danger"
+                        }`}
+                    >
+                      {checkingAddress
+                        ? "Checking Delivery..."
+                        : !addressChecked
+                          ? "Check Delivery Availability By Adding Address"
+                          : isDeliveryAvailable
+                            ? "Delivery Available Here..."
+                            : "Delivery Unavailable Here..."}
+                    </span>
+                  )
+                }
+              </div>
+
 
               <div style={{ margin: '-10px 0px 20px 10px' }} >
                 {
-                  JWTService.isTokenAvailable() ? (
-                    <span className="fs-4 text-dark" style={{ cursor: "pointer" }} onClick={() => navigate('/dashboard/settings', {
-                      state: {
-                        from: 'productDefaultAddress',
-                      }
-                    })}>
-                      <GrLocation /> {<span className="text-primary fs-6 text-decoration-underline">Deliver to {defaultAddress?.name?.split(' ')[0] + " - " + defaultAddress?.city + " " + defaultAddress?.pincode}</span>}
-                    </span>
-                  )
-                    : (
-                      ""
-                    )
+
+                  <span className="fs-4 text-dark" style={{ cursor: "pointer" }} onClick={() => navigate('/dashboard/settings', {
+                    state: {
+                      from: 'productDefaultAddress',
+                    }
+                  })}>
+                    <GrLocation /> {!defaultAddress ? (<span className="text-primary fs-6 text-decoration-underline">Add Address</span>) : (<span className="text-primary fs-6 text-decoration-underline">Deliver to {defaultAddress?.name?.split(' ')[0] + " - " + defaultAddress?.city + " " + defaultAddress?.pincode}</span>)}
+                  </span>
+
                 }
                 <span style={{ fontSize: "20px", marginBottom: "50px" }}>
-                  {JWTService.isTokenAvailable() ? (" | ") : ""}
+                  {" | "}
                 </span>
                 <span>
                   <span className="fw-bold">

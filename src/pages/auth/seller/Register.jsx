@@ -5,6 +5,7 @@ import authApi from "../../../api/authApi";
 import toast from "react-hot-toast";
 import GlobalLoader from "../../../components/GlobalLoader";
 import { useNavigate } from "react-router-dom";
+import PickupAvailabilityCheck from "../../../components/PickupAvailabilityCheck";
 
 // ── Font + Style Injection ──────────────────────────────────────────────────
 const injectStyle = () => {
@@ -285,6 +286,7 @@ export default function SellerRegister() {
   const [done, setDone] = useState(false);
   const [apiError, setApiError] = useState(null);
   const [submittedData, setSubmittedData] = useState(null);
+  const [pickupResult, setPickupResult] = useState(null);
 
   const navigate = useNavigate();
 
@@ -319,7 +321,16 @@ export default function SellerRegister() {
   // ── Step navigation ────────────────────────────────────────────────────────
   const next = async () => {
     const valid = await trigger(STEP_FIELDS[step]);
+
     if (!valid) return;
+
+    // Pickup must be checked, but an unavailable location
+    // must not prevent seller registration.
+    if (step === 3 && pickupResult === null) {
+      toast.error("Please check pickup availability before continuing.");
+      return;
+    }
+
     setStep((s) => s + 1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -344,6 +355,12 @@ export default function SellerRegister() {
         }
       });
 
+      // Save the pickup verification result with registration.
+      formData.append(
+        "pickup_serviceable",
+        String(pickupResult?.available === true)
+      );
+
       // Signature image
       const signatureFile = payload.seller_signature_image?.[0];
       if (signatureFile) {
@@ -354,7 +371,8 @@ export default function SellerRegister() {
 
       if (res.success) {
         toast.success(res.message || "Your Account successfully Created");
-        localStorage.setItem("token", res.token);
+        localStorage.setItem("token", res?.data.token);
+        localStorage.setItem('pickup_serviceable', res?.data.user.pickup_serviceable)
         setSubmittedData({ name: payload.name, email: payload.email });
         setDone(true);
       }
@@ -724,6 +742,15 @@ export default function SellerRegister() {
                           {...register("address_line_1", { required: "Full address is required" })}
                         />
                       </Field>
+                      <PickupAvailabilityCheck
+                        address={{
+                          "pickup_postcode": watch("pincode"),
+                          "weight": 59,
+                          "delivery_postcode": watch("pincode"),
+                          "cod": 0
+                        }}
+                        onResult={setPickupResult}
+                      />
                     </>
                   )}
 
@@ -776,8 +803,8 @@ export default function SellerRegister() {
                           </Field>
                         </Col>
                         <Col sm={6}>
-                          <Field label="Bank name" className="">
-                            <Form.Control className={ic(errors.bank_name)} placeholder="e.g. HDFC Bank" {...register("bank_name")} />
+                          <Field label="Bank name *" className="">
+                            <Form.Control className={ic(errors.bank_name)} placeholder="e.g. HDFC Bank" {...register("bank_name", { required: "Bank Name is required" })} />
                           </Field>
                         </Col>
                       </Row>

@@ -14,6 +14,10 @@ const JWTService = {
     return localStorage.getItem(STORAGE_KEY);
   },
 
+  // getShiprocketTokenDetails() {
+  //   return localStorage.getItem("shiprocketToken");
+  // },
+
   isTokenAvailable() {
     return localStorage.getItem(STORAGE_KEY) !== null && this.isTokenValid();
   },
@@ -31,6 +35,7 @@ const JWTService = {
 
   clearTokenDetails() {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem("shiprocketToken");
   },
 
   isTokenValid() {

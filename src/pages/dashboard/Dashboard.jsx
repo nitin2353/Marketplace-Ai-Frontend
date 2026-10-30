@@ -18,6 +18,7 @@ import { FMT } from "../../helper/GlobalHelper";
 import CategorySection from "../../components/CategorySection";
 import orderApi from "../../api/order.api";
 import JWTService from "../../config/jwt.config";
+import shiprocketApi from "../../api/shiprocket.api";
 const PER_PAGE = 12;
 const WELCOME_COUPON = "WELCOME10";
 const WELCOME_KEY = "pd_welcome_seen";
