@@ -6,7 +6,7 @@ import Toolbar from "../../components/Toolbar";
 import orderApi from "../../api/order.api";
 import { useAuthWrapper } from "../../helper/AuthWrapper";
 import JWTService from "../../config/jwt.config";
-import { FMT, FMT_DATE, TABS, STATUS_META, PAYMENT_METHOD_LABELS, TIMELINE_STEPS, FMT_DATE_TIME } from "../../helper/GlobalHelper";
+import { FMT, FMT_DATE, TABS, STATUS_META, PAYMENT_METHOD_LABELS, FMT_DATE_TIME } from "../../helper/GlobalHelper";
 import ConfirmModal from "../../components/ConfirmModal";
 import ReviewModal from "../../components/ReviewModal.jsx";
 import "./orderpage.css";
@@ -104,6 +104,7 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                     <p className="mb-0 text-muted small">
                         Total Amount: <span className="text-primary fw-bold">{FMT(order.total_amount)}</span>
                     </p>
+
                 </div>
                 <div className="expand-indicator ms-md-auto">
                     <i className={`fas fa-chevron-${expanded ? 'up' : 'down'}`}></i>
@@ -123,16 +124,31 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                                 ) : items.map((item, i) => {
                                     return (
                                         <Row>
-                                            <Col key={i} className="item-row d-flex flex-column flex-md-row gap-3 align-items-md-center p-3 p-md-2 rounded-3 hover-bg-light border border-light border-md-0 mb-2 mb-md-0" onClick={() => navigate(`/product/${item.product_id}`)}>
+                                            <Col key={i} className="item-row d-flex flex-column flex-md-row gap-3 align-items-md-center p-1  rounded-3 hover-bg-light border border-light border-md-0 mb-2 mb-md-0" onClick={() => navigate(`/product/${item.product_id}`)}>
                                                 <img src={item.product_image_url?.split(',')[0].replace(/[{}"\\]/g, "") || `https://placehold.co/100?text=Product`} className="item-img" alt="item" />
-                                                <div className="flex-grow-1 min-w-0">
-                                                    <div className="fw-bold text-truncate small" style={{ color: "#0046b7" }}>{item.product_title}</div>
-                                                    <div className="text-muted tiny">
+                                                <div className="flex-grow-1 min-w-0" style={{marginTop : "-30px"}}>
+                                                    <div className="text-muted m-0 p-0">
                                                         Qty: {item.quantity} • {FMT(item.unit_price)} each
+                                                    {item.variant_size && (
+                                                        <>
+                                                            <span> | Size </span>
+                                                            <span>{item.variant_size} </span>
+                                                        </>
+                                                    )}
+                                                    {item.variant_color && (
+                                                        <>
+                                                            <span> | Colour </span>
+                                                            <span
+                                                                className="so-color-dot mt-5"
+                                                                style={{ background: item.variant_color }}
+                                                            />
+                                                        </>
+                                                    )}
                                                     </div>
+                                                    <div className="fw-bold text-truncate" style={{ color: "#0046b7" }}>{item.product_title}</div>
                                                 </div>
                                             </Col>
-                                            <Col className="d-flex float-end align-item-center text-align-center gap-2 mt-2 mt-md-0 justify-content-md-end" style={{"height" : "40px"}}>
+                                            <Col className="d-flex float-end align-item-center text-align-center gap-2 mt-2 mt-md-0 justify-content-md-end" style={{ "height": "40px" }}>
                                                 {isDelivered && (
                                                     <>
                                                         <RBButton
@@ -188,7 +204,7 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                         <Col lg={3}>
                             <div className="bg-light p-3 h-100 mb-5">
                                 <h6 className="section-title">Timeline & Delivery</h6>
-                                <OrderTimeline currentStatus={order.order_status} />
+                                <OrderTimeline currentStatus={order.order_status} order={order} />
                                 {address && (
                                     <div className="delivery-address mt-4 pt-3 border-top border-white">
                                         <p className="tiny fw-black text-muted uppercase mb-2">Shipping To</p>

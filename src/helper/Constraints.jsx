@@ -4,10 +4,14 @@ import { BiSolidBriefcase, BiSolidCategoryAlt, BiSolidDollarCircle, } from "reac
 import { FaProductHunt } from "react-icons/fa6";
 import { GrUpdate } from "react-icons/gr";
 
-const API_BASE_URL = `https://api.nitinverma.blog/api/v1`; 
+const API_BASE_URL = `http://localhost:3000/api/v1`; 
 const FRONTEND_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}`;
 
 const BUSINESS_EMAIL = 'nv5327260@gmail.com'
+
+
+const AVB_COUNTRIES = ["India"];
+
 
 
 const SIDEBAR_MENUS = [
@@ -170,6 +174,16 @@ export const timeAgo = (dateString) => {
   return `${years}y ago`;
 };
 
+const ORDER_STATUSES = [
+    { value: "placed", label: "Placed", icon: "📋", bulk_visible: false },
+    { value: "confirmed", label: "Confirmed", icon: "✅", bulk_visible: true },
+    { value: "processing", label: "Ready For Pickup", icon: "🚚", bulk_visible: true },
+    { value: "cancelled", label: "Cancelled", icon: "❌", bulk_visible: false },
+    // { value: "processing", label: "Processing", icon: "⚙️", bulk_visible: false },
+    // { value: "shipped", label: "Shipped", icon: "🚚", bulk_visible: false },
+    // { value: "delivered", label: "Delivered", icon: "📦", bulk_visible: false },
+    // { value: "payment_failed", label: "Payment Failed", icon: "⚠️", bulk_visible: false },
+];
 
 
 export {
@@ -179,5 +193,7 @@ export {
   PAYMENT_METHOD_META,
   SELLER_NAV_ITEMS,
   FRONTEND_BASE_URL,
-  BUSINESS_EMAIL
+  BUSINESS_EMAIL,
+  AVB_COUNTRIES,
+  ORDER_STATUSES
 };

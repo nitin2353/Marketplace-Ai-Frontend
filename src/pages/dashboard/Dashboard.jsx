@@ -420,7 +420,7 @@ export default function ProductDashboard() {
     const [selectedProduct, setSelected] = useState(null);
     const [sidebarOpen, setSidebar] = useState(window.innerWidth >= 992);
     const [categorySections, setCategorySections] = useState([]);
-    const [isDefaultView, setIsDefaultView] = useState(true);
+    const [isDefaultView, setIsDefaultView] = useState(false);
 
     // NEW popup / landing state
     const [showWelcome, setShowWelcome] = useState(false);

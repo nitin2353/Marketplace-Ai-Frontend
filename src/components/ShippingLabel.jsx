@@ -9,6 +9,7 @@ import {
 
 import s from "../style/Shippinglabel.styles";
 import { FORMATED_DATE_TIME } from "../helper/GlobalHelper";
+import { generateBarcode } from "../../utils/barcodeGenerator";
 
 const MAX_QTY_PER_PARCEL = 5;
 const LABELS_PER_PAGE = 2;
@@ -122,8 +123,14 @@ const allocateAmount = (amount, weights) => {
     });
 };
 
+
 const generateShipmentLabels = (order = {}) => {
     const parcelConfig = order?.parcelConfig;
+    const orderItems = Array.isArray(order?.items)
+        ? order.items
+        : [];
+
+    console.log("order", order);
 
     let parcels = [];
 
@@ -133,6 +140,14 @@ const generateShipmentLabels = (order = {}) => {
         parcelConfig.parcels.length > 0
     ) {
         parcels = parcelConfig.parcels.map((parcel, index) => {
+
+            // Match original order item using product_id.
+            const sourceItem = orderItems.find(
+                (item) =>
+                    item.product_id === parcel.product_id ||
+                    item.id === parcel.order_item_id
+            ) || {};
+
             const quantity = toNumber(
                 parcel.parcel_quantity ?? parcel.quantity
             );
@@ -140,40 +155,72 @@ const generateShipmentLabels = (order = {}) => {
             const unitPrice = toNumber(parcel.unit_price);
 
             return {
+                ...sourceItem,
                 ...parcel,
+
                 id:
                     parcel.id ||
                     parcel.product_id ||
                     `parcel-${index + 1}`,
-                product_id: parcel.product_id || parcel.id || null,
+
+                product_id:
+                    parcel.product_id ||
+                    sourceItem.product_id ||
+                    null,
+
                 product_title:
                     parcel.product_title ||
                     parcel.title ||
                     parcel.name ||
+                    sourceItem.product_title ||
                     "Product",
+
                 parcel_quantity: quantity,
                 quantity,
+
+                order_items: parcel.items,
+
                 unit_price: unitPrice,
+
                 parcel_gross_amount: roundMoney(
                     unitPrice * quantity
                 ),
+
                 product_image: parseImageUrl(
-                    parcel.product_image_url || parcel.product_image
+                    parcel.product_image_url ||
+                    parcel.product_image ||
+                    sourceItem.product_image_url ||
+                    sourceItem.product_image
                 ),
+
+                // Shipment details from original order item.
+                refnum:
+                    parcel.refnum ||
+                    sourceItem.refnum ||
+                    null,
+
+                waybill:
+                    parcel.waybill ||
+                    sourceItem.waybill ||
+                    null,
+
+                client:
+                    parcel.client ||
+                    sourceItem.client ||
+                    null,
+
                 parcel_no:
                     toNumber(parcel.parcel_no) || index + 1,
+
                 parcel_tracking_no:
                     parcel.parcel_tracking_no ||
                     `${order?.order_number || "ORD"}-P${toNumber(parcel.parcel_no) || index + 1}`,
             };
         });
+
     } else {
         // 2. Backward-compatible automatic splitting.
-        const items = Array.isArray(order?.items)
-            ? order.items
-            : [];
-
-        items.forEach((item) => {
+        orderItems.forEach((item) => {
             let remainingQty = toNumber(item?.quantity);
             const unitPrice = toNumber(item?.unit_price);
 
@@ -185,12 +232,21 @@ const generateShipmentLabels = (order = {}) => {
 
                 parcels.push({
                     ...item,
+
                     parcel_quantity: quantity,
                     quantity,
+
                     unit_price: unitPrice,
+
                     parcel_gross_amount: roundMoney(
                         unitPrice * quantity
                     ),
+
+                    // Shipment details.
+                    refnum: item.refnum || null,
+                    waybill: item.waybill || null,
+                    client: item.client || null,
+
                     product_image: parseImageUrl(
                         item?.product_image_url ||
                         item?.product_image
@@ -218,8 +274,9 @@ const generateShipmentLabels = (order = {}) => {
     );
 
     // 4. Read order-level discount and delivery charges.
-    // discount_amount is assumed to be a currency amount, not a percentage.
-    const discountPercentage = toNumber(order.discount_percentage);
+    const discountPercentage = toNumber(
+        order.discount_percentage
+    );
 
     const orderDiscount = roundMoney(
         order.discount_amount !== undefined &&
@@ -228,7 +285,6 @@ const generateShipmentLabels = (order = {}) => {
             : subtotal * discountPercentage / 100
     );
 
-    // Supports common field names; use the field your API actually returns.
     const orderDelivery = roundMoney(
         order.delivery_charge ??
         order.delivery_amount ??
@@ -243,18 +299,29 @@ const generateShipmentLabels = (order = {}) => {
         0
     );
 
-    // Prevent discount from exceeding the product subtotal.
+    // 5. Prevent discount from exceeding subtotal.
     const safeDiscount = Math.min(
         Math.max(0, orderDiscount),
         subtotal
     );
 
-    // 5. Allocate each order-level amount proportionally.
-    const discounts = allocateAmount(safeDiscount, grossAmounts);
-    const deliveries = allocateAmount(orderDelivery, grossAmounts);
-    const taxes = allocateAmount(orderTax, grossAmounts);
+    // 6. Allocate order-level amounts proportionally.
+    const discounts = allocateAmount(
+        safeDiscount,
+        grossAmounts
+    );
 
-    // 6. Calculate each parcel's final value and COD amount.
+    const deliveries = allocateAmount(
+        orderDelivery,
+        grossAmounts
+    );
+
+    const taxes = allocateAmount(
+        orderTax,
+        grossAmounts
+    );
+
+    // 7. Calculate final parcel values.
     return parcels.map((parcel, index) => {
         const gross = grossAmounts[index];
         const discount = discounts[index];
@@ -267,14 +334,23 @@ const generateShipmentLabels = (order = {}) => {
 
         return {
             ...parcel,
+
             parcel_no:
                 toNumber(parcel.parcel_no) || index + 1,
+
             total_parcels: parcels.length,
+
             parcel_gross_amount: gross,
             parcel_discount: discount,
             parcel_delivery: delivery,
             parcel_tax: tax,
             parcel_net_amount: netAmount,
+
+            // Preserve shipment details in final output.
+            refnum: parcel.refnum || null,
+            waybill: parcel.waybill || null,
+            client: parcel.client || null,
+
             parcel_tracking_no:
                 parcel.parcel_tracking_no ||
                 `${order?.order_number || "ORD"}-P${index + 1}`,
@@ -330,11 +406,7 @@ const ShippingParcelLabel = ({
         order?.qrDataUrl ||
         null;
 
-    /*
-     * Parcel-wise COD.
-     * Confirm that your courier supports parcel-wise COD
-     * before using these amounts for actual collection.
-     */
+
     const codCollectAmount = isCOD
         ? toNumber(shipment?.parcel_net_amount)
         : 0;
@@ -361,11 +433,23 @@ const ShippingParcelLabel = ({
                     </Text>
                 </View>
 
-                <View style={s.headerRight}>
-                    <Text style={s.orderText}>
-                        ORDER #{safeText(order?.order_number, "")}
-                    </Text>
+                {shipment.refnum && (
+                    <View style={{ alignItems: "center", marginTop: 1 }}>
+                        <Image
+                            src={generateBarcode(shipment.refnum) || shipment.refnum}
+                            style={{
+                                width: 180,
+                                height: 65,
+                                objectFit: "contain",
+                            }}
+                        />
+                    </View>
+                )}
 
+
+
+
+                <View style={s.headerRight}>
                     <Text style={s.parcelBadge}>
                         PARCEL {shipment?.parcel_no} OF{" "}
                         {shipment?.total_parcels}
@@ -544,18 +628,19 @@ const ShippingParcelLabel = ({
                         </View>
                     )}
 
-                    <View style={s.trackingBox}>
-                        <Text style={s.trackingLabel}>
-                            TRACKING NO.
-                        </Text>
+                    {shipment.waybill && (
+                        <View style={{ alignItems: "center", marginTop: 1 }}>
+                            <Image
+                                src={generateBarcode(shipment.waybill) || shipment.waybill}
+                                style={{
+                                    width: 180,
+                                    height: 65,
+                                    objectFit: "contain",
+                                }}
+                            />
+                        </View>
+                    )}
 
-                        <Text style={s.trackingNo}>
-                            {safeText(
-                                shipment?.parcel_tracking_no,
-                                ""
-                            )}
-                        </Text>
-                    </View>
 
                     <View
                         style={
@@ -612,10 +697,12 @@ const ShippingParcelLabel = ({
 
 const ShippingLabel = ({ order = {} }) => {
     const shipmentLabels = generateShipmentLabels(order);
+    console.log('shipmentLabels', shipmentLabels)
     const pages = chunkArray(
         shipmentLabels,
         LABELS_PER_PAGE
     );
+    console.log('pages', pages)
 
     return (
         <Document>

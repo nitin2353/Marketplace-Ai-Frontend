@@ -938,10 +938,7 @@ export default function SellerSettings() {
                 
                 const json = Object.fromEntries(data.entries());
                 const payload = {
-                    "pickup_postcode": json?.pincode,
-                    "weight": 1,
-                    "delivery_postcode": json?.pincode,
-                    "cod": 0
+                    "pincode": json?.pincode
                 }
 
                 const response = await shiprocketApi?.checkDeliveryAvailability(payload);

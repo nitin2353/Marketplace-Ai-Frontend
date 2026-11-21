@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import GlobalLoader from "../../../components/GlobalLoader";
 import { useNavigate } from "react-router-dom";
 import PickupAvailabilityCheck from "../../../components/PickupAvailabilityCheck";
+import { AVB_COUNTRIES } from "../../../helper/Constraints";
 
 // ── Font + Style Injection ──────────────────────────────────────────────────
 const injectStyle = () => {
@@ -125,7 +126,8 @@ const CATEGORIES = [
   "Automotive", "Health & Wellness", "Jewellery", "Art & Crafts", "Other",
 ];
 
-const COUNTRIES = ["India", "USA", "UK", "Canada", "Australia", "UAE", "Singapore"];
+const COUNTRIES = AVB_COUNTRIES;
+
 const INDIA_STATES = [
   "Andhra Pradesh", "Assam", "Bihar", "Chhattisgarh", "Delhi", "Goa", "Gujarat",
   "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh",
@@ -287,6 +289,7 @@ export default function SellerRegister() {
   const [apiError, setApiError] = useState(null);
   const [submittedData, setSubmittedData] = useState(null);
   const [pickupResult, setPickupResult] = useState(null);
+  const [isValidLocation, setIsValidLocation] = useState(true);
 
   const navigate = useNavigate();
 
@@ -371,7 +374,7 @@ export default function SellerRegister() {
 
       if (res.success) {
         toast.success(res.message || "Your Account successfully Created");
-        localStorage.setItem("token", res?.data.token);
+        localStorage.setItem("token", res?.data?.token);
         localStorage.setItem('pickup_serviceable', res?.data.user.pickup_serviceable)
         setSubmittedData({ name: payload.name, email: payload.email });
         setDone(true);
@@ -749,6 +752,7 @@ export default function SellerRegister() {
                           "delivery_postcode": watch("pincode"),
                           "cod": 0
                         }}
+                        setIsValidLocation={setIsValidLocation}
                         onResult={setPickupResult}
                       />
                     </>
@@ -896,7 +900,7 @@ export default function SellerRegister() {
                   )}
 
                   {step < 4 ? (
-                    <Button className="sr-btn-main" onClick={next} type="button" style={{ minWidth: 140 }}>
+                    <Button className="sr-btn-main" onClick={next} type="button" disabled={(step == 3) ? isValidLocation : false} style={{ minWidth: 140 }}>
                       Next step →
                     </Button>
                   ) : (

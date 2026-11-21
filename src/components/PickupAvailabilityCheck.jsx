@@ -6,6 +6,7 @@ import shiprocketApi from "../api/shiprocket.api";
 export default function PickupAvailabilityCheck({
     address,
     onResult,
+    setIsValidLocation
 }) {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
@@ -36,10 +37,7 @@ export default function PickupAvailabilityCheck({
         try {
             // These keys must match the request body expected by your backend route.
             const response = await shiprocketApi.checkDeliveryAvailability({
-                pickup_postcode: address.pickup_postcode,
-                weight: address.weight,
-                delivery_postcode: address.delivery_postcode,
-                cod: address.cod,
+                pincode: address.pickup_postcode
             });
 
             // Map the response field used by your backend to this boolean.
@@ -61,8 +59,10 @@ export default function PickupAvailabilityCheck({
             onResult?.(verification);
 
             if (available) {
+                setIsValidLocation(false)
                 toast.success("Pickup is available at this address!");
             } else {
+                setIsValidLocation(true)
                 toast("Pickup is currently unavailable. You can still complete registration.", {
                     icon: "⚠️",
                     duration: 5000,
@@ -121,12 +121,7 @@ export default function PickupAvailabilityCheck({
 
             {result?.available === false && (
                 <Alert variant="warning" className="mt-3 mb-0 rounded-3">
-                    <strong>⚠ Pickup currently unavailable</strong>
-                    <div className="small mt-1">
-                        You can still create your seller account. Your products will remain
-                        hidden from customers until pickup service becomes available at
-                        your registered location.
-                    </div>
+                    <strong>⚠ Pickup currently unavailable at your Pincode</strong>
                 </Alert>
             )}
 

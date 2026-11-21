@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "../pages/seller-orders/SellerOrders.css";
 import OrderTimeline from "../pages/customer-order-list/OrderTimeline.jsx";
-import { PAYMENT_METHOD_META } from "../helper/Constraints";
+import { PAYMENT_METHOD_META, ORDER_STATUSES } from "../helper/Constraints";
 import { Button as RBButton } from "react-bootstrap";
 import { Col, Row, Stack } from "react-bootstrap";
 import { FMT, FMT_DATE } from "../helper/GlobalHelper";
@@ -9,6 +9,8 @@ import PayBadge from "./PayBadge";
 import { useNavigate } from "react-router-dom";
 import DownloadLabelButton from "./DownloadLabelButton.jsx";
 import ShippingLabelModal from '../components/ShippingLabelModal.jsx'
+import { Modal, Button, Form } from "react-bootstrap";
+import { FaInfoCircle } from "react-icons/fa";
 
 
 const fmtDT = (d) =>
@@ -22,15 +24,7 @@ const fmtDT = (d) =>
         })
         : "—";
 
-const ORDER_STATUSES = [
-    { value: "placed", label: "Placed", icon: "📋" },
-    { value: "confirmed", label: "Confirmed", icon: "✅" },
-    { value: "processing", label: "Processing", icon: "⚙️" },
-    { value: "shipped", label: "Shipped", icon: "🚚" },
-    { value: "delivered", label: "Delivered", icon: "📦" },
-    { value: "cancelled", label: "Cancelled", icon: "❌" },
-    { value: "payment_failed", label: "Payment Failed", icon: "⚠️" },
-];
+
 
 const PAYMENT_STATUSES = [
     { value: "pending", label: "Pending" },
@@ -48,7 +42,6 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
     const [downloadLabel, setDownloadLabel] = useState(false)
     const [parcelConfig, setParcelConfig] = useState(null);
     const [ShippingLabelModalView, setShippingLabelModal] = useState(false);
-
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -63,9 +56,6 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
         icon: "💳",
         label: order.payment_method || "Unknown",
     };
-
-
-
 
     return (
         <>
@@ -412,57 +402,9 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
 
                         <div className="so-drawer-section">
                             <p className="so-drawer-section-title">🗺️ Order Progress</p>
-                            <OrderTimeline currentStatus={order.order_status} />
+                            <OrderTimeline currentStatus={order.order_status} order={order} />
                         </div>
 
-                        <div className="so-update-panel">
-                            <p className="so-drawer-section-title mb-3">⚙️ Update Order Status</p>
-
-                            <Stack direction="horizontal" gap={2} className="mb-2 flex-wrap">
-                                <select
-                                    className="so-status-select flex-fill"
-                                    value={newStatus}
-                                    onChange={(e) => setNewStatus(e.target.value)}
-                                >
-                                    {ORDER_STATUSES.map((s) => (
-                                        <option key={s.value} value={s.value}>
-                                            {s.icon} {s.label}
-                                        </option>
-                                    ))}
-                                </select>
-
-                                <button
-                                    className="so-btn-primary"
-                                    onClick={() => onStatusUpdate(order.id, newStatus)}
-                                    disabled={updating || newStatus === order.order_status}
-                                >
-                                    {updating ? "Saving…" : "Update"}
-                                </button>
-                            </Stack>
-
-                            <Stack direction="horizontal" gap={2} className="flex-wrap">
-                                <select
-                                    className="so-status-select flex-fill"
-                                    value={newPayment}
-                                    onChange={(e) => setNewPayment(e.target.value)}
-                                >
-                                    {PAYMENT_STATUSES.map((s) => (
-                                        <option key={s.value} value={s.value}>
-                                            {s.label}
-                                        </option>
-                                    ))}
-                                </select>
-
-                                <button
-                                    className="so-btn-outline"
-                                    style={{ whiteSpace: "nowrap" }}
-                                    onClick={() => onPaymentUpdate(order.id, newPayment)}
-                                    disabled={updating || newPayment === order.payment_status}
-                                >
-                                    {updating ? "Saving…" : "Pay Status"}
-                                </button>
-                            </Stack>
-                        </div>
 
                         {order.razorpay_payment_id && (
                             <div className="so-drawer-section">
@@ -505,6 +447,8 @@ export default function OrderDrawer({ order, onClose, onStatusUpdate, onPaymentU
                     setShippingLabelModal(false);
                 }}
             />
+
+      
 
         </>
     );

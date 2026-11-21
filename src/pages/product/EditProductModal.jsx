@@ -290,7 +290,7 @@ export default function EditProductModal({ show, handleClose, product, setRefres
         <Modal show={show} onHide={handleReset} size="xl" centered scrollable className="ep-modal">
             <Modal.Header closeButton>
                 <Modal.Title className="d-flex align-items-center gap-2 text-light">
-                    ✏️ Edit Product
+                    Edit Product
                     {product?.title && (
                         <span style={{ fontSize: "0.85rem", marginTop: "3px", fontWeight: 600, color: "#ffffffff" }}>
                             — {product.title.length > 40 ? product.title.slice(0, 40) + "…" : product.title}
@@ -336,7 +336,7 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                     </Field>
                                 </Col>
                                 <Col md={4}>
-                                    <Field label="Category" error={errors.category?.message}>
+                                    <Field label="Category *" error={errors.category?.message}>
                                         <Select
                                             options={categories?.map((ele) => ({
                                                 value: ele.name,
@@ -370,9 +370,9 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                     </Field>
                                 </Col>
                                 <Col md={3}>
-                                    <Field label="Brand *" error={errors.brand?.message}>
+                                    <Field label="Brand" error={errors.brand?.message}>
                                         <Form.Control className={`cp-input ${errors.brand ? "is-invalid" : ""}`} placeholder="e.g. Nike"
-                                            {...register("brand", { required: "Brand is required" })} />
+                                            {...register("brand")} />
                                     </Field>
                                 </Col>
                                 <Col xs={12}>
@@ -425,7 +425,7 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                         {...register("base_price", { required: "Base price required", min: { value: 1, message: "Must be > 0" } })} />
                                 </Col>
                                 <Col sm={6} md={4}>
-                                    <PriceInput label="MRP / Old Price (₹)" placeholder="999" {...register("old_price")} />
+                                    <PriceInput label="MRP / Old Price (₹) *" placeholder="999" {...register("old_price", { required: "Old Price is Required" })} />
                                 </Col>
                                 <Col sm={6} md={4}>
                                     <Field label="Discount">
@@ -588,7 +588,7 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                         <div className="cp-card">
                             <SectionTitle icon="🚚">Shipping & Delivery</SectionTitle>
                             <Row className="g-3">
-                                <Col sm={6} md={3}>
+                                <Col sm={6} md={4}>
                                     <Field label="Weight (kg)">
                                         <InputGroup>
                                             <Form.Control className="cp-input cp-input-inner-right" type="number" min="0" step="0.01" placeholder="0.5" {...register("weight")} />
@@ -596,28 +596,28 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                         </InputGroup>
                                     </Field>
                                 </Col>
-                                <Col sm={6} md={5}>
-                                    <Field label="Dimensions (L×W×H cm)">
+                                <Col sm={6} md={6}>
+                                    <Field label="Dimensions (L×W×H cm) *">
                                         <Row className="g-1">
-                                            <Col><Form.Control className="cp-input" type="number" min="0" placeholder="L" {...register("length")} /></Col>
-                                            <Col><Form.Control className="cp-input" type="number" min="0" placeholder="W" {...register("width")} /></Col>
-                                            <Col><Form.Control className="cp-input" type="number" min="0" placeholder="H" {...register("height")} /></Col>
+                                            <Col><Form.Control className="cp-input" type="number" min="0" placeholder="L" {...register("length", { required: "length price required" })} /></Col>
+                                            <Col><Form.Control className="cp-input" type="number" min="0" placeholder="W" {...register("width", { required: "width price required" })} /></Col>
+                                            <Col><Form.Control className="cp-input" type="number" min="0" placeholder="H" {...register("height", { required: "height price required" })} /></Col>
                                         </Row>
                                     </Field>
                                 </Col>
-                                <Col sm={6} md={3}>
+                                {/* <Col sm={6} md={3}>
                                     <Field label="Delivery Days">
                                         <InputGroup>
                                             <Form.Control className="cp-input cp-input-inner-right" type="number" min="1" placeholder="5" {...register("delivery_days")} />
                                             <InputGroup.Text className="cp-addon cp-addon-right">days</InputGroup.Text>
                                         </InputGroup>
                                     </Field>
-                                </Col>
-                                <Col sm={6} md={6}>
+                                </Col> */}
+                                {/* <Col sm={6} md={6}>
                                     <Field label="COD Available?">
                                         <Toggle value={isCod} onChange={setIsCod} />
                                     </Field>
-                                </Col>
+                                </Col> */}
                             </Row>
                         </div>
 

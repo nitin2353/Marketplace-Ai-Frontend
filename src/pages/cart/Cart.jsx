@@ -10,6 +10,7 @@ import { useAuthWrapper } from "../../helper/AuthWrapper";
 import { FMT } from "../../helper/GlobalHelper";
 import JWTService from "../../config/jwt.config";
 import orderApi from "../../api/order.api";
+import globalApi from "../../api/globalApi";
 
 
 
@@ -24,11 +25,12 @@ export default function CartPage() {
     const [removing, setRemoving] = useState(null);
     const [updatingQty, setUpdatingQty] = useState(null);
     const [isFirstOrder, setIstFirstOrder] = useState(0);
-
+    
     const searchRef = useRef();
     const navigate = useNavigate();
     const { refresh, setRefresh, coupon, setCoupon } = useAuthWrapper();
     const addToast = useCallback((msg) => toast.success(msg), []);
+
 
 
     const checkIsFirstOrder = async () => {
@@ -135,7 +137,7 @@ export default function CartPage() {
 
         if (couponDiscount !== undefined) {
             setDiscount(couponDiscount);
-            setCouponMsg({  
+            setCouponMsg({
                 type: "success",
                 text: `✅ Coupon applied! ${couponDiscount}% off`
             });
@@ -150,13 +152,13 @@ export default function CartPage() {
 
 
 
-
     const subtotal = items.reduce((s, i) => s + i.product_price * i.qty, 0);
     const saved = items.reduce((s, i) => s + Math.max(0, i.old_price - i.price) * i.qty, 0);
     const couponSave = Math.round(subtotal * discount / 100);
-    const delivery = subtotal > 0 && subtotal >= 499 ? 0 : subtotal > 0 ? 49 : 0;
+    const delivery = subtotal > 0 && subtotal >= 499 ? 0 : subtotal > 0 ? 479 : 0;
     const tax = items.reduce((sum, item) => sum + (Number(item.product_price || item.price || 0) * Number(item.qty || 0) * Number(item.tax_percentage || 0)) / 100, 0);
-    const total = subtotal - couponSave + delivery + tax;
+    // const total = subtotal - couponSave + delivery + tax;
+    const total = subtotal - couponSave + tax;
     const totalItems = items.reduce((s, i) => s + i.qty, 0);
 
     useEffect(() => {
@@ -478,7 +480,7 @@ export default function CartPage() {
                                     { label: `Subtotal (${totalItems} items)`, val: FMT(subtotal), color: "#374151" },
                                     ...(saved > 0 ? [{ label: "You Save", val: `-${FMT(saved)}`, color: "#22c55e" }] : []),
                                     ...(couponSave > 0 ? [{ label: `Coupon (${discount}% off)`, val: `-${FMT(couponSave)}`, color: "#22c55e" }] : []),
-                                    { label: "Delivery", val: delivery === 0 ? "FREE 🎉" : FMT(delivery), color: delivery === 0 ? "#22c55e" : "#374151" },
+                                    // { label: "Delivery", val: delivery === 0 ? "FREE 🎉" : FMT(delivery), color: delivery === 0 ? "#22c55e" : "#374151" },
                                 ].map(({ label, val, color }) => (
                                     <div key={label} className="d-flex justify-content-between align-items-center mb-2">
                                         <span style={{ fontSize: ".85rem", color: "#6b7280", fontWeight: 700 }}>{label}</span>
@@ -494,14 +496,14 @@ export default function CartPage() {
                                 </div>
 
                                 {/* Free delivery nudge */}
-                                {delivery > 0 && subtotal > 0 && (
+                                {/* {delivery > 0 && subtotal > 0 && (
                                     <div style={{
                                         background: "#fff8e6", borderRadius: 10, padding: "8px 12px",
                                         marginBottom: 14, fontSize: ".78rem", fontWeight: 700, color: "#92400e"
                                     }}>
                                         🚚 Add <b>{FMT(499 - subtotal)}</b> more for FREE delivery!
                                     </div>
-                                )}
+                                )} */}
 
                                 <button
                                     className="checkout-btn"
@@ -520,7 +522,7 @@ export default function CartPage() {
                                         padding: "11px", fontFamily: "Nunito", cursor: "pointer",
                                         marginTop: 10, transition: "all .15s"
                                     }}
-                                    onClick={() => navigate("/dashboard")}
+                                    onClick={() => navigate("/")}
                                 >
                                     ← Continue Shopping
                                 </button>

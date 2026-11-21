@@ -95,9 +95,9 @@ const getOrderUserSnapshot = async (orderId) => {
 };
 
 // UPDATE ORDER STATUS
-const updateOrderStatus = async (orderId, status) => {
+const updateOrderStatus = async (orderId = "", status = "", pickup_payload={}) => {
     try {
-        const response = await apiConfig.patch(`/order/${orderId}/status`, { status });
+        const response = await apiConfig.patch(`/order/${orderId}/status`, { status, ...pickup_payload });
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "Error updating order status" };

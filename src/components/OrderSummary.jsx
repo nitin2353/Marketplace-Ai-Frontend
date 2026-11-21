@@ -80,10 +80,11 @@ export default function OrderSummary({
 
             {/* Breakdown */}
             {[
-                { label: "Subtotal", val: FMT(subtotal), cls: "val" },
+                // { label: "Subtotal", val: FMT(subtotal), cls: "val" },
                 ...(saved > 0 ? [{ label: "You save", val: `-${FMT(saved)}`, cls: "save" }] : []),
                 ...(couponSave > 0 ? [{ label: `Coupon (${discount}%)`, val: `-${FMT(couponSave)}`, cls: "save" }] : []),
-                { label: "Delivery", val: delivery === 0 ? "FREE 🎉" : FMT(delivery), cls: delivery === 0 ? "free" : "val" },
+                // { label: "Delivery", val: delivery === 0 ? "FREE 🎉" : FMT(delivery), cls: delivery === 0 ? "free" : "val" },
+                // { label: "Delivery", val:  FMT(delivery), cls: delivery === 0 ? "free" : "val" },
             ].map(({ label, val, cls }) => (
                 <div key={label} className="co-summary-row">
                     <span className="label">{label}</span>
@@ -91,17 +92,17 @@ export default function OrderSummary({
                 </div>
             ))}
 
-            {delivery > 0 && subtotal > 0 && (
+            {/* {delivery > 0 && subtotal > 0 && (
                 <div className="co-delivery-nudge">
                     🚚 Add <b>{FMT(499 - subtotal)}</b> more for FREE delivery!
                 </div>
-            )}
+            )} */}
 
             <div className="co-divider" />
 
             <div className="co-total-row">
-                <span className="co-total-label">Total</span>
-                <span className="co-total-val">{FMT(total)}</span>
+                <span className="co-total-label">Sub Total</span>
+                <span className="co-total-val">{FMT(subtotal)}</span>
             </div>
 
             <div className="co-divider" />

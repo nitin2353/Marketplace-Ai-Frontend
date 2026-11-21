@@ -347,7 +347,7 @@ const OrderCard = ({ order, onCancel, cancelling, setSelectedOrder, setShowCance
                                 <p style={{ fontSize: "0.75rem", fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
                                     Order Status
                                 </p>
-                                <OrderTimeline currentStatus={status} />
+                                {/* <OrderTimeline currentStatus={status} /> */}
 
                                 {addressSnapshot && (
                                     <div style={{ marginTop: 16 }}>

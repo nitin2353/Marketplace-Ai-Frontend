@@ -97,10 +97,7 @@ function StepAddress({
 
         try {
             const response = await shiprocketApi.checkDeliveryAvailability({
-                pickup_postcode: deliveryPincode,
-                weight: 1,
-                delivery_postcode: deliveryPincode,
-                cod: 0,
+                pincode: deliveryPincode
             });
 
             console.log("Shiprocket response:", response);

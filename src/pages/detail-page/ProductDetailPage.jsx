@@ -121,24 +121,24 @@ export default function ProductDetail() {
 
 
 
-useEffect(() => {
-  const initializeProductPage = async () => {
+  useEffect(() => {
+    const initializeProductPage = async () => {
 
-    await fetchProduct();
+      await fetchProduct();
 
-    if (JWTService.isTokenAvailable()) {
-      await fetchDefaultAddress();
-    }
-  };
+      if (JWTService.isTokenAvailable()) {
+        await fetchDefaultAddress();
+      }
+    };
 
-  initializeProductPage();
+    initializeProductPage();
 
-  // These can load independently
-  fetchWishlist();
-  fetchReviews();
+    // These can load independently
+    fetchWishlist();
+    fetchReviews();
 
-  window.scrollTo(0, 0);
-}, [id]);
+    window.scrollTo(0, 0);
+  }, [id]);
 
 
 
@@ -308,9 +308,12 @@ useEffect(() => {
       const payload = {
         product_id: product.id,
         variant_id: activeVariant?.id || null,
-        quantity: qty
+        quantity: qty,
+        delhivery_pickup_address_id: product?.delhivery_pickup_address_id,
+        delhivery_pickup_code: product.delhivery_pickup_code
       };
       const res = await orderApi?.buyNow(payload);
+
       if (res.success) {
         localStorage.setItem("buyNowData", JSON.stringify(res.data));
         navigate("/dashboard/checkout?type=buy-now");
@@ -370,10 +373,7 @@ useEffect(() => {
 
     try {
       const payload = {
-        pickup_postcode: "305001",
-        weight: 1,
-        delivery_postcode: deliveryPincode,
-        cod: 0,
+        pincode: deliveryPincode
       };
       const response = await shiprocketApi.checkDeliveryAvailability(payload);
 
@@ -579,11 +579,11 @@ useEffect(() => {
                   </div>
                 </div>
               )}
-              <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 mb-3">
+              <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 mb-1">
                 {
                   JWTService.isTokenAvailable && (
                     <span
-                      className={`badge rounded-0 text-wrap text-start ${!addressChecked
+                      className={`badge rounded-0 text-wrap m-3 text-start ${!addressChecked
                         ? "bg-secondary"
                         : isDeliveryAvailable
                           ? "bg-success"

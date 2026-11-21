@@ -90,6 +90,9 @@ const Dashboard = () => {
                 acc.platformFees += Number(
                     seller.total_platform_fee || 0
                 );
+                acc.pickupCharges += Number(
+                    seller.seller_delivery_charges || 0
+                );
                 acc.totalPaid += Number(seller.total_paid_amount || 0);
                 acc.pendingBalance += Number(
                     seller.pending_balance || 0
@@ -108,6 +111,7 @@ const Dashboard = () => {
                 totalRevenue: 0,
                 totalDiscount: 0,
                 platformFees: 0,
+                pickupCharges: 0,
                 totalPaid: 0,
                 pendingBalance: 0,
                 refunds: 0,
@@ -138,7 +142,7 @@ const Dashboard = () => {
         },
         {
             title: "Platform Earnings ( - discount)",
-            value: formatCurrency(financialOverview.platformFees - financialOverview.totalDiscount),
+            value: formatCurrency(financialOverview.platformFees - financialOverview.totalDiscount + financialOverview?.pickupCharges),
             description: "Platform fees / commission",
             color: "success",
         },

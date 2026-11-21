@@ -101,7 +101,7 @@ const SellerPayments = () => {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>ShopEase - Payment Receipt</title>
+            <title>FlashiBuy - Payment Receipt</title>
             <meta charset="UTF-8" />
             <style>
                 @page {
@@ -437,7 +437,7 @@ const SellerPayments = () => {
                                                 <div className="text-success small fw-bold">Due</div>
                                             </div>
                                             <h6 className="text-muted mb-1 text-uppercase fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>Available Balance</h6>
-                                            <h3 className="fw-bold mb-0">₹{Number(summary?.available_balance || 0).toLocaleString()}</h3>
+                                            <h3 className="fw-bold mb-0">₹{Number(summary?.available_balance - summary?.settlement_amount || 0).toLocaleString()}</h3>
                                         </Card.Body>
                                     </Card>
                                 </Col>
@@ -464,6 +464,7 @@ const SellerPayments = () => {
                                                 </div>
                                                 <div className="text-danger small fw-bold">Settled</div>
                                             </div>
+                                            {console.log('summary', summary)}
                                             <h6 className="text-muted mb-1 text-uppercase fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>Settlement Amount</h6>
                                             <h3 className="fw-bold mb-0">₹{Number(summary?.settlement_amount || 0).toLocaleString()}</h3>
                                         </Card.Body>
@@ -682,9 +683,10 @@ const SellerPayments = () => {
                     {selectedTransaction && (
                         <div ref={receiptRef} className="receipt-print-area">   
                             <div className="receipt-header">
-                                <h3>ShopEase</h3>
+                                <h3>FlashiBuy</h3>
                                 <hr />
                                 <h5>Payment Receipt</h5>
+                                {console.log('selectedTransaction', selectedTransaction)}
                                 <p>
                                     Order: {selectedTransaction.order_number || "N/A"}
                                 </p>
@@ -778,6 +780,18 @@ const SellerPayments = () => {
                                         </div>
 
                                         <div className="receipt-row">
+                                            <span>Pickup Charges : </span>
+                                            <strong>
+                                                ₹{Number(
+                                                    selectedTransaction.seller_delivery_charges || 0
+                                                ).toLocaleString("en-IN", {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2
+                                                })}
+                                            </strong>
+                                        </div>
+
+                                        <div className="receipt-row">
                                             <span>Refund Amount : </span>
                                             <strong>
                                                 ₹{Number(
@@ -815,7 +829,7 @@ const SellerPayments = () => {
                             </Row>
                             <hr />
                             <div className="receipt-footer fw-bold">
-                                Thank you for using ShopEase.
+                                Thank you for using FlashiBuy.
                             </div>
                         </div>
                     )}

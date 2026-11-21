@@ -78,7 +78,7 @@ export default function CreateProduct() {
     const [isFreeDelivery, setIsFreeDelivery] = useState(false);
     const [taxInclusive, setTaxInclusive] = useState(false);
     const [categories, setCategories] = useState([]);
-    const { register,setValue, handleSubmit, watch, formState: { errors } } = useForm({
+    const { register, setValue, handleSubmit, watch, formState: { errors } } = useForm({
         defaultValues: {
             title: "", description: "", brand: "", category: "",
             base_price: "", old_price: "", stock: "",
@@ -290,7 +290,7 @@ export default function CreateProduct() {
                                             </Field>
                                         </Col>
                                         <Col md={4}>
-                                            <Field label="Category" error={errors.category?.message}>
+                                            <Field label="Category *" error={errors.category?.message}>
                                                 <Select
                                                     options={categories?.map((ele) => ({
                                                         value: ele.name,
@@ -369,16 +369,35 @@ export default function CreateProduct() {
 
                                     <Row className="g-3">
                                         <Col sm={6} md={4}>
-                                            <PriceInput label={hasVariants ? "Base / Display Price (₹) *" : "Selling Price (₹) *"}
+                                            <PriceInput
+                                                label={
+                                                    <span className="d-inline-flex align-items-center gap-1">
+                                                        <span
+                                                            title="Your payout will be calculated after deducting ₹49 fixed pickup charges and 10% marketplace commission from the selling price."
+                                                            className="text-dark"
+                                                            style={{ cursor: "help" }}
+                                                        >
+                                                            <i className="fa fa-info-circle"></i>
+                                                        </span>
+
+                                                        {hasVariants
+                                                            ? "Base / Display Price (₹) *"
+                                                            : "Selling Price (₹) *"}
+                                                    </span>
+                                                }
                                                 placeholder="499"
                                                 error={errors.base_price?.message}
                                                 className={`cp-input cp-input-inner-left ${errors.base_price ? "is-invalid" : ""}`}
-                                                {...register("base_price", { required: "Base price required", min: { value: 1, message: "Must be > 0" } })} />
+                                                {...register("base_price", {
+                                                    required: "Base price required",
+                                                    min: { value: 1, message: "Must be > 0" }
+                                                })}
+                                            />
                                         </Col>
                                         <Col sm={6} md={4}>
-                                            <PriceInput label="MRP / Old Price (₹)" placeholder="999"
+                                            <PriceInput label="MRP / Old Price (₹) *" placeholder="550"
                                                 className="cp-input cp-input-inner-left"
-                                                {...register("old_price")} />
+                                                {...register("old_price", { required: "Old Price is Required" })} />
                                         </Col>
                                         <Col sm={6} md={4}>
                                             <Field label="Discount">
@@ -465,7 +484,7 @@ export default function CreateProduct() {
                                                         <label className="cp-label">Old Price (₹)</label>
                                                         <InputGroup>
                                                             <InputGroup.Text className="cp-addon cp-addon-left">₹</InputGroup.Text>
-                                                            <Form.Control className="cp-input cp-input-inner-left" type="number" min="0" placeholder="999"
+                                                            <Form.Control className="cp-input cp-input-inner-left" type="number" min="0" placeholder="550"
                                                                 value={v.old_price} onChange={e => updateVariant(i, "old_price", e.target.value)} />
                                                         </InputGroup>
                                                     </Col>
@@ -542,38 +561,38 @@ export default function CreateProduct() {
                                 <div className="cp-card">
                                     <SectionTitle icon="🚚">Step {hasVariants ? "6" : "5"} — Shipping & Delivery</SectionTitle>
                                     <Row className="g-3">
-                                        <Col sm={6} md={3}>
-                                            <Field label="Weight (kg)">
+                                        <Col sm={6} md={4}>
+                                            <Field label="Weight (kg) *">
                                                 <InputGroup>
-                                                    <Form.Control className="cp-input cp-input-inner-right" type="number" min="0" step="0.01" placeholder="0.5" {...register("weight")} />
+                                                    <Form.Control className="cp-input cp-input-inner-right" type="number" min="0" step="0.01" placeholder="0.5" {...register("weight", { required: "weight required" })} />
                                                     <InputGroup.Text className="cp-addon cp-addon-right">kg</InputGroup.Text>
                                                 </InputGroup>
                                             </Field>
                                         </Col>
-                                        <Col sm={6} md={6}>
-                                            <Field label="Dimensions (L×W×H cm)">
+                                        <Col sm={6} md={8}>
+                                            <Field label="Dimensions (L×W×H cm) *">
                                                 <Row className="g-1">
-                                                    <Col><Form.Control className="cp-input" type="number" min="0" placeholder="L" {...register("length")} /></Col>
-                                                    <Col><Form.Control className="cp-input" type="number" min="0" placeholder="W" {...register("width")} /></Col>
-                                                    <Col><Form.Control className="cp-input" type="number" min="0" placeholder="H" {...register("height")} /></Col>
+                                                    <Col><Form.Control className="cp-input" type="number" min="0" placeholder="L" {...register("length", { required: "length price required" })} /></Col>
+                                                    <Col><Form.Control className="cp-input" type="number" min="0" placeholder="W" {...register("width", { required: "width price required" })} /></Col>
+                                                    <Col><Form.Control className="cp-input" type="number" min="0" placeholder="H" {...register("height", { required: "height price required" })} /></Col>
                                                 </Row>
                                             </Field>
                                         </Col>
-                                        <Col sm={6} md={3}>
+                                        {/* <Col sm={6} md={3}>
                                             <Field label="Delivery Days">
                                                 <InputGroup>
                                                     <Form.Control className="cp-input cp-input-inner-right" type="number" min="1" placeholder="5" {...register("delivery_days")} />
                                                     <InputGroup.Text className="cp-addon cp-addon-right">days</InputGroup.Text>
                                                 </InputGroup>
                                             </Field>
-                                        </Col>
-                                        <Row className="g-3 mt-3">
+                                        </Col> */}
+                                        {/* <Row className="g-3 mt-3">
                                             <Col sm={6} md={6}>
                                                 <Field label="COD Available?">
                                                     <Toggle value={isCod} onChange={setIsCod} />
                                                 </Field>
                                             </Col>
-                                        </Row>
+                                        </Row> */}
                                     </Row>
                                 </div>
 

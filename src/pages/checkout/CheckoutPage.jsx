@@ -25,13 +25,14 @@ import { COUPONS } from '../../helper/GlobalHelper'
 const STEPS = ["Address", "Payment", "Review", "Done"];
 
 
-const calcTotals = (cart, discount) => {
+const calcTotals = (cart, discount, totalDeliveryAmount) => {
     const subtotal = cart.reduce((s, i) => s + Number(i.product_price) * i.qty, 0);
     const saved = cart.reduce((s, i) => s + Math.max(0, Number(i.old_price || 0) - Number(i.price)) * i.qty, 0);
     const couponSave = (subtotal * discount / 100);
-    const delivery = subtotal >= 499 ? 0 : 49;
+    // const delivery = subtotal >= 499 ? 0 : 479;
+    const delivery = (totalDeliveryAmount < 0 ) ? 49 : totalDeliveryAmount;
     const tax_amount = cart.reduce((s, i) => s + (Number(i.product_price) * i.qty) * (Number(i.tax_percentage || 0) / 100), 0);
-    const total = subtotal - couponSave + delivery + tax_amount;
+    const total = subtotal - couponSave + delivery?.shippingCharge + tax_amount;
     return { subtotal, saved, couponSave, delivery, tax_amount, total };
 };
 
@@ -68,7 +69,7 @@ export default function CheckoutPage() {
 
     const [addresses, setAddresses] = useState([]);
     const [selectedAddr, setSelectedAddr] = useState(null);
-
+    const [totalDeliveryAmount, setTotalDeliveryAmount] = useState({})
 
     const [paymentMethod, setPayment] = useState("");
 
@@ -82,10 +83,10 @@ export default function CheckoutPage() {
     const [isFirstOrder, setIstFirstOrder] = useState(0);
 
     const { coupon, setCoupon } = useAuthWrapper();
-    
 
 
-    const { subtotal, saved, couponSave, delivery, tax_amount, total } = calcTotals(cart, discount);
+
+    const { subtotal, saved, couponSave, delivery, tax_amount, total } = calcTotals(cart, discount, totalDeliveryAmount);
 
     const checkIsFirstOrder = async () => {
         try {
@@ -98,25 +99,31 @@ export default function CheckoutPage() {
     }
 
 
-
-
     const fetchCart = useCallback(async () => {
         const urlParams = new URLSearchParams(window.location.search);
         const type = urlParams.get("type");
-
         if (type === "buy-now") {
             const data = JSON.parse(localStorage.getItem("buyNowData"));
             if (data) {
                 setCart(data.items?.map(i => ({
                     product_id: i.product_id,
+                    seller_id: i.seller_id,
+                    pincode: i.pincode,
+                    delhivery_pickup_address_id: i.delhivery_pickup_address_id,
+                    delhivery_pickup_code: i.delhivery_pickup_code,
                     image_url: i.image_url,
                     variant_id: i.variant_id,
                     title: i.title,
                     product_price: i.price,
                     qty: i.quantity,
-                    price: i.price, // For consistency
+                    price: i.price,
                     tax_percentage: Number(i.tax_percentage) || 0,
-                    total: i.total
+                    total: i.total,
+                    height: i.height,
+                    width: i.width,
+                    length: i.length,
+                    weight: i.weight,
+
                 })));
                 setIsBuyNow(true);
                 setCartLoading(false);
@@ -129,6 +136,7 @@ export default function CheckoutPage() {
             const { data } = await cartApi.getAllCart();
             const rows = data?.success && Array.isArray(data.data) ? data.data : [];
             setCart(rows.map(GlobalHelper.API_FIELDS_MAP["cart"]));
+            // fetchDeliveryPrice(rows.map(GlobalHelper.API_FIELDS_MAP["cart"]));
         } catch (err) {
             console.error("Cart fetch error:", err);
             toast.error("Failed to load cart items.");
@@ -184,7 +192,6 @@ export default function CheckoutPage() {
     const applyCoupon = useCallback(() => {
         const code = coupon.trim().toUpperCase();
 
-        // WELCOME10 is only valid for first-time customers
         if (code === "WELCOME10" && isFirstOrder !== 0) {
             setDiscount(0);
             setCouponMsg({
@@ -226,6 +233,8 @@ export default function CheckoutPage() {
             cart_id: item.id,
             quantity: item.qty,
             price: item.price,
+            delhivery_pickup_address_id: item.delhivery_pickup_address_id,
+            delhivery_pickup_code: item.delhivery_pickup_code,
             variant_id: item.variant_id || null,
         }));
 
@@ -260,7 +269,7 @@ export default function CheckoutPage() {
                 total_amount: total,
                 subtotal_amount: subtotal,
                 discount_amount: couponSave,
-                delivery_charge: delivery,
+                delivery_charge: delivery?.shippingCharge,
                 notes: selectedAddr?.instructions || null,
             };
 
@@ -291,7 +300,7 @@ export default function CheckoutPage() {
             const createOrderPayload = {
                 address_id: selectedAddr?.id,
                 payment_method: paymentMethod,
-                delivery_charge: delivery,
+                delivery_charge: delivery?.shippingCharge,
                 coupon_code: discount > 0 ? coupon.trim() : null,
                 discount_percentage: discount,
                 subtotal_amount: subtotal,
@@ -324,6 +333,7 @@ export default function CheckoutPage() {
 
                         // STEP 3: Verify payment and create final order
                         const verifyPayload = {
+                            ...selectedAddr,
                             address_id: selectedAddr?.id,
                             payment_method: paymentMethod,
                             payment_id: paymentData.razorpay_payment_id,
@@ -478,6 +488,7 @@ export default function CheckoutPage() {
                                             onCouponApply={applyCoupon}
                                             onBack={() => setStep(1)}
                                             onPlace={placeOrder}
+                                            setTotalDeliveryAmount={setTotalDeliveryAmount}
                                         />
                                     )}
 

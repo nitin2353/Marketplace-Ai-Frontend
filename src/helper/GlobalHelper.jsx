@@ -24,6 +24,8 @@ export const TABLE_HEADERS = [
 ];
 
 
+
+
 const API_FIELDS_MAP = {
 
     products: (p) => {
@@ -103,12 +105,15 @@ const API_FIELDS_MAP = {
     cart: (row) => ({
         id: row.cart_id,
         product_id: row.product_id,
+        seller_id: row.seller_id,
         title: row.title,
         brand: row.brand,
         price: parseFloat(row.amount),
         old_price: parseFloat(row.old_price),
         discount: row.discount,
+        pincode: row.pincode,
         qty: row.total_quantity,
+        variant_id: row.variant_id,
         stock: Number(row.available_stock) || Number(row.product_avl_stock) || 0,
         image_url: Array.isArray(row.image_url) ? JSON.stringify(row.image_url[0]) : JSON.stringify(row.image_url),
         color: row.color ? row.color.split(",")[0].trim() : null,
@@ -116,10 +121,16 @@ const API_FIELDS_MAP = {
         tag: row.tag ? row.tag.split(",").map(t => t.trim()) : [],
         rating: row.rating,
         reviews: row.reviews,
+        height: row.height,
+        width: row.width,
+        weight: row.weight,
+        length: row.length,
         size: row.size,
         product_price: row.product_price,
         is_return: row.is_return,
         is_replace: row.is_replace,
+        delhivery_pickup_address_id: row.delhivery_pickup_address_id,
+        delhivery_pickup_code: row.delhivery_pickup_code,
         return_replace_duration: row.return_replace_duration,
         tax_percentage: Number(row.tax_percentage) || 0,
     }),
@@ -201,9 +212,25 @@ export const FORMATED_DATE = (date) => {
 
 // Only Time: "10:30:00"
 export const FORMATED_TIME = (date) => {
-    const pad = (n) => String(n).padStart(2, '0');
+    if (!date) return "";
+
+    if (typeof date === "string" && /^\d{2}:\d{2}:\d{2}/.test(date)) {
+        const match = date.match(/^(\d{2}):(\d{2}):(\d{2})/);
+        if (!match) return "";
+
+        return `${match[1]}:${match[2]}`;
+    }
+
     const d = new Date(date);
-    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+    if (isNaN(d.getTime())) return "";
+
+    return d.toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Kolkata"
+    });
 };
 
 export const METHODS = [
@@ -276,7 +303,53 @@ export const STATUS_META = {
     payment_failed: { icon: "⚠️", label: "Payment Failed" },
 };
 
-export const TIMELINE_STEPS = ["placed", "confirmed", "processing", "shipped", "delivered"];
+
+export const TIMELINE_STEPS = [
+    "confirmed",
+    "processing",
+    "manifested",
+    "picked_up",
+    "in_transit",
+    "at_destination_hub",
+    "out_for_delivery",
+    "delivered",
+];
+
+export const TIMELINE_STATUS_META = {
+    confirmed: {
+        label: "Confirmed",
+        icon: "fa-check-circle",
+    },
+    processing: {
+        label: "Processing",
+        icon: "fa-box",
+    },
+    manifested: {
+        label: "Manifested",
+        icon: "fa-file-alt",
+    },
+    picked_up: {
+        label: "Picked Up",
+        icon: "fa-truck-loading",
+    },
+    in_transit: {
+        label: "In Transit",
+        icon: "fa-shipping-fast",
+    },
+    at_destination_hub: {
+        label: "At Destination Hub",
+        icon: "fa-warehouse",
+    },
+    out_for_delivery: {
+        label: "Out for Delivery",
+        icon: "fa-truck",
+    },
+    delivered: {
+        label: "Delivered",
+        icon: "fa-check-double",
+    },
+};
+
 
 
 export const PAYMENT_METHOD_LABELS = {
@@ -329,7 +402,7 @@ export const LogoutTab = () => {
 
 const checkAddressAvilability = async (data) => {
     try {
-        const {data} = await shiprocketApi?.checkDeliveryAvailability(data);
+        const { data } = await shiprocketApi?.checkDeliveryAvailability(data);
         return data;
     } catch (error) {
         console.log(error);

@@ -12,6 +12,24 @@ const getCategories = async (data) => {
   }
 };
 
+
+const getPickupScheduledDate = async () => {
+  try {
+    const response = await apiConfig.get(`/global/pickup-scheduled/date`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || {
+      message: "Something went wrong",
+    };
+  }
+};
+
+
+
+
+
+
 export default {
-    getCategories   
+    getCategories,
+    getPickupScheduledDate
 }

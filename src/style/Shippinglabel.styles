@@ -86,7 +86,7 @@ export default StyleSheet.create({
         paddingLeft: 10,
         paddingVertical: 0,
         alignItems: "center",
-        gap: 22,
+        gap: 15,
     },
 
     addressRow: {

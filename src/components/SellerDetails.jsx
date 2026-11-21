@@ -472,6 +472,11 @@ const SellerDetails = () => {
                                 render: (value) => formatCurrency(value),
                             },
                             {
+                                key: "seller_delivery_charges",
+                                label: "Pickup Fee",
+                                render: (value) => formatCurrency(value),
+                            },
+                            {
                                 key: "refund_amount",
                                 label: "Refund Amount",
                                 render: (value) => formatCurrency(value),

@@ -6,12 +6,16 @@ import orderApi from "../../api/order.api";
 import { useAuthWrapper } from "../../helper/AuthWrapper";
 import JWTService from "../../config/jwt.config";
 import "./SellerOrders.css";
-import { FMT, FMT_DATE_TIME } from "../../helper/GlobalHelper";
+import { FMT, FMT_DATE_TIME, FORMATED_TIME } from "../../helper/GlobalHelper";
 import OrderDrawer from "../../components/OrderDrawer";
-import { PAYMENT_METHOD_META } from "../../helper/Constraints";
+import { PAYMENT_METHOD_META, ORDER_STATUSES } from "../../helper/Constraints";
 import PayBadge from "../../components/PayBadge";
 import SellerSidebar from "../../components/SellerSidebar.jsx";
 import SellerNavbar from "../../components/SellerNavbar.jsx";
+import ScheduledPickupModal from "../../components/ScheduledPickupModal";
+import { FaInfoCircle } from "react-icons/fa";
+import globalApi from "../../api/globalApi.jsx";
+
 
 const fmt = FMT;
 
@@ -26,15 +30,7 @@ const fmtDate = (d) =>
 
 const PER_PAGE = 15;
 
-const ORDER_STATUSES = [
-    { value: "placed", label: "Placed", icon: "📋" },
-    { value: "confirmed", label: "Confirmed", icon: "✅" },
-    { value: "processing", label: "Processing", icon: "⚙️" },
-    { value: "shipped", label: "Shipped", icon: "🚚" },
-    { value: "delivered", label: "Delivered", icon: "📦" },
-    { value: "cancelled", label: "Cancelled", icon: "❌" },
-    { value: "payment_failed", label: "Payment Failed", icon: "⚠️" },
-];
+
 
 const PAYMENT_STATUSES = [
     { value: "pending", label: "Pending" },
@@ -146,6 +142,9 @@ export default function SellerOrders() {
     const [updating, setUpdating] = useState(false);
     const [bulkWorking, setBulkWorking] = useState(false);
     const [confirm, setConfirm] = useState(null);
+    const [showPickupModal, setShowPickupModal] = useState(false);
+    const [scheduledDate, setScheduledDate] = useState([]);
+    const [showScheduledPickups, setShowScheduledPickups] = useState(false);
 
     // ── Search debounce ──
     useEffect(() => {
@@ -157,6 +156,7 @@ export default function SellerOrders() {
     const fetchOrders = useCallback(async () => {
         setLoading(true);
         setError(null);
+        fetchPickupScheduledDate()
         try {
             const userData = JWTService.decodeTokenDetails?.() || {};
             const sellerId = userData?.id || userData?.user_id || user?.id;
@@ -199,10 +199,10 @@ export default function SellerOrders() {
     );
 
     // ── Status / payment updates ──
-    const handleStatusUpdate = useCallback(async (orderId, newStatus) => {
+    const handleStatusUpdate = useCallback(async (orderId, newStatus, pickup_payload) => {
         setUpdating(true);
         try {
-            const data = await orderApi.updateOrderStatus(orderId, newStatus);
+            const data = await orderApi.updateOrderStatus(orderId, newStatus, pickup_payload);
             if (!data?.success) throw new Error(data?.message || "Update failed");
             const patch = (o) => (o.id === orderId ? { ...o, order_status: newStatus } : o);
             setOrders((prev) => prev.map(patch));
@@ -246,33 +246,19 @@ export default function SellerOrders() {
             setBulkWorking(true);
             const ids = Array.from(selected);
             try {
-                const results = await Promise.allSettled(
-                    ids.map((id) => orderApi.updateOrderStatus(id, newStatus))
-                );
-                const successIds = [];
-                let fail = 0;
-                results.forEach((r, idx) => {
-                    r.status === "fulfilled" && r.value?.success
-                        ? successIds.push(ids[idx])
-                        : fail++;
-                });
-                if (successIds.length) {
-                    setOrders((prev) =>
-                        prev.map((o) => successIds.includes(o.id) ? { ...o, order_status: newStatus } : o)
-                    );
-                    setOrderDetailsMap((prev) => {
-                        const next = { ...prev };
-                        successIds.forEach((id) => {
-                            if (next[id]) next[id] = { ...next[id], order_status: newStatus };
-                        });
-                        return next;
-                    });
-                    setDrawerOrder((prev) =>
-                        prev && successIds.includes(prev.id) ? { ...prev, order_status: newStatus } : prev
-                    );
-                    toast.success(`${successIds.length} order${successIds.length > 1 ? "s" : ""} updated to "${newStatus}"`);
+
+                console.log(ids, newStatus)
+
+                const pickup_payload = {
+                    order_ids: ids,
+                    status: newStatus
+                };
+
+                const results = await orderApi.updateOrderStatus(null, null, pickup_payload)
+
+                if (results.success) {
+                    toast.success(`Status Update Successfuly`);
                 }
-                if (fail) toast.error(`${fail} order${fail > 1 ? "s" : ""} failed to update.`);
                 setSelected(new Set());
                 setConfirm(null);
             } catch {
@@ -428,6 +414,89 @@ export default function SellerOrders() {
         setPaymentFilter("all"); setDateSort("desc"); setPage(1);
     };
 
+    const handleScheduledPickupSubmit = async (pickupPayload) => {
+        if (!selected.size) return;
+
+        setBulkWorking(true);
+
+        try {
+            const orderIds = Array.from(selected);
+
+            const pickup_payload = {
+                order_ids: orderIds,
+                status: "processing",
+                ...pickupPayload
+            };
+
+            console.log('payload', pickup_payload)
+
+            // One API call for the entire selected batch
+            const response = await orderApi.updateOrderStatus(null, null, pickup_payload);
+
+            if (!response?.success) {
+                throw new Error(response?.message || "Pickup request failed");
+            }
+
+            setOrders((prev) =>
+                prev.map((order) =>
+                    orderIds.includes(order.id)
+                        ? { ...order, order_status: "processing" }
+                        : order
+                )
+            );
+
+            setOrderDetailsMap((prev) => {
+                const next = { ...prev };
+
+                orderIds.forEach((id) => {
+                    if (next[id]) {
+                        next[id] = {
+                            ...next[id],
+                            order_status: "processing"
+                        };
+                    }
+                });
+
+                return next;
+            });
+
+            setDrawerOrder((prev) =>
+                prev && orderIds.includes(prev.id)
+                    ? { ...prev, order_status: "processing" }
+                    : prev
+            );
+
+            setSelected(new Set());
+            setShowPickupModal(false);
+
+            toast.success("Pickup request created successfully!");
+
+        } catch (error) {
+            toast.error(
+                error?.response?.data?.message ||
+                error.message ||
+                "Pickup request failed"
+            );
+        } finally {
+            setBulkWorking(false);
+        }
+    };
+
+    const fetchPickupScheduledDate = async () => {
+        try {
+            const { data } = await globalApi?.getPickupScheduledDate();
+            setScheduledDate(data?.filter((date) => ({ "scheduled_date": date.scheduled_date, "parcel_qty": date?.parcel_qty })) || [])
+        } catch (error) {
+            toast.error(
+                error?.response?.data?.message ||
+                error.message ||
+                "Failed to Fetch Date"
+            );
+        }
+    }
+
+
+
     return (
         <>
             <SellerSidebar />
@@ -445,28 +514,181 @@ export default function SellerOrders() {
                 <SellerNavbar />
 
 
-
-                <div style={{ backgroundColor: "#3549ff" }} className="so-topbar d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
+                <div
+                    style={{ backgroundColor: "#3549ff" }}
+                    className="so-topbar d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3"
+                >
+                    {/* Title */}
                     <Stack direction="horizontal" gap={2} className="align-items-center">
-                        <span className="so-topbar-title">🏪 Orders Management</span>
+                        <span className="so-topbar-title">
+                            🏪 Orders Management
+                        </span>
                     </Stack>
-                    <div className="so-topbar-right d-flex align-items-center gap-3 w-100 w-sm-auto justify-content-between justify-content-sm-end">
+
+                    {/* Scheduled Pickups Accordion */}
+                    <div className="position-relative">
+                        <button
+                            type="button"
+                            onClick={() => setShowScheduledPickups((prev) => !prev)}
+                            className="d-flex align-items-center gap-2 px-3 py-2 rounded-3 border"
+                            style={{
+                                background: "rgba(255,255,255,0.15)",
+                                borderColor: "rgba(255,255,255,0.3)",
+                                color: "#fff",
+                                fontSize: "0.85rem",
+                                fontWeight: 600,
+                                width: "100%",
+                                justifyContent: "space-between",
+                                minWidth: "190px"
+                            }}
+                        >
+                            <span className="d-flex align-items-center gap-2">
+                                📅 Scheduled Pickups
+                                <span
+                                    className="rounded-pill px-2 py-1"
+                                    style={{
+                                        background: "rgba(255,255,255,0.2)",
+                                        fontSize: "0.72rem"
+                                    }}
+                                >
+                                    {scheduledDate?.length || 0}
+                                </span>
+                            </span>
+
+                            <span
+                                style={{
+                                    transition: "transform 0.2s",
+                                    transform: showScheduledPickups
+                                        ? "rotate(180deg)"
+                                        : "rotate(0deg)"
+                                }}
+                            >
+                                ▼
+                            </span>
+                        </button>
+
+                        {showScheduledPickups && (
+                            <>
+                                {/* Outside click overlay */}
+                                <div
+                                    onClick={() => setShowScheduledPickups(false)}
+                                    style={{
+                                        position: "fixed",
+                                        inset: 0,
+                                        zIndex: 1040
+                                    }}
+                                />
+
+                                {/* Popup */}
+                                <div
+                                    className="position-absolute rounded-3 shadow-lg p-3"
+                                    style={{
+                                        top: "calc(100% + 10px)",
+                                        left: 0,
+                                        width: "min(320px, calc(100vw - 32px))",
+                                        background: "#fff",
+                                        color: "#212529",
+                                        zIndex: 1050,
+                                        maxHeight: "300px",
+                                        overflowY: "auto"
+                                    }}
+                                >
+                                    <div className="d-flex justify-content-between align-items-center mb-3">
+                                        <strong style={{ fontSize: "0.9rem" }}>
+                                            Upcoming Pickups
+                                        </strong>
+
+                                        <span
+                                            className="text-muted"
+                                            style={{ fontSize: "0.75rem" }}
+                                        >
+                                            {scheduledDate?.length || 0} Scheduled
+                                        </span>
+                                    </div>
+                                    {console.log('scheduledDate', scheduledDate)}
+                                    {scheduledDate?.length > 0 ? (
+                                        <Stack gap={2}>
+                                            {scheduledDate.map((item) => (
+                                                <div
+                                                    key={item.id}
+                                                    className="d-flex justify-content-between align-items-center p-3 rounded-3"
+                                                    style={{
+                                                        background: "#f5f7ff",
+                                                        border: "1px solid #e5e9ff"
+                                                    }}
+                                                >
+                                                    <div className="d-flex flex-column gap-1">
+                                                        <span
+                                                            className="fw-semibold"
+                                                            style={{ fontSize: "0.85rem" }}
+                                                        >
+                                                            {new Date(item.scheduled_date).toLocaleDateString(
+                                                                "en-IN",
+                                                                {
+                                                                    day: "2-digit",
+                                                                    month: "short",
+                                                                    year: "numeric"
+                                                                }
+                                                            )}
+                                                        </span>
+
+                                                        <span
+                                                            className="text-muted"
+                                                            style={{ fontSize: "0.72rem" }}
+                                                        >
+                                                            Pickup scheduled
+                                                        </span>
+                                                    </div>
+
+                                                    <span
+                                                        className="rounded-pill px-3 py-2 fw-semibold"
+                                                        style={{
+                                                            background: "#e5eaff",
+                                                            color: "#3549ff",
+                                                            fontSize: "0.78rem",
+                                                            whiteSpace: "nowrap"
+                                                        }}
+                                                    >
+                                                        {FORMATED_TIME(item.pickup_time)}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </Stack>
+                                    ) : (
+                                        <div className="text-center py-4">
+                                            <div style={{ fontSize: "2rem" }}>📦</div>
+                                            <div className="fw-semibold mt-2">
+                                                No Scheduled Pickups
+                                            </div>
+                                            <small className="text-muted">
+                                                Your upcoming pickups will appear here.
+                                            </small>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Right Actions */}
+                    <div className="so-topbar-right d-flex align-items-center gap-3 w-100 w-lg-auto justify-content-between justify-content-lg-end">
                         <span
                             style={{
                                 color: "rgba(255,255,255,.8)",
                                 fontSize: "0.8rem",
-                                fontWeight: 700,
+                                fontWeight: 700
                             }}
                         >
                             {orders.length} total orders
                         </span>
+
                         <button
                             className="so-btn-outline"
                             style={{
                                 fontSize: "0.78rem",
                                 padding: "6px 14px",
                                 borderColor: "rgba(255,255,255,.4)",
-                                color: "#fff",
+                                color: "#fff"
                             }}
                             onClick={fetchOrders}
                         >
@@ -474,6 +696,7 @@ export default function SellerOrders() {
                         </button>
                     </div>
                 </div>
+
 
                 {/* ── PAGE CONTENT ────────────────────────────────────────── */}
                 <div className="py-4 px-4" style={{ flex: 1 }}>
@@ -560,6 +783,7 @@ export default function SellerOrders() {
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
                             >
+
                                 <option value="all">Statuses</option>
                                 {ORDER_STATUSES.map((s) => (
                                     <option key={s.value} value={s.value}>
@@ -604,23 +828,29 @@ export default function SellerOrders() {
                     {/* Bulk bar */}
                     {selected.size > 0 && (
                         <div className="so-bulk-bar" style={{ background: "#3549ffe5" }}>
-                            <span className="so-bulk-label">
+                            <span className="so-bulk-label mt-2">
                                 {selected.size} order{selected.size > 1 ? "s" : ""} selected
+                                <span title="Order status cannot be changed after submitting a pickup request." className="mb-2 float-end d-flex" style={{ cursor: 'pointer', fontSize: '22px' }}><FaInfoCircle /></span>
                             </span>
-                            {["confirmed", "processing", "shipped", "delivered"].map((status) => (
+                            {ORDER_STATUSES.map((status) => (
+                                status?.bulk_visible &&
                                 <button
-                                    key={status}
+                                    key={status?.value}
                                     className="so-bulk-btn"
                                     disabled={bulkWorking}
-                                    onClick={() =>
+                                    onClick={() => {
+                                        if (status.value === "processing") {
+                                            setShowPickupModal(true);
+                                            return;
+                                        }
+
                                         setConfirm({
-                                            message: `Mark ${selected.size} order${selected.size > 1 ? "s" : ""} as "${status}"?`,
-                                            onConfirm: () => bulkUpdateStatus(status),
-                                        })
-                                    }
+                                            message: `Mark ${selected.size} orders as ${status.value}?`,
+                                            onConfirm: () => bulkUpdateStatus(status.value),
+                                        });
+                                    }}
                                 >
-                                    {ORDER_STATUSES.find((s) => s.value === status)?.icon}{" "}
-                                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                                    {status.label + " " + status?.icon}
                                 </button>
                             ))}
                             <button
@@ -824,21 +1054,16 @@ export default function SellerOrders() {
                                                     </p>
                                                 </td>
                                                 <td onClick={(e) => e.stopPropagation()}>
-                                                    <select
-                                                        className="so-status-select"
-                                                        value={order.order_status || "placed"}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        onChange={(e) => {
-                                                            e.stopPropagation();
-                                                            handleStatusUpdate(order.id, e.target.value);
+                                                    <p
+                                                        style={{
+                                                            fontSize: "0.88rem",
+                                                            fontWeight: 700,
+                                                            color: "#374151",
+                                                            marginBottom: 0,
                                                         }}
                                                     >
-                                                        {ORDER_STATUSES.map((s) => (
-                                                            <option key={s.value} value={s.value}>
-                                                                {s.icon} {s.label}
-                                                            </option>
-                                                        ))}
-                                                    </select>
+                                                        {order.order_status == 'processing' ? '📅 Pickup Scheduled' : ORDER_STATUSES.find(item => item.value === order.order_status)?.icon + " " + ORDER_STATUSES.find(item => item.value === order.order_status)?.label}
+                                                    </p>
                                                 </td>
                                                 <td style={{ whiteSpace: "nowrap" }}>
                                                     <p
@@ -940,6 +1165,13 @@ export default function SellerOrders() {
                     loading={bulkWorking}
                 />
             )}
+            <ScheduledPickupModal
+                show={showPickupModal}
+                onClose={() => setShowPickupModal(false)}
+                onSubmit={handleScheduledPickupSubmit}
+                selectedCount={selected.size}
+                loading={bulkWorking}
+            />
         </>
     );
 }

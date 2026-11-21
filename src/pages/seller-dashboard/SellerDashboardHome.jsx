@@ -72,7 +72,7 @@ export default function SellerDashboardHome() {
   const [loading, setLoading] = useState(true);
   const [chartLoading, setChartLoading] = useState(true);
   const [period, setPeriod] = useState("monthly");
-  const [isPickupServiceable, setIsPickupServiceable] = useState(false);
+  const [isPickupServiceable, setIsPickupServiceable] = useState(true);
 
   // ── Real chart data state ──
   const [monthlyChartData, setMonthlyChartData] = useState(
@@ -225,6 +225,7 @@ export default function SellerDashboardHome() {
 
       } catch (err) {
         console.error(err);
+        console.log('err', err)
         toast.error("Failed to load chart data");
       } finally {
         setChartLoading(false);
