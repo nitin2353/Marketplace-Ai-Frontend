@@ -127,7 +127,7 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                                             <Col key={i} className="item-row d-flex flex-column flex-md-row gap-3 align-items-md-center p-1  rounded-3 hover-bg-light border border-light border-md-0 mb-2 mb-md-0" onClick={() => navigate(`/product/${item.product_id}`)}>
                                                 <img src={item.product_image_url?.split(',')[0].replace(/[{}"\\]/g, "") || `https://placehold.co/100?text=Product`} className="item-img" alt="item" />
                                                 <div className="flex-grow-1 min-w-0" style={{marginTop : "-30px"}}>
-                                                    <div className="text-muted m-0 p-0">
+                                                    <div className="text-muted m-0 mt-5 p-0">
                                                         Qty: {item.quantity} • {FMT(item.unit_price)} each
                                                     {item.variant_size && (
                                                         <>
@@ -145,10 +145,10 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                                                         </>
                                                     )}
                                                     </div>
-                                                    <div className="fw-bold text-truncate" style={{ color: "#0046b7" }}>{item.product_title}</div>
+                                                    <div className="fw-bold text-truncate mt-0" style={{ color: "#0046b7" }}>{item.product_title}</div>
                                                 </div>
                                             </Col>
-                                            <Col className="d-flex float-end align-item-center text-align-center gap-2 mt-2 mt-md-0 justify-content-md-end" style={{ "height": "40px" }}>
+                                            <Col className="d-flex float-end align-item-center text-align-center gap-2 mt-md-0 justify-content-md-end" style={{ "height": "40px" }}>
                                                 {isDelivered && (
                                                     <>
                                                         <RBButton
