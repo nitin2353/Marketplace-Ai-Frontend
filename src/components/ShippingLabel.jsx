@@ -130,8 +130,6 @@ const generateShipmentLabels = (order = {}) => {
         ? order.items
         : [];
 
-    console.log("order", order);
-
     let parcels = [];
 
     // 1. Use parcel selections from ShippingLabelModal.
@@ -697,13 +695,10 @@ const ShippingParcelLabel = ({
 
 const ShippingLabel = ({ order = {} }) => {
     const shipmentLabels = generateShipmentLabels(order);
-    console.log('shipmentLabels', shipmentLabels)
     const pages = chunkArray(
         shipmentLabels,
         LABELS_PER_PAGE
     );
-    console.log('pages', pages)
-
     return (
         <Document>
             {pages.length > 0 ? (

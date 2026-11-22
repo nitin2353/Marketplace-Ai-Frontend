@@ -377,11 +377,9 @@ export default function ProductDetail() {
       };
       const response = await shiprocketApi.checkDeliveryAvailability(payload);
 
-      console.log("Delivery availability response:", response);
 
       // Handle common API response formats.
       const result = response;
-      console.log('result', result)
       const availability = result?.available;
 
       if (typeof availability !== "boolean") {

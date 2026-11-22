@@ -31,7 +31,6 @@ export default function ProtectedRoute({
     try {
         decodedToken = JWTService.decodeTokenDetails(token);
 
-        console.log("location.href",location.pathname)
         if(decodedToken.role == 'admin' && location.pathname == '/auth/login'){
             return <Navigate to="/admin/login" replace />
         }

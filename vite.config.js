@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
@@ -9,12 +10,17 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
 
+      // Disable service worker in development
       devOptions: {
         enabled: false,
       },
 
+      // Production service worker configuration
       workbox: {
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
       },
 
       manifest: {
@@ -26,6 +32,7 @@ export default defineConfig({
         display: "standalone",
         start_url: "/",
         scope: "/",
+
         icons: [
           {
             src: "/logo-image.png",
@@ -46,5 +53,6 @@ export default defineConfig({
 
   build: {
     outDir: "build",
+    emptyOutDir: true,
   },
 });

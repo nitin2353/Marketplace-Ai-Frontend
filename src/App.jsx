@@ -90,7 +90,7 @@ const App = () => {
 
           <Route path={ROUTE.POLICY} element={ <TermsAndConditions  /> } />
 
-          {/* <Route path={ROUTE.SELLER_RETURNS} element={<ProtectedRoute moduleName="returns"><SellerReturns /></ProtectedRoute>} /> */}
+          {/* <Route path={ROUTE.SELLER_RETURNS} element={<ProtectedRoute moduleName="returns"><SellerReturns /></ProtectedRoute>} /> */}helper
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>

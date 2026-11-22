@@ -383,15 +383,6 @@ export default function StepReview({
                     });
                 }
 
-                // Optional debugging
-                console.log("Shipping Calculation:", {
-                    totalQuantity,
-                    sellerCount: shippingPayload.length,
-                    sellerPayload: shippingPayload,
-                    shippingResponses,
-                    totalShipping,
-                    finalShippingCharge
-                });
 
             } catch (error) {
                 if (!isCancelled) {

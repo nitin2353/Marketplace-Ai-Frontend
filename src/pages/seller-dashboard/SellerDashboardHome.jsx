@@ -225,7 +225,6 @@ export default function SellerDashboardHome() {
 
       } catch (err) {
         console.error(err);
-        console.log('err', err)
         toast.error("Failed to load chart data");
       } finally {
         setChartLoading(false);
@@ -254,7 +253,6 @@ export default function SellerDashboardHome() {
     try {
       const seller = JWTService.decodeTokenDetails();
       const res = await userSettingsApi?.getProfile(seller?.id)
-      console.log('res?.data?.pickup_serviceable', res?.data)
       setIsPickupServiceable(res?.data?.pickup_serviceable)
     } catch (error) {
       console.error(error);

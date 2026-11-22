@@ -100,7 +100,6 @@ function StepAddress({
                 pincode: deliveryPincode
             });
 
-            console.log("Shiprocket response:", response);
 
             // Read availability from the actual response.
             const available = response?.available;

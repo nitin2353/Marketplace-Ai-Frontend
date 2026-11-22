@@ -464,7 +464,6 @@ const SellerPayments = () => {
                                                 </div>
                                                 <div className="text-danger small fw-bold">Settled</div>
                                             </div>
-                                            {console.log('summary', summary)}
                                             <h6 className="text-muted mb-1 text-uppercase fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>Settlement Amount</h6>
                                             <h3 className="fw-bold mb-0">₹{Number(summary?.settlement_amount || 0).toLocaleString()}</h3>
                                         </Card.Body>
@@ -686,7 +685,6 @@ const SellerPayments = () => {
                                 <h3>FlashiBuy</h3>
                                 <hr />
                                 <h5>Payment Receipt</h5>
-                                {console.log('selectedTransaction', selectedTransaction)}
                                 <p>
                                     Order: {selectedTransaction.order_number || "N/A"}
                                 </p>

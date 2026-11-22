@@ -413,5 +413,35 @@ const checkAddressAvilability = async (data) => {
 
 
 
+export const fetchOrderStatusByTracking = async (order) => {
+    const waybill = order?.items?.map(ord => ord.waybill);
+    const ref_ids = order?.items?.at(-1)?.refnum;
 
-export default { ALL_TAGS, TABLE_HEADERS, SORT_OPTIONS, API_FIELDS_MAP, COUPONS, FORMATED_DATE_TIME, FORMATED_DATE, FORMATED_TIME, METHODS, METHOD_ICONS, FMT, FMT_DATE, FMT_DATE_TIME, TABS, STATUS_META, TIMELINE_STEPS, PAYMENT_METHOD_LABELS, LogoutTab, checkAddressAvilability };
+    try {
+        if (!waybill) {
+            toast.error("Tracking number not found");
+            return;
+        }
+
+        const {data} = await shiprocketApi.trackDelivery(waybill,ref_ids);
+
+        return data;
+    } catch (error) {
+        console.error("Tracking API Error:", error);
+        toast.error(
+            error?.response?.data?.message ||
+            error?.message ||
+            "Unable to fetch tracking details"
+        );
+        return null;
+    }
+};
+
+
+
+
+
+
+
+
+export default { ALL_TAGS, TABLE_HEADERS, SORT_OPTIONS, API_FIELDS_MAP, COUPONS, FORMATED_DATE_TIME, FORMATED_DATE, FORMATED_TIME, METHODS, METHOD_ICONS, FMT, FMT_DATE, FMT_DATE_TIME, TABS, STATUS_META, TIMELINE_STEPS, PAYMENT_METHOD_LABELS, LogoutTab, checkAddressAvilability, fetchOrderStatusByTracking };

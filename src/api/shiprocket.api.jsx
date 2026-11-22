@@ -38,12 +38,11 @@ const calculateShippingCharges = async (payload) => {
   }
 };
 
-const trackDelivery = async ({ waybill, ref_ids }) => {
+const trackDelivery = async (waybill, ref_ids) => {
   try {
-    console.log('waybill, ref_ids', waybill.join(','), ref_ids)
-    const {data} = await apiConfig.post(`/delhivery/services/shipping/tracking?waybill=${waybill.join(',')}&ref_ids=${ref_ids}`);
-    console.log('ShipmentData', ShipmentData)
-    return data?.ShipmentData;
+    const response = await apiConfig.get(`/delhivery/services/shipping/tracking/?waybill=${waybill.join(',')}&ref_ids=${ref_ids}`);
+
+    return response;
   } catch (error) {
     throw error.response?.data || {
       message: "Something went wrong",

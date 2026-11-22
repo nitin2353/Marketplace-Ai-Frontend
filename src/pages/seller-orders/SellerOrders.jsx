@@ -247,8 +247,6 @@ export default function SellerOrders() {
             const ids = Array.from(selected);
             try {
 
-                console.log(ids, newStatus)
-
                 const pickup_payload = {
                     order_ids: ids,
                     status: newStatus
@@ -428,8 +426,6 @@ export default function SellerOrders() {
                 ...pickupPayload
             };
 
-            console.log('payload', pickup_payload)
-
             // One API call for the entire selected batch
             const response = await orderApi.updateOrderStatus(null, null, pickup_payload);
 
@@ -605,7 +601,6 @@ export default function SellerOrders() {
                                             {scheduledDate?.length || 0} Scheduled
                                         </span>
                                     </div>
-                                    {console.log('scheduledDate', scheduledDate)}
                                     {scheduledDate?.length > 0 ? (
                                         <Stack gap={2}>
                                             {scheduledDate.map((item) => (

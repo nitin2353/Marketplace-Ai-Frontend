@@ -95,7 +95,6 @@ function ProfileTab({ seller, onSave, saving }) {
     const [avatarFile, setAvatarFile] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState(null);
     const fileRef = useRef();
-    console.log('seller', seller)
     useEffect(() => {
         if (!seller) return;
         setForm({
