@@ -40,7 +40,7 @@ const SellerPayments = () => {
                 paymentApi.getSellerTransactions(filters),
                 paymentApi.getSellerChartData()
             ]);
-
+            console.log('summaryRes.data', summaryRes.data)
             setSummary(summaryRes.data);
 
             // Map data for DataTable compatibility
@@ -437,7 +437,8 @@ const SellerPayments = () => {
                                                 <div className="text-success small fw-bold">Due</div>
                                             </div>
                                             <h6 className="text-muted mb-1 text-uppercase fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>Available Balance</h6>
-                                            <h3 className="fw-bold mb-0">₹{Number(summary?.available_balance - summary?.settlement_amount || 0).toLocaleString()}</h3>
+                                            {/* <h3 className="fw-bold mb-0">₹{Number(summary?.available_balance - summary?.settlement_amount || 0).toLocaleString()}</h3> */}
+                                            <h3 className="fw-bold mb-0">₹{Number(summary?.available_balance || 0).toLocaleString()}</h3>
                                         </Card.Body>
                                     </Card>
                                 </Col>
@@ -618,6 +619,7 @@ const SellerPayments = () => {
 
                                     <Row className="mt-4 g-2">
                                         <Col md={3}>
+                                            <label htmlFor="Methods" className="fw-bold">Methods</label>
                                             <Form.Select
                                                 value={filters.payment_method}
                                                 onChange={(e) => setFilters({ ...filters, payment_method: e.target.value })}
@@ -632,6 +634,7 @@ const SellerPayments = () => {
                                             </Form.Select>
                                         </Col>
                                         <Col md={3}>
+                                            <label htmlFor="Status" className="fw-bold">Status</label>
                                             <Form.Select
                                                 value={filters.settlement_status}
                                                 onChange={(e) => setFilters({ ...filters, settlement_status: e.target.value })}
@@ -642,6 +645,7 @@ const SellerPayments = () => {
                                             </Form.Select>
                                         </Col>
                                         <Col md={3}>
+                                            <label htmlFor="From" className="fw-bold">From</label>
                                             <Form.Control
                                                 type="date"
                                                 placeholder="Start Date"
@@ -650,6 +654,7 @@ const SellerPayments = () => {
                                             />
                                         </Col>
                                         <Col md={3}>
+                                            <label htmlFor="To" className="fw-bold">To</label>
                                             <Form.Control
                                                 type="date"
                                                 placeholder="End Date"
@@ -680,7 +685,7 @@ const SellerPayments = () => {
 
                 <Modal.Body className="p-4">
                     {selectedTransaction && (
-                        <div ref={receiptRef} className="receipt-print-area">   
+                        <div ref={receiptRef} className="receipt-print-area">
                             <div className="receipt-header">
                                 <h3>FlashiBuy</h3>
                                 <hr />

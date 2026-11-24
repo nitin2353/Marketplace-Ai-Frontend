@@ -352,12 +352,12 @@ export default function WishlistPage() {
                                                         </>
                                                     )}
                                                     {item.is_customizable && (
-                                                    <span style={{ fontSize: ".6rem", fontWeight: 800, background: "#ede9fe", color: "#7c3aed", borderRadius: 6, padding: "1px 6px" }}>
-                                                        ✏️ Custom
-                                                    </span>
-                                                )}
+                                                        <span style={{ fontSize: ".6rem", fontWeight: 800, background: "#ede9fe", color: "#7c3aed", borderRadius: 6, padding: "1px 6px" }}>
+                                                            ✏️
+                                                        </span>
+                                                    )}
                                                 </div>
-                                                
+
                                             </div>
 
                                             {/* ── Add to Cart CTA ── */}

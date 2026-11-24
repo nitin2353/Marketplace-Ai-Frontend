@@ -1,0 +1,73 @@
+.tc-feedback {
+    background: #fff;
+    border: 1px solid var(--tc-border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-top: 22px;
+}
+
+.tc-feedback h3 {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: #1e293b;
+}
+
+.tc-feedback-description {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 18px;
+    line-height: 1.7;
+}
+
+.tc-feedback textarea {
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    padding: 13px;
+    border: 1px solid var(--tc-border);
+    border-radius: 9px;
+    outline: none;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.tc-feedback textarea:focus {
+    border-color: var(--tc-primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+}
+
+.tc-feedback-submit {
+    background: var(--tc-primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 22px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.tc-feedback-submit:hover {
+    background: #1d4ed8;
+}
+
+.tc-feedback-submit:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.tc-feedback-message {
+    font-size: 13px;
+    margin-top: 12px;
+    font-weight: 600;
+}
+
+.tc-feedback-message.success {
+    color: #15803d;
+}
+
+.tc-feedback-message.error {
+    color: #dc2626;
+}

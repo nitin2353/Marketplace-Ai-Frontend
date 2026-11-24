@@ -8,7 +8,7 @@ import authApi from '../../api/authApi';
 import GlobalLoader from '../../components/GlobalLoader';
 import { useNavigate } from 'react-router-dom';
 
-const Profile = ({ loading, setLoading, userProfile }) => {
+const Profile = ({ loading, setLoading, userProfile, refresh, setRefresh }) => {
 
     const [validated, setValidated] = useState(false);
     const navigate = useNavigate()
@@ -40,6 +40,7 @@ const Profile = ({ loading, setLoading, userProfile }) => {
             toast.error(error.message || "Failed to update profile");
         } finally {
             setLoading(false);
+            setRefresh(!refresh)
         }
     };
 

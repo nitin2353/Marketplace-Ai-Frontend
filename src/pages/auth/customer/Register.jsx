@@ -23,7 +23,7 @@ const passwordStrength = (pwd) => {
 const STRENGTH_COLOR = { danger: "#dc3545", warning: "#f59e0b", success: "#16a34a" };
 
 const FEATURES = [
-    { icon: "🚚", title: "Free Delivery", desc: "On orders above ₹499" },
+    // { icon: "🚚", title: "Free Delivery", desc: "On orders above ₹499" },
     // { icon: "↩️", title: "Easy 30-Day Returns", desc: "No questions asked" },
     { icon: "🔐", title: "100% Secure Payments", desc: "PCI DSS compliant" },
     { icon: "🎁", title: "Exclusive Member Deals", desc: "Up to 80% off every day" },
@@ -71,7 +71,6 @@ export default function Register() {
             const res = await authApi?.signupCustomer(payload);
             if (res.success) {
                 toast.success(res.message || "Your Account successfully Created");
-                localStorage.setItem("token", res.token);
                 setSubmitted(true); // only show the success screen when signup really worked
             } else {
                 toast.error(res.message || "Something went wrong!!");
@@ -195,7 +194,7 @@ export default function Register() {
                                 </Row>
 
                                 {/* Email */}
-                                <Field label="Email address *" icon="✉️" error={errors.email}>
+                                <Field label="Email address *" error={errors.email}>
                                     <Form.Control
                                         className={inputCls(errors.email, "has-icon")}
                                         type="email"
@@ -212,7 +211,8 @@ export default function Register() {
                                 </Field>
 
                                 {/* Phone — field is registered as "phone", so errors.phone (was errors.mobile) */}
-                                <Field label="Mobile number *" prefix="🇮🇳 +91" error={errors.phone}>
+                                <Field label="Mobile number *"  error={errors.phone}>
+                                    
                                     <Form.Control
                                         className={inputCls(errors.phone, "has-prefix")}
                                         type="tel"
@@ -249,7 +249,7 @@ export default function Register() {
                                 </Form.Group>
 
                                 {/* Password */}
-                                <Field label="Password *" icon="🔑" error={errors.password} className="mb-1">
+                                <Field label="Password *" error={errors.password} className="mb-1">
                                     <Form.Control
                                         className={inputCls(errors.password, "has-icon has-eye")}
                                         type={showPass ? "text" : "password"}
@@ -284,7 +284,7 @@ export default function Register() {
                                 )}
 
                                 {/* Confirm password */}
-                                <Field label="Confirm password *" icon="🔐" error={errors.confirm} className="mb-4">
+                                <Field label="Confirm password *" error={errors.confirm} className="mb-4">
                                     <Form.Control
                                         className={inputCls(errors.confirm, "has-icon has-eye")}
                                         type={showConfirm ? "text" : "password"}

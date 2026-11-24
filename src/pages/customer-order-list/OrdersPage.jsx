@@ -126,24 +126,24 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                                         <Row>
                                             <Col key={i} className="item-row d-flex flex-column flex-md-row gap-3 align-items-md-center p-1  rounded-3 hover-bg-light border border-light border-md-0 mb-2 mb-md-0" onClick={() => navigate(`/product/${item.product_id}`)}>
                                                 <img src={item.product_image_url?.split(',')[0].replace(/[{}"\\]/g, "") || `https://placehold.co/100?text=Product`} className="item-img" alt="item" />
-                                                <div className="flex-grow-1 min-w-0" style={{marginTop : "-30px"}}>
+                                                <div className="flex-grow-1 min-w-0" style={{ marginTop: "-30px" }}>
                                                     <div className="text-muted m-0 mt-5 p-0">
                                                         Qty: {item.quantity} • {FMT(item.unit_price)} each
-                                                    {item.variant_size && (
-                                                        <>
-                                                            <span> | Size </span>
-                                                            <span>{item.variant_size} </span>
-                                                        </>
-                                                    )}
-                                                    {item.variant_color && (
-                                                        <>
-                                                            <span> | Colour </span>
-                                                            <span
-                                                                className="so-color-dot mt-5"
-                                                                style={{ background: item.variant_color }}
-                                                            />
-                                                        </>
-                                                    )}
+                                                        {item.variant_size && (
+                                                            <>
+                                                                <span> | Size </span>
+                                                                <span>{item.variant_size} </span>
+                                                            </>
+                                                        )}
+                                                        {item.variant_color && (
+                                                            <>
+                                                                <span> | Colour </span>
+                                                                <span
+                                                                    className="so-color-dot mt-5"
+                                                                    style={{ background: item.variant_color }}
+                                                                />
+                                                            </>
+                                                        )}
                                                     </div>
                                                     <div className="fw-bold text-truncate mt-0" style={{ color: "#0046b7" }}>{item.product_title}</div>
                                                 </div>
@@ -461,24 +461,35 @@ export default function OrdersPage() {
                                 />
                             </div>
                         </Col>
-                        <Col md={8}>
+
+                        <Col md={8} xs={12}>
                             <div className="tabs-wrapper">
-                                {TABS.map(tab => (
-                                    <button
-                                        key={tab.key}
-                                        className={`tab-item ${activeTab === tab.key ? 'active' : ''}`}
-                                        onClick={() => { setActiveTab(tab.key); setCurrentPage(1); }}
-                                    >
-                                        {tab.label}
-                                        {orders.filter(o => tab.key === 'all' || o.order_status === tab.key).length > 0 && (
-                                            <span className="count">
-                                                {orders.filter(o => tab.key === 'all' || o.order_status === tab.key).length}
-                                            </span>
-                                        )}
-                                    </button>
-                                ))}
+                                {TABS.map(tab => {
+                                    const count = orders.filter(
+                                        o => tab.key === "all" || o.order_status === tab.key
+                                    ).length;
+
+                                    return (
+                                        <button
+                                            key={tab.key}
+                                            className={`tab-item ${activeTab === tab.key ? "active" : ""
+                                                }`}
+                                            onClick={() => {
+                                                setActiveTab(tab.key);
+                                                setCurrentPage(1);
+                                            }}
+                                        >
+                                            {tab.label}
+
+                                            {count > 0 && (
+                                                <span className="count">{count}</span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </Col>
+
                     </Row>
                 </div>
 

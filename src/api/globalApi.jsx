@@ -25,11 +25,35 @@ const getPickupScheduledDate = async () => {
 };
 
 
+const createUserFeedback = async (feedback) => {
+    try {
+        const response = await apiConfig.post(`/global/user-feedback`, { feedback });
+        return response.data;
+
+    } catch (error) {
+        throw error.response?.data || {
+            message: "Something went wrong",
+        };
+    }
+};
 
 
+
+const getUserFeedback = async () => {
+  try {
+    const response = await apiConfig.get(`/global/user-feedback`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || {
+      message: "Something went wrong",
+    };
+  }
+};
 
 
 export default {
     getCategories,
-    getPickupScheduledDate
+    getPickupScheduledDate,
+    createUserFeedback,
+    getUserFeedback
 }

@@ -286,6 +286,10 @@
     /* accent-color: var(--p); */
     cursor: pointer;
 }
+.so-chk:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
 
 /* ── Order number ── */
 .so-order-num {

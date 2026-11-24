@@ -1,14 +1,9 @@
-import { FaHome, FaTasks, FaBan, FaCalendarAlt, FaUser, FaTachometerAlt } from "react-icons/fa";
-import { FaCrown } from "react-icons/fa";
-import { BiSolidBriefcase, BiSolidCategoryAlt, BiSolidDollarCircle, } from "react-icons/bi";
-import { FaProductHunt } from "react-icons/fa6";
-import { GrUpdate } from "react-icons/gr";
-
 const API_BASE_URL = `https://api.nitinverma.blog/api/v1`; 
 // const API_BASE_URL = `http://localhost:3000/api/v1`; 
 const FRONTEND_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}`;
-
 const BUSINESS_EMAIL = 'nv5327260@gmail.com'
+const GROK_API = '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'
+
 
 
 const AVB_COUNTRIES = ["India"];
@@ -80,7 +75,7 @@ const SETTINGS_TABS = [
   },
   {
     icon: "❔",
-    label: "Help",
+    label: "Help & Feedback",
     id: "help",
     description: "Terms&Conditions"
   },
@@ -178,12 +173,14 @@ export const timeAgo = (dateString) => {
 const ORDER_STATUSES = [
     { value: "placed", label: "Placed", icon: "📋", bulk_visible: false },
     { value: "confirmed", label: "Confirmed", icon: "✅", bulk_visible: true },
-    { value: "processing", label: "Ready For Pickup", icon: "🚚", bulk_visible: true },
+    { value: "processing", label: "Shipment Request", icon: "🚚", bulk_visible: true },
+    { value: "manifested", label: "Manifested", icon: "📄", bulk_visible: false },
+    { value: "picked_up", label: "Picked Up", icon: "📦", bulk_visible: false },
+    { value: "in_transit", label: "In Transit", icon: "🚚", bulk_visible: false },
+    { value: "at_destination_hub", label: "At Destination Hub", icon: "🏢", bulk_visible: false },
+    { value: "out_for_delivery", label: "Out For Delivery", icon: "🛵", bulk_visible: false },
+    { value: "delivered", label: "Delivered", icon: "🎉", bulk_visible: false },
     { value: "cancelled", label: "Cancelled", icon: "❌", bulk_visible: false },
-    // { value: "processing", label: "Processing", icon: "⚙️", bulk_visible: false },
-    // { value: "shipped", label: "Shipped", icon: "🚚", bulk_visible: false },
-    // { value: "delivered", label: "Delivered", icon: "📦", bulk_visible: false },
-    // { value: "payment_failed", label: "Payment Failed", icon: "⚠️", bulk_visible: false },
 ];
 
 
@@ -196,5 +193,6 @@ export {
   FRONTEND_BASE_URL,
   BUSINESS_EMAIL,
   AVB_COUNTRIES,
-  ORDER_STATUSES
+  ORDER_STATUSES,
+  GROK_API
 };

@@ -99,7 +99,7 @@ const getProductTitle = (product) =>
 
 
 const TRUST_ITEMS = [
-    { icon: "🚚", title: "Free delivery", text: "On orders above ₹499" },
+    // { icon: "🚚", title: "Free delivery", text: "On orders above ₹499" },
     {
         icon: "🖊️",
         title: "Customization Available",
@@ -170,10 +170,10 @@ function HeroBanner({ products, onCta }) {
     const title = !product
         ? "Discover products you'll love"
         : idx === 0
-            ? `${discount}% OFF on ${getProductTitle(product).slice(0, 20)+'..'}`
+            ? `${discount}% OFF on ${getProductTitle(product).slice(0, 20) + '..'}`
             : idx === 1
-                ? `New arrival: ${getProductTitle(product).slice(0, 20)+'..'}`
-                : `${getProductTitle(product).slice(0, 20)+'..'} — ${rating.toFixed(1)} ★`;
+                ? `New arrival : ${getProductTitle(product).slice(0, 20) + '..'}`
+                : `${getProductTitle(product).slice(0, 20) + '..'} — ${rating.toFixed(1)} ★`;
 
     const subtitle = !product
         ? "Explore our latest products and offers."
@@ -421,35 +421,35 @@ export default function ProductDashboard() {
     const [sidebarOpen, setSidebar] = useState(window.innerWidth >= 992);
     const [categorySections, setCategorySections] = useState([]);
     const [isDefaultView, setIsDefaultView] = useState(false);
-
+    const [showAllProducts, setShowAllProducts] = useState(false);
     // NEW popup / landing state
     const [showWelcome, setShowWelcome] = useState(false);
     const [showCompare, setShowCompare] = useState(false);
     const [addedItem, setAddedItem] = useState(null);
     const [showTop, setShowTop] = useState(false);
-    const [orderCount, setOrderCount] = useState(0);
+    const [orderCount, setOrderCount] = useState(1);
 
     const { isLike, setIsLike, globalCartLength } = useAuthWrapper()
 
     const searchRef = useRef();
     const contentRef = useRef();
 
-    
+
     // ── Fetch products from API ────────────────────────────────────────────────
     useEffect(() => {
         fetchProductData();
         fetchCategorySections();
-        if(JWTService.isTokenAvailable()){
+        if (JWTService.isTokenAvailable()) {
             fetchWishlist();
             fetchOrderCount();
         }
     }, []);
 
-    
-    const fetchOrderCount = async() =>{
+
+    const fetchOrderCount = async () => {
         const tokenDetail = JWTService?.decodeTokenDetails();
         try {
-            const {data} = await orderApi?.getCustomerOrders(tokenDetail?.id)
+            const { data } = await orderApi?.getCustomerOrders(tokenDetail?.id)
             setOrderCount(data?.length)
         } catch (error) {
             console.error("Failed to fetch Order", error);
@@ -573,15 +573,6 @@ export default function ProductDashboard() {
             .filter(p => {
                 if (navSection === "wishlist" && !wishlist.includes(p.id)) return false;
                 if (NAV_RULES[navSection] && !NAV_RULES[navSection](p)) return false;
-
-                if (search) {
-                    const q = search.toLowerCase();
-                    if (!p.title.toLowerCase().includes(q) &&
-                        !p.brand.toLowerCase().includes(q) &&
-                        !p.category.toLowerCase().includes(q) &&
-                        !p.tags.some(t => t.toLowerCase().includes(q)))
-                        return false;
-                }
                 if (p.price > priceMax) return false;
                 if (p.rating < minRating) return false;
                 if (activeTags.length && !activeTags.some(t => p.tags.includes(t))) return false;
@@ -676,16 +667,29 @@ export default function ProductDashboard() {
     }, [rawProducts]);
 
     useEffect(() => {
-        // Search / section / filters active → grid view, otherwise landing sections
-        const activeFiltersCount = (activeTags?.length || 0) + (minRating > 0 ? 1 : 0) + (priceMax < (dataMaxPrice || 20000) ? 1 : 0);
-        const hasActiveFilters = activeFiltersCount > 0 || sortBy !== "relevance";
+        const activeFiltersCount =
+            (activeTags?.length || 0) +
+            (minRating > 0 ? 1 : 0) +
+            (priceMax < (dataMaxPrice || 20000) ? 1 : 0);
+
+        const hasActiveFilters =
+            activeFiltersCount > 0 || sortBy !== "relevance";
 
         if (search || navSection !== "all" || hasActiveFilters) {
             setIsDefaultView(false);
         } else {
-            setIsDefaultView(true);
+            setIsDefaultView(!showAllProducts);
         }
-    }, [search, navSection, activeTags, minRating, priceMax, dataMaxPrice, sortBy]);
+    }, [
+        search,
+        navSection,
+        activeTags,
+        minRating,
+        priceMax,
+        dataMaxPrice,
+        sortBy,
+        showAllProducts
+    ]);
 
     const scrollToContent = () => {
         contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -698,6 +702,8 @@ export default function ProductDashboard() {
         setNavSection(key);
         setPage(1);
 
+        setShowAllProducts(key === "all");
+
         if (key === "new") {
             setSortBy("newest");
         } else if (key === "toprated") {
@@ -709,12 +715,12 @@ export default function ProductDashboard() {
         }
 
         if (key === "all") {
+            setIsDefaultView(false);
             scrollToContent();
         } else {
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
     };
-
 
     const pickCategory = (cat) => {
         setNavSection("all");
@@ -747,7 +753,7 @@ export default function ProductDashboard() {
             toast.error("Code: " + WELCOME_COUPON);
         }
     };
-
+    console.log('filtered', filtered)
     const totalPages = Math.ceil((filtered?.length || 0) / PER_PAGE);
     const paged = (filtered || []).slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
@@ -757,7 +763,14 @@ export default function ProductDashboard() {
     };
 
     const clearAll = () => {
-        setSearch(""); setActiveTags([]); setMinRating(0); setPriceMax(dataMaxPrice); setNavSection("all"); setSortBy("relevance"); setPage(1);
+        setSearch("");
+        setActiveTags([]);
+        setMinRating(0);
+        setPriceMax(dataMaxPrice);
+        setNavSection("all");
+        setSortBy("relevance");
+        setPage(1);
+        setShowAllProducts(false);
     };
 
     const sidebarShown = sidebarOpen && window.innerWidth >= 992;
@@ -888,14 +901,14 @@ export default function ProductDashboard() {
                     )}
 
                     {/* Active filter chips */}
-                    {(search || activeTags.length > 0 || minRating > 0 || priceMax < dataMaxPrice) && (
+                    {/* {(search || activeTags.length > 0 || minRating > 0 || priceMax < dataMaxPrice) && (
                         <div className="d-flex gap-2 flex-wrap mb-3 fu">
                             {search && <span className="pd-pill on" onClick={() => setSearch("")}>🔍 "{search}" ✕</span>}
                             {priceMax < dataMaxPrice && <span className="pd-pill on" onClick={() => setPriceMax(dataMaxPrice)}>Under {FMT(priceMax)} ✕</span>}
                             {minRating > 0 && <span className="pd-pill on" onClick={() => setMinRating(0)}>{minRating}+ ★ ✕</span>}
                             {activeTags.map(t => <span key={t} className="pd-pill on" onClick={() => toggleTag(t)}>{t} ✕</span>)}
                         </div>
-                    )}
+                    )} */}
 
                     {/* Products */}
                     {loading ? (

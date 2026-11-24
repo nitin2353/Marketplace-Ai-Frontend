@@ -6,22 +6,15 @@ import GlobalHelper from '../helper/GlobalHelper';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Form, InputGroup, ListGroup } from 'react-bootstrap';
 import cartApi from '../api/cartApi';
-import wishlistApi from '../api/wishlist.api';
 import notificationApi from '../api/notification.api';
 import { useAuthWrapper } from '../helper/AuthWrapper';
 import { Overlay, Popover } from 'react-bootstrap';
 import NotificationPanel from './NotificationPanel';
 import JWTService from '../config/jwt.config';
 import { MdOutlineLogin } from "react-icons/md";
+import wishlistApi from "../api/wishlist.api";
 
 
-function debounce(fn, delay = 500) {
-    let timer;
-    return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => fn(...args), delay);
-    };
-}
 
 
 const Toolbar = ({
@@ -37,25 +30,32 @@ const Toolbar = ({
     const navigate = useNavigate();
 
     const [localSearch, setLocalSearch] = useState("");
-    const committedSearch = searchProp !== undefined ? searchProp : localSearch;
-    const setCommittedSearch = setSearchProp !== undefined ? setSearchProp : setLocalSearch;
+
+    const committedSearch =
+        searchProp !== undefined ? searchProp : localSearch;
+
+    const setCommittedSearch =
+        setSearchProp !== undefined ? setSearchProp : setLocalSearch;
 
     const [inputSearch, setInputSearch] = useState(committedSearch || "");
+
     const search = inputSearch;
+
     const [suggestions, setSuggestions] = useState([]);
     const [activeIndex, setActiveIndex] = useState(-1);
-    const [isLoading, setIsLoading] = useState(false);
+
+    const skipNextSuggestionRef = useRef(false);
+    const searchRequestRef = useRef(0);
+    const suggestionRequestRef = useRef(0);
     const [cartQuantity, setCartQuanity] = useState()
-    const [wishlistQuantity, setWishlistQty] = useState(0)
     const itemRefs = useRef([]);
     const dropdownRef = useRef(null);
-    const searchValueRef = useRef("");
     const bellRef = useRef(null);
 
     const [showNotif, setShowNotif] = useState(false);
     const [notifyCount, setNotifyCount] = useState(0);
     const [refreshNotify, setRefreshNotify] = useState(false);
-    const [isLogin, setIsLogin] = useState(JWTService?.isTokenAvailable());
+    const isLogin = JWTService?.isTokenAvailable();
     const { isLike, refresh, setGlobalCartLength } = useAuthWrapper()
     const userData = JWTService.decodeTokenDetails();
     const entityId = userData?.id || userData?.user_id;
@@ -63,11 +63,6 @@ const Toolbar = ({
     useEffect(() => {
         setInputSearch(committedSearch || "");
     }, [committedSearch]);
-
-
-    useEffect(() => {
-        searchValueRef.current = search;
-    }, [search]);
 
     useEffect(() => {
         itemRefs.current[activeIndex]?.scrollIntoView({ block: "nearest" });
@@ -104,55 +99,109 @@ const Toolbar = ({
         (isLogin) && fetchCart()
     }, [refresh])
 
-    const fetchSuggestions = useCallback(async (query) => {
-        if (!query.trim()) {
+    useEffect(() => {
+        if (skipNextSuggestionRef.current) {
+            skipNextSuggestionRef.current = false;
             setSuggestions([]);
+            setActiveIndex(-1);
             return;
         }
 
-        try {
-            const res = await productApi.productSuggestions(query);
-            const rows = res?.data ?? [];
+        const query = inputSearch.trim();
 
-            if (rows.length === 0) {
-                setSuggestions([{ keyword: "No items found", isEmpty: true }]);
-            } else {
-                setSuggestions(rows);
-            }
-
+        if (query.length < 2) {
+            setSuggestions([]);
             setActiveIndex(-1);
-        } catch (err) {
-            console.error("Suggestion error:", err);
-            setSuggestions([{ keyword: "No items found", isEmpty: true }]);
+            return;
         }
-    }, []);
+
+        let isActive = true;
+
+        const timer = setTimeout(async () => {
+            const requestId = ++suggestionRequestRef.current;
+
+            try {
+                const res = await productApi.productSuggestions(query);
+
+                if (
+                    !isActive ||
+                    requestId !== suggestionRequestRef.current
+                ) return;
+
+                const rows = Array.isArray(res?.data)
+                    ? res.data
+                    : [];
+                console.log('rows', rows)
+
+                setSuggestions(
+                    rows.filter(item => item?.keyword?.trim())
+                );
+
+                setActiveIndex(-1);
+
+            } catch (error) {
+                if (!isActive) return;
+
+                console.error("Suggestion error:", error);
+                setSuggestions([]);
+            }
+        }, 300);
+
+        return () => {
+            isActive = false;
+            clearTimeout(timer);
+        };
+
+    }, [inputSearch]);
+
 
 
     const fetchProducts = useCallback(async (query) => {
-        setIsLoading(true);
-        try {
-            if (!query.trim()) {
+        const requestId = ++searchRequestRef.current;
 
+        try {
+            const normalizedQuery = query.trim();
+
+            let rows = [];
+
+            if (!normalizedQuery) {
                 const { data } = await productApi.getAllProducts();
-                const rows = Array.isArray(data) ? data
-                    : Array.isArray(data?.rows) ? data.rows
-                        : Array.isArray(data?.data) ? data.data
-                            : Array.isArray(data?.data?.rows) ? data.data.rows
+
+                rows = Array.isArray(data)
+                ? data
+                    : Array.isArray(data?.rows)
+                        ? data.rows
+                        : Array.isArray(data?.data)
+                            ? data.data
+                            : Array.isArray(data?.data?.rows)
+                                ? data.data.rows
                                 : [];
-                setRawProducts(rows.map(GlobalHelper.API_FIELDS_MAP['products']));
+
             } else {
-                const res = await productApi.searchProduct(query);
-                const rows = Array.isArray(res?.data) ? res.data
-                    : Array.isArray(res?.data?.rows) ? res.data.rows
-                        : [];
-                setRawProducts(rows.map(GlobalHelper.API_FIELDS_MAP['products']));
+                const res = await productApi.searchProduct(normalizedQuery);
+                
+                rows = Array.isArray(res?.data)
+                ? res.data
+                : Array.isArray(res?.data?.rows)
+                ? res.data.rows
+                : [];
             }
-        } catch (err) {
-            console.error("Search error:", err);
-        } finally {
-            setIsLoading(false);
+            
+            // Ignore outdated API responses
+            if (requestId !== searchRequestRef.current) return;
+
+            setRawProducts(
+                rows.map(GlobalHelper.API_FIELDS_MAP.products)
+            );
+            
+        } catch (error) {
+            if (requestId !== searchRequestRef.current) return;
+
+            console.error("Search error:", error);
         }
+
     }, [setRawProducts]);
+
 
 
     const fetchCart = async () => {
@@ -167,89 +216,75 @@ const Toolbar = ({
         }
     }
 
-    const fetchSuggestionsRef = useRef(fetchSuggestions);
-    useEffect(() => { fetchSuggestionsRef.current = fetchSuggestions; }, [fetchSuggestions]);
-
-    const debouncedSuggestions = useRef(
-        debounce((query) => fetchSuggestionsRef.current(query), 400)
-    ).current;
 
 
     const handleChange = (e) => {
         const value = e.target.value;
 
         setInputSearch(value);
-        searchValueRef.current = value;
-
-        debouncedSuggestions(value);
+        setActiveIndex(-1);
     };
 
     const handleSelect = useCallback(async (keyword) => {
-        const q = keyword?.trim() ?? "";
+        const query = keyword?.trim() || "";
 
-        setInputSearch(q);
-        searchValueRef.current = q;
-        setCommittedSearch(q);
+        skipNextSuggestionRef.current = true;
 
-        setSuggestions([]); // Enter ya click ke baad suggestions close
+        setInputSearch(query);
+        setCommittedSearch(query);
+
+        setSuggestions([]);
         setActiveIndex(-1);
 
-        await fetchProducts(q);
+        await fetchProducts(query);
+
     }, [fetchProducts, setCommittedSearch]);
 
 
     const handleClear = useCallback(() => {
+        skipNextSuggestionRef.current = true;
+
         setInputSearch("");
         setCommittedSearch("");
 
         setSuggestions([]);
-        setActiveIndex(0);
+        setActiveIndex(-1);
 
         fetchProducts("");
+
         searchRef?.current?.focus();
+
     }, [fetchProducts, searchRef, setCommittedSearch]);
+
 
     const handleKeyDown = (e) => {
         switch (e.key) {
+
             case "ArrowDown": {
+                if (!suggestions.length) return;
+
                 e.preventDefault();
 
-                const validSuggestions = suggestions
-                    .map((item, index) => ({ item, index }))
-                    .filter(({ item }) => !item.isEmpty);
-
-                if (validSuggestions.length === 0) return;
-
-                const currentPosition = validSuggestions.findIndex(
-                    ({ index }) => index === activeIndex
+                setActiveIndex(prev =>
+                    prev < suggestions.length - 1
+                        ? prev + 1
+                        : 0
                 );
 
-                const nextPosition = Math.min(
-                    currentPosition + 1,
-                    validSuggestions.length - 1
-                );
-
-                setActiveIndex(validSuggestions[nextPosition].index);
                 break;
             }
 
             case "ArrowUp": {
+                if (!suggestions.length) return;
+
                 e.preventDefault();
 
-                const validSuggestions = suggestions
-                    .map((item, index) => ({ item, index }))
-                    .filter(({ item }) => !item.isEmpty);
-
-                if (validSuggestions.length === 0) return;
-
-                const currentPosition = validSuggestions.findIndex(
-                    ({ index }) => index === activeIndex
+                setActiveIndex(prev =>
+                    prev > 0
+                        ? prev - 1
+                        : suggestions.length - 1
                 );
 
-                const previousPosition =
-                    currentPosition <= 0 ? 0 : currentPosition - 1;
-
-                setActiveIndex(validSuggestions[previousPosition].index);
                 break;
             }
 
@@ -258,29 +293,33 @@ const Toolbar = ({
 
                 const selected = suggestions[activeIndex];
 
-                if (selected && !selected.isEmpty) {
+                if (selected?.keyword) {
                     handleSelect(selected.keyword);
                 } else {
-                    const query = searchValueRef.current.trim();
+                    const query = inputSearch.trim();
 
-                    setSuggestions([]); // Suggestions close
-                    setActiveIndex(-1); // Highlight reset
+                    setSuggestions([]);
+                    setActiveIndex(-1);
                     setCommittedSearch(query);
+
                     fetchProducts(query);
                 }
 
                 break;
             }
 
-            case "Escape":
+            case "Escape": {
                 setSuggestions([]);
                 setActiveIndex(-1);
                 break;
+            }
 
             default:
+                // Backspace and normal typing work naturally.
                 break;
         }
     };
+
 
     return (
         <div className="pd-topbar d-flex align-items-center gap-2 gap-md-3 px-2 py-2 px-md-4" style={{
@@ -340,21 +379,8 @@ const Toolbar = ({
 
                         <Form.Control
                             ref={searchRef}
-                            value={search}
+                            value={inputSearch}
                             placeholder="Search for products, brands and more"
-                            style={{
-                                border: "1px solid var(--border-light)",
-                                borderLeft: "none",
-                                borderRight: search ? "none" : "1px solid var(--border-light)",
-                                borderRadius: 0,
-                                fontFamily: "var(--font-body)",
-                                fontWeight: 500,
-                                fontSize: "0.95rem",
-                                background: "var(--bg-hover)",
-                                padding: "9px 12px",
-                                outline: "none",
-                                boxShadow: "none"
-                            }}
                             onChange={handleChange}
                             onKeyDown={handleKeyDown}
                             autoComplete="off"
@@ -597,16 +623,27 @@ export default Toolbar;
 
 // ── Highlight matching text in suggestion ───────────────────────────────────
 function highlightMatch(text, query) {
-    if (!query.trim()) return text;
-    try {
-        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, "gi");
-        const parts = text?.split(regex);
-        return parts.map((part, i) =>
-            regex.test(part)
-                ? <span key={i} style={{ color: "var(--primary)", fontWeight: 800 }}>{part}</span>
-                : part
+    if (!query?.trim() || !text) return text;
+
+    const words = query
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .map(word => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+
+    if (!words.length) return text;
+
+    const regex = new RegExp(`(${words.join("|")})`, "gi");
+
+    return text.split(regex).map((part, index) => {
+        const matched = words.some(
+            word => new RegExp(`^${word}$`, "i").test(part)
         );
-    } catch {
-        return text;
-    }
+
+        return matched ? (
+            <span key={index} style={{ fontWeight: 800 }}>
+                {part}
+            </span>
+        ) : part;
+    });
 }

@@ -121,11 +121,6 @@ export default function SellerOrders() {
     const { id } = useParams();
     const { user } = useAuthWrapper();
 
-    const { isOpen, setIsOpen } = useAuthWrapper();
-
-    // ── Responsive state ──
-    const winW = useWindowWidth();
-
     // ── Data state ──
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -172,7 +167,7 @@ export default function SellerOrders() {
         }
     }, [user]);
 
-    useEffect(() => { fetchOrders(); }, [fetchOrders]);
+    useEffect(() => { fetchOrders(),  fetchPickupScheduledDate(); }, [fetchOrders]);
 
     // ── Open drawer ──
     const openDrawer = useCallback(
@@ -215,6 +210,7 @@ export default function SellerOrders() {
         } catch (err) {
             toast.error(err?.response?.data?.data?.message || err?.message || "Update failed.");
         } finally {
+            fetchOrders()
             setUpdating(false);
         }
     }, []);
@@ -258,10 +254,10 @@ export default function SellerOrders() {
                     toast.success(`Status Update Successfuly`);
                 }
                 setSelected(new Set());
-                setConfirm(null);
-            } catch {
-                toast.error("Bulk update failed.");
+            } catch(err) {
+                toast.error(err.message || "Bulk update failed.");
             } finally {
+                setConfirm(null);
                 setBulkWorking(false);
             }
         },
@@ -270,19 +266,40 @@ export default function SellerOrders() {
 
     // ── Selection helpers ──
     const toggleSelect = useCallback((id) => {
+        const order = orders.find((o) => o.id === id);
+
+        if (!order || order.order_status === "cancelled") {
+            return;
+        }
+
         setSelected((prev) => {
             const next = new Set(prev);
             next.has(id) ? next.delete(id) : next.add(id);
             return next;
         });
-    }, []);
+    }, [orders]);
+
 
     const toggleAll = useCallback((ids) => {
-        setSelected((prev) => {
-            const allSel = ids.length > 0 && ids.every((id) => prev.has(id));
-            return allSel ? new Set() : new Set(ids);
+        const selectableIds = ids.filter((id) => {
+            const order = orders.find((o) => o.id === id);
+            return order && order.order_status !== "cancelled";
         });
-    }, []);
+
+        setSelected((prev) => {
+            const allSelected =
+                selectableIds.length > 0 &&
+                selectableIds.every((id) => prev.has(id));
+
+            if (allSelected) {
+                const next = new Set(prev);
+                selectableIds.forEach((id) => next.delete(id));
+                return next;
+            }
+
+            return new Set([...prev, ...selectableIds]);
+        });
+    }, [orders]);
 
     // ── Filtered + paged ──
     const filtered = useMemo(() => {
@@ -490,6 +507,10 @@ export default function SellerOrders() {
             );
         }
     }
+
+    const selectablePagedIds = paged
+        .filter((order) => order.order_status !== "cancelled")
+        .map((order) => order.id);
 
 
 
@@ -886,11 +907,11 @@ export default function SellerOrders() {
                                         <input
                                             type="checkbox"
                                             className="so-chk"
-                                            style={{ accentColor: "#151c3c" }}
                                             checked={
-                                                pagedIds.length > 0 &&
-                                                pagedIds.every((id) => selected.has(id))
+                                                selectablePagedIds.length > 0 &&
+                                                selectablePagedIds.every((id) => selected.has(id))
                                             }
+                                            disabled={selectablePagedIds.length === 0}
                                             onChange={() => toggleAll(pagedIds)}
                                         />
                                     </th>
@@ -964,7 +985,13 @@ export default function SellerOrders() {
                                                         type="checkbox"
                                                         className="so-chk"
                                                         checked={selected.has(order.id)}
+                                                        disabled={order.order_status === "cancelled"}
                                                         onChange={() => toggleSelect(order.id)}
+                                                        title={
+                                                            order.order_status === "cancelled"
+                                                                ? "Cancelled orders cannot be selected"
+                                                                : "Select order"
+                                                        }
                                                     />
                                                 </td>
                                                 <td>
@@ -1166,6 +1193,7 @@ export default function SellerOrders() {
                 onSubmit={handleScheduledPickupSubmit}
                 selectedCount={selected.size}
                 loading={bulkWorking}
+                getBookedPickupDates={globalApi?.getPickupScheduledDate}
             />
         </>
     );

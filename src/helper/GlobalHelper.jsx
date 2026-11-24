@@ -286,8 +286,11 @@ export const TABS = [
     { key: "all", label: "All Orders" },
     { key: "placed", label: "Placed" },
     { key: "confirmed", label: "Confirmed" },
-    { key: "processing", label: "Processing" },
-    { key: "shipped", label: "Shipped" },
+    { key: "processing", label: "Manifested" },
+    { key: "picked_up", label: "Picked Up" },
+    { key: "in_transit", label: "In Transit" },
+    { key: "at_destination_hub", label: "At Destination Hub" },
+    { key: "out_for_delivery", label: "Out For Delivery" },
     { key: "delivered", label: "Delivered" },
     { key: "cancelled", label: "Cancelled" },
 ];
@@ -297,12 +300,15 @@ export const STATUS_META = {
     placed: { icon: "📋", label: "Placed" },
     confirmed: { icon: "✅", label: "Confirmed" },
     processing: { icon: "⚙️", label: "Processing" },
-    shipped: { icon: "🚚", label: "Shipped" },
-    delivered: { icon: "📦", label: "Delivered" },
+    manifested: { icon: "📄", label: "Manifested" },
+    picked_up: { icon: "📦", label: "Picked Up" },
+    in_transit: { icon: "🚚", label: "In Transit" },
+    at_destination_hub: { icon: "🏢", label: "At Destination Hub" },
+    out_for_delivery: { icon: "🛵", label: "Out For Delivery" },
+    delivered: { icon: "🎉", label: "Delivered" },
     cancelled: { icon: "❌", label: "Cancelled" },
     payment_failed: { icon: "⚠️", label: "Payment Failed" },
 };
-
 
 export const TIMELINE_STEPS = [
     "confirmed",

@@ -627,7 +627,7 @@ const ShippingParcelLabel = ({
                     )}
 
                     {shipment.waybill && (
-                        <View style={{ alignItems: "center", marginTop: 1 }}>
+                        <View style={{ alignItems: "center", marginRight: '3px', marginTop: 1 }}>
                             <Image
                                 src={generateBarcode(shipment.waybill) || shipment.waybill}
                                 style={{

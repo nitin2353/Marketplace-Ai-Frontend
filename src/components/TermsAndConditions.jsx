@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { BUSINESS_EMAIL } from "../helper/Constraints";
 import GlobalLoader from "./GlobalLoader";
+import globalApi from "../api/globalApi";
+import '../styles/feedback.css'
 
 const TermsAndConditions = ({
     siteName = "FlashiBuy",
@@ -13,13 +15,65 @@ const TermsAndConditions = ({
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(true);
     const normalizedRole = String(userRole || "all").toLowerCase();
+    const [feedback, setFeedback] = useState("");
+    const [feedbackLoading, setFeedbackLoading] = useState(false);
+    const [feedbackMessage, setFeedbackMessage] = useState({
+        type: "",
+        text: "",
+    });
 
     const isCustomer = normalizedRole === "customer";
     const isSeller = normalizedRole === "seller";
 
     setTimeout(() => {
         setLoading(false);
-    },500)
+    }, 500)
+
+    const handleFeedbackSubmit = async (e) => {
+        e.preventDefault();
+
+        const message = feedback.trim();
+
+        if (!message) {
+            setFeedbackMessage({
+                type: "error",
+                text: "Please enter your feedback.",
+            });
+            return;
+        }
+
+        if (message.length < 5) {
+            setFeedbackMessage({
+                type: "error",
+                text: "Feedback must contain at least 5 characters.",
+            });
+            return;
+        }
+
+        try {
+            setFeedbackLoading(true);
+
+            const response = await globalApi.createUserFeedback(message);
+
+            setFeedback("");
+            setFeedbackMessage({
+                type: "success",
+                text: response?.message || "Thank you! Your feedback has been submitted successfully.",
+            });
+
+        } catch (error) {
+            setFeedbackMessage({
+                type: "error",
+                text: error?.message || "Failed to submit feedback. Please try again.",
+            });
+
+        } finally {
+            setFeedbackLoading(false);
+        }
+    };
+
+
+
 
     const sections = [
         {
@@ -774,12 +828,12 @@ const TermsAndConditions = ({
         setExpandedSections({});
     };
 
- 
+
     const initialView = isCustomer
         ? "customer"
         : isSeller
-        ? "seller"
-        : "all";
+            ? "seller"
+            : "all";
 
     // The role prop determines the initial audience.
     // Users can switch views unless the page is configured otherwise.
@@ -1227,9 +1281,8 @@ const TermsAndConditions = ({
                     <div className="tc-tabs">
                         <button
                             type="button"
-                            className={`tc-tab ${
-                                activeView === "all" ? "active" : ""
-                            }`}
+                            className={`tc-tab ${activeView === "all" ? "active" : ""
+                                }`}
                             onClick={() => setActiveView("all")}
                         >
                             All Terms
@@ -1237,9 +1290,8 @@ const TermsAndConditions = ({
 
                         <button
                             type="button"
-                            className={`tc-tab ${
-                                activeView === "customer" ? "active" : ""
-                            }`}
+                            className={`tc-tab ${activeView === "customer" ? "active" : ""
+                                }`}
                             onClick={() => setActiveView("customer")}
                         >
                             Customer Terms
@@ -1247,9 +1299,8 @@ const TermsAndConditions = ({
 
                         <button
                             type="button"
-                            className={`tc-tab ${
-                                activeView === "seller" ? "active" : ""
-                            }`}
+                            className={`tc-tab ${activeView === "seller" ? "active" : ""
+                                }`}
                             onClick={() => setActiveView("seller")}
                         >
                             Seller Terms
@@ -1379,6 +1430,61 @@ const TermsAndConditions = ({
                                 </p>
                             </div>
                         )}
+
+
+                        <div className="tc-feedback">
+                            <h3>Share Your Feedback</h3>
+
+                            <p className="tc-feedback-description">
+                                We value your opinion! Let us know your experience
+                                and how we can improve {siteName}.
+                            </p>
+
+                            <form onSubmit={handleFeedbackSubmit}>
+                                <textarea
+                                    placeholder="Write your feedback here..."
+                                    value={feedback}
+                                    onChange={(e) => {
+                                        setFeedback(e.target.value);
+
+                                        if (feedbackMessage.text) {
+                                            setFeedbackMessage({
+                                                type: "",
+                                                text: "",
+                                            });
+                                        }
+                                    }}
+                                    maxLength={1000}
+                                    disabled={feedbackLoading}
+                                />
+
+                                <div className="d-flex justify-content-between align-items-center mt-2">
+                                    <small className="text-muted">
+                                        {feedback.length}/1000 characters
+                                    </small>
+
+                                    <button
+                                        type="submit"
+                                        className="tc-feedback-submit"
+                                        disabled={feedbackLoading || !feedback.trim()}
+                                    >
+                                        {feedbackLoading
+                                            ? "Submitting..."
+                                            : "Submit Feedback"}
+                                    </button>
+                                </div>
+
+                                {feedbackMessage.text && (
+                                    <div
+                                        className={`tc-feedback-message ${feedbackMessage.type}`}
+                                        role="status"
+                                    >
+                                        {feedbackMessage.text}
+                                    </div>
+                                )}
+                            </form>
+                        </div>
+
 
                         <div className="tc-contact">
                             <h3>Questions About These Terms?</h3>

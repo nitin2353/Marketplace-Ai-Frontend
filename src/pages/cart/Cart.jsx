@@ -405,7 +405,7 @@ export default function CartPage() {
                             {/* Trust badges */}
                             <div className="d-flex gap-3 flex-wrap mt-4 fu">
                                 {[
-                                    { icon: "🚚", label: "Free Delivery above ₹499" },
+                                    // { icon: "🚚", label: "Free Delivery above ₹499" },
                                     { icon: "🔒", label: "100% Secure Payment" },
                                     // { icon: "↩️", label: "Easy 7-day Returns" },
                                 ].map(({ icon, label }) => (

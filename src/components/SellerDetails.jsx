@@ -162,6 +162,7 @@ const SellerDetails = () => {
             );
         } finally {
             setSavingPayment(false);
+            setShowPaymentModal(false)
         }
     };
 
@@ -206,6 +207,16 @@ const SellerDetails = () => {
             .filter(Boolean)
             .join(" ") ||
         "—";
+
+
+    const isCancelledOrder =
+        String(selectedPayment?.settlement_status || "").toLowerCase() === "cancelled";
+    console.log('selectedPayment', selectedPayment)
+
+    const payableAmount = isCancelledOrder
+        ? Number(selectedPayment?.refund_amount || 0) +
+        Number(selectedPayment?.seller_delivery_charges || 0)
+        : Number(selectedPayment?.seller_earning || 0);
 
     return (
         <div className="container-fluid py-4">
@@ -257,7 +268,6 @@ const SellerDetails = () => {
                             ["Gender", seller.gender],
                             ["Registered", formatDate(seller.seller_created_at)],
                             ["Business Type", seller.business_type],
-                            ["Website", seller.website],
                             ["GSTIN", seller.gstin],
                             ["PAN", seller.pan],
                             ["Date of Birth", formatDate(seller.dob)],
@@ -412,7 +422,7 @@ const SellerDetails = () => {
                             <small className="text-muted">Paid</small>
                         </span>
                     </h5>
-
+                    {console.log('payments', payments)}
                     <DataTable
                         tableData={payments}
                         isHeader={true}
@@ -443,8 +453,16 @@ const SellerDetails = () => {
                             },
                             {
                                 key: "seller_earning",
-                                label: "My Earning",
+                                label: "Payable Amount",
                                 render: (value, row) => {
+                                    const isCancelled =
+                                        String(row.status || "").toLowerCase() === "cancelled";
+
+                                    const payableAmount = isCancelled
+                                        ? Number(row.refund_amount || 0) +
+                                        Number(row.seller_delivery_charges || 0)
+                                        : Number(value || 0);
+
                                     const isUnpaid =
                                         !row.settlement_date &&
                                         Number(row.seller_amount || 0) === 0;
@@ -461,7 +479,7 @@ const SellerDetails = () => {
                                                 borderColor: isUnpaid ? "#ffc107" : "#198754",
                                             }}
                                         >
-                                            {formatCurrency(value)}
+                                            {formatCurrency(payableAmount)}
                                         </span>
                                     );
                                 },
@@ -596,8 +614,11 @@ const SellerDetails = () => {
                                     ["Payment ID", selectedPayment.id],
                                     [
                                         "Order Number",
-                                        selectedPayment.order_number ||
-                                        selectedPayment.order_id,
+                                        selectedPayment.order_number || selectedPayment.order_id,
+                                    ],
+                                    [
+                                        "Order Status",
+                                        selectedPayment.order_status,
                                     ],
                                     [
                                         "Payment Method",
@@ -620,8 +641,16 @@ const SellerDetails = () => {
                                         formatCurrency(selectedPayment.platform_fee),
                                     ],
                                     [
+                                        "Pickup Fee",
+                                        formatCurrency(selectedPayment.seller_delivery_charges),
+                                    ],
+                                    [
                                         "Refund Amount",
-                                        formatCurrency(selectedPayment.refund_amount),
+                                        formatCurrency((selectedPayment.settlement_status == 'cancelled' ? (selectedPayment.refund_amount + selectedPayment.seller_delivery_charges) : selectedPayment.refund_amount)),
+                                    ],
+                                    [
+                                        "Payable Amount",
+                                        formatCurrency(payableAmount),
                                     ],
                                     [
                                         "Settlement Status",
@@ -641,6 +670,7 @@ const SellerDetails = () => {
                                             <div className="small text-muted mb-1">
                                                 {label}
                                             </div>
+
                                             <div className="fw-semibold text-break">
                                                 {value === null ||
                                                     value === undefined ||

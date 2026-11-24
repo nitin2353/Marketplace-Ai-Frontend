@@ -30,7 +30,7 @@ const calcTotals = (cart, discount, totalDeliveryAmount) => {
     const saved = cart.reduce((s, i) => s + Math.max(0, Number(i.old_price || 0) - Number(i.price)) * i.qty, 0);
     const couponSave = (subtotal * discount / 100);
     // const delivery = subtotal >= 499 ? 0 : 479;
-    const delivery = (totalDeliveryAmount < 0 ) ? 49 : totalDeliveryAmount;
+    const delivery = (totalDeliveryAmount < 0) ? 49 : totalDeliveryAmount;
     const tax_amount = cart.reduce((s, i) => s + (Number(i.product_price) * i.qty) * (Number(i.tax_percentage || 0) / 100), 0);
     const total = subtotal - couponSave + delivery?.shippingCharge + tax_amount;
     return { subtotal, saved, couponSave, delivery, tax_amount, total };
@@ -81,7 +81,7 @@ export default function CheckoutPage() {
     const [placing, setPlacing] = useState(false);
     const [orderId, setOrderId] = useState("");
     const [isFirstOrder, setIstFirstOrder] = useState(0);
-
+    const [loading, setLoading] = useState(false);
     const { coupon, setCoupon } = useAuthWrapper();
 
 
@@ -284,6 +284,8 @@ export default function CheckoutPage() {
         } catch (error) {
             console.error("COD ORDER ERROR:", error);
             toast.error(error?.message || "Failed to place COD order");
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -329,6 +331,7 @@ export default function CheckoutPage() {
                     contact: selectedAddr?.mobile || selectedAddr?.phone,
                 },
                 onSuccess: async (paymentData) => {
+                    setLoading(true)
                     try {
 
                         // STEP 3: Verify payment and create final order
@@ -363,6 +366,8 @@ export default function CheckoutPage() {
                     } catch (error) {
                         console.error("VERIFY AND CREATE ORDER ERROR:", error);
                         toast.error(error?.message || "Order creation failed after payment.");
+                    } finally {
+                        setLoading(false)
                     }
                 },
                 onFailure: (reason) => {
@@ -374,6 +379,8 @@ export default function CheckoutPage() {
         } catch (error) {
             console.error("ONLINE ORDER ERROR:", error);
             toast.error(error?.message || "Failed to initiate online payment");
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -526,6 +533,7 @@ export default function CheckoutPage() {
                     </>
                 )}
             </Container>
+            {loading && <GlobalLoader />}
         </div>
     );
 }

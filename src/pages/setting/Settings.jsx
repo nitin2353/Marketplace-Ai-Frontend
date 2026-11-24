@@ -23,7 +23,7 @@ export default function SettingsPage() {
     const [loading, setLoading] = useState(false);
     const [pageLoading, setPageLoading] = useState(true);
 
-    const { refresh } = useAuthWrapper();
+    const { refresh, setRefresh } = useAuthWrapper();
 
 
     const searchRef = useRef();
@@ -89,6 +89,7 @@ export default function SettingsPage() {
     useEffect(() => {
         fetchAllData();
     }, [refresh]);
+
 
     const fetchAllData = async () => {
         setPageLoading(true);
@@ -265,6 +266,8 @@ export default function SettingsPage() {
                             <Profile
                                 userProfile={userProfile}
                                 loading={loading}
+                                setRefresh={setRefresh}
+                                refresh={refresh}
                                 setLoading={setLoading}
                             />
                         )}

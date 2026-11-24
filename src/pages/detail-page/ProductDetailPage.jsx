@@ -25,6 +25,7 @@ import { GrLocation } from "react-icons/gr";
 import addressApi from "../../api/address.api";
 import { FaShop } from "react-icons/fa6";
 import shiprocketApi from "../../api/shiprocket.api";
+import { IoChatbubblesOutline } from "react-icons/io5";
 
 // ── Skeleton ────────────────────────────────────────────────────────────────
 function DetailSkeleton() {
@@ -128,13 +129,13 @@ export default function ProductDetail() {
 
       if (JWTService.isTokenAvailable()) {
         await fetchDefaultAddress();
+        fetchWishlist();
       }
     };
 
     initializeProductPage();
 
     // These can load independently
-    fetchWishlist();
     fetchReviews();
 
     window.scrollTo(0, 0);
@@ -403,15 +404,6 @@ export default function ProductDetail() {
 
 
 
-
-
-
-
-
-
-
-
-
   const isWished = wishlist.some(w => w.product_id === product?.id);
 
   if (loading) {
@@ -627,17 +619,52 @@ export default function ProductDetail() {
 
 
               {/* Quantity */}
-              <div className="d-flex align-items-center gap-4 mb-5">
+              <div className="d-flex align-items-center gap-4 mb-5 w-100">
+
                 <div className="d-flex align-items-center border rounded-pill p-1 bg-white shadow-sm">
-                  <button className="btn btn-sm btn-light rounded-circle shadow-none" style={{ width: 32, height: 32 }} disabled={displayStock === 0 || qty <= 1} onClick={() => setQty(q => Math.max(1, q - 1))}>-</button>
-                  <span className="px-3 fw-bold" style={{ minWidth: 40, textAlign: "center" }}>{displayStock === 0 ? 0 : qty}</span>
-                  <button className="btn btn-sm btn-light rounded-circle shadow-none" style={{ width: 32, height: 32 }} disabled={(displayStock === 0 || qty >= displayStock) || qty >= 10} onClick={() => setQty(q => Math.min(displayStock, q + 1))}>+</button>
+                  <button
+                    className="btn btn-sm btn-light rounded-circle shadow-none"
+                    style={{ width: 32, height: 32 }}
+                    disabled={displayStock === 0 || qty <= 1}
+                    onClick={() => setQty(q => Math.max(1, q - 1))}
+                  >
+                    -
+                  </button>
+
+                  <span className="px-3 fw-bold" style={{ minWidth: 40, textAlign: "center" }}>
+                    {displayStock === 0 ? 0 : qty}
+                  </span>
+
+                  <button
+                    className="btn btn-sm btn-light rounded-circle shadow-none"
+                    disabled={(displayStock === 0 || qty >= displayStock) || qty >= 10}
+                    onClick={() => setQty(q => Math.min(displayStock, q + 1))}
+                  >
+                    +
+                  </button>
                 </div>
+
                 <div className="d-flex flex-column">
                   <span className={`small fw-bold ${displayStock < 10 ? 'text-danger' : 'text-success'}`}>
-                    {displayStock === 0 ? "Out of Stock" : displayStock < 10 ? `Only ${displayStock} left!` : "In Stock"}
+                    {displayStock === 0
+                      ? "Out of Stock"
+                      : displayStock < 10
+                        ? `Only ${displayStock} left!`
+                        : "In Stock"}
                   </span>
                 </div>
+
+                {product.is_customizable && (
+                  <Button
+                    variant="primary"
+                    className="rounded-pill px-4 m-3 ms-auto"
+                    
+                    title="Customize your product"
+                    onClick={handleCustomizeWithSeller}
+                  >
+                    <IoChatbubblesOutline />
+                  </Button>
+                )}
               </div>
 
 
@@ -651,11 +678,7 @@ export default function ProductDetail() {
                   onClick={() => { handleBuyNow() }} disabled={displayStock === 0}>
                   <FiZap className="me-2" /> Buy Now
                 </Button>
-                {product.is_customizable && (
-                  <Button variant="dark" className="rounded-pill px-4" title="Customize" onClick={handleCustomizeWithSeller}>
-                    <FiMessageSquare />
-                  </Button>
-                )}
+
               </div>
 
               {/* Info Tabs */}

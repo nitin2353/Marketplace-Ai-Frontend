@@ -427,9 +427,9 @@ export default function SellerRegister() {
           <div>
             <div className="text-white mb-1" style={{ fontSize: "2.2rem", fontWeight: 900 }}>🛍️ FlashiBuy</div>
             <div className="text-white fw-bold mb-1" style={{ fontSize: "1.05rem", opacity: 0.95 }}>Seller registration</div>
-            <div style={{ color: "rgba(255,255,255,0.78)", fontSize: "0.87rem", marginBottom: 28, fontWeight: 600 }}>
+            {/* <div style={{ color: "rgba(255,255,255,0.78)", fontSize: "0.87rem", marginBottom: 28, fontWeight: 600 }}>
               Join 5 lakh+ sellers already growing with us
-            </div>
+            </div> */}
 
             {STEPS.map((s) => (
               <div key={s.id}>
@@ -593,7 +593,7 @@ export default function SellerRegister() {
                         error={errors.seller_signature_image}
                       />
 
-                      <div className="sr-note">🎁 Register now &amp; sell commission-free for 3 months!</div>
+                      {/* <div className="sr-note">🎁 Register now &amp; sell commission-free for 3 months!</div> */}
                     </>
                   )}
 
