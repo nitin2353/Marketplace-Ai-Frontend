@@ -2,7 +2,7 @@ import apiConfig from '../config/axios-config';
 import Groq from "groq-sdk";
 
 const groq = new Groq({
-  apiKey: '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',
+  apiKey: "",
   dangerouslyAllowBrowser: true 
 });
 
