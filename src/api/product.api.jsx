@@ -1,10 +1,7 @@
 import apiConfig from '../config/axios-config';
 import Groq from "groq-sdk";
 
-const groq = new Groq({
-  apiKey: "",
-  dangerouslyAllowBrowser: true 
-});
+const groq = new Groq();
 
 
 const getAllProducts = async () => {
