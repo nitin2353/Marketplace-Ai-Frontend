@@ -2,7 +2,7 @@ const API_BASE_URL = `https://api.nitinverma.blog/api/v1`;
 // const API_BASE_URL = `http://localhost:3000/api/v1`; 
 const FRONTEND_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}`;
 const BUSINESS_EMAIL = 'nv5327260@gmail.com'
-const GROK_API = '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'
+export const GROK_API = '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'
 
 
 
