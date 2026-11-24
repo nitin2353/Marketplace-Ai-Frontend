@@ -1,9 +1,8 @@
 import apiConfig from '../config/axios-config';
 import Groq from "groq-sdk";
-import { GROK_API } from '../helper/Constraints';
 
 const groq = new Groq({
-  apiKey: GROK_API,
+  apiKey: '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',
   dangerouslyAllowBrowser: true 
 });
 
