@@ -13,7 +13,6 @@ import { LogoutTab } from '../../helper/GlobalHelper';
 import { useNavigate } from "react-router-dom";
 import shiprocketApi from "../../api/shiprocket.api.jsx";
 
-const IMG_BASE = API_BASE_URL.replace("/api/v1", "/uploads/profiles/");
 
 const NAV_ITEMS = [
     { key: "profile", icon: "👤", label: "Profile" },

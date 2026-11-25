@@ -5,7 +5,7 @@ import Invoice, { invoiceNo } from "./Invoice";
 import styles from "../style/InvoicePage";
 import QRCode from "qrcode";
 import AiMarketPlaceApi from "../api/AiMarketPlaceApi";
-import { API_BASE_URL, FRONTEND_BASE_URL } from "../helper/Constraints";
+import { FRONTEND_BASE_URL } from "../helper/Constraints";
 
 
 
