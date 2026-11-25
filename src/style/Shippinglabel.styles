@@ -123,7 +123,7 @@ export default StyleSheet.create({
     phoneText: {
         fontSize: 8.5,
         color: "#111827",
-        marginTop: 4,
+        marginTop: '10px',
         fontWeight: "bold",
     },
 
@@ -136,6 +136,7 @@ export default StyleSheet.create({
     productRow: {
         flexDirection: "row",
         alignItems: "center",
+        marginTop: 4
     },
 
     productImage: {

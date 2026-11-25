@@ -401,7 +401,6 @@ export default function SellerRegister() {
             Welcome, <strong style={{ color: "var(--primary)" }}>{v.name}</strong>! Your application is under review.
             We'll notify you at <strong>{v.email}</strong> within 24–48 hours.
           </p>
-          <div className="sr-note justify-content-center">🎁 First 3 months — zero commission on all sales!</div>
           <div className="d-flex gap-2 flex-wrap justify-content-center mb-4">
             {["📦 List Products", "📊 View Dashboard", "💬 Seller Support"].map((b) => (
               <Badge key={b} bg="light" text="dark" className="px-3 py-2 fw-bold rounded-pill" style={{ fontSize: "0.8rem" }}>{b}</Badge>

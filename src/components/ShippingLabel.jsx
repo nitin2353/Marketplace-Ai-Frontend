@@ -460,6 +460,25 @@ const ShippingParcelLabel = ({
                     <View style={s.addressRow}>
                         <View style={s.addressBox}>
                             <Text style={s.sectionLabel}>
+                                SHIP FROM (RETURN IF NOT DELIVER)
+                            </Text>
+
+                            <Text style={s.nameText}>
+                                {safeText(seller?.name, "")}
+                            </Text>
+
+                            <Text style={s.addressText}>
+                                {safeText(shipFromAddress, "")}
+                                {"\n"}
+                                {safeText(seller?.city, "")} -{" "}
+                                {safeText(seller?.pincode, "")}
+                                {"\n"}
+                                {safeText(seller?.state, "")},{" "}
+                                {safeText(seller?.country, "India")}
+                            </Text>
+                        </View>
+                        <View style={s.addressBox}>
+                            <Text style={s.sectionLabel}>
                                 DELIVER TO
                             </Text>
 
@@ -484,26 +503,6 @@ const ShippingParcelLabel = ({
                                     "—"}
                             </Text>
                         </View>
-
-                        <View style={s.addressBox}>
-                            <Text style={s.sectionLabel}>
-                                SHIP FROM (RETURN IF NOT DELIVER)
-                            </Text>
-
-                            <Text style={s.nameText}>
-                                {safeText(seller?.name, "")}
-                            </Text>
-
-                            <Text style={s.addressText}>
-                                {safeText(shipFromAddress, "")}
-                                {"\n"}
-                                {safeText(seller?.city, "")} -{" "}
-                                {safeText(seller?.pincode, "")}
-                                {"\n"}
-                                {safeText(seller?.state, "")},{" "}
-                                {safeText(seller?.country, "India")}
-                            </Text>
-                        </View>
                     </View>
 
                     <View style={s.productBox}>
@@ -525,15 +524,17 @@ const ShippingParcelLabel = ({
                                     {safeText(shipment?.product_id, "")}
                                 </Text>
 
-                                <Text style={s.productMeta}>
-                                    Variant:{" "}
-                                    {shipment?.variant_color ||
-                                        shipment?.variant_size
-                                        ? `${shipment?.variant_color || ""
-                                            } ${shipment?.variant_size || ""
-                                            }`.trim()
-                                        : "—"}
-                                </Text>
+                                {shipment.variant_id &&
+                                    <Text style={s.productMeta}>
+                                        Variant:{" "}
+                                        {shipment?.variant_color ||
+                                            shipment?.variant_size
+                                            ? `${shipment?.variant_color || ""
+                                                } ${shipment?.variant_size || ""
+                                                }`.trim()
+                                            : "—"}
+                                    </Text>
+                                }
                             </View>
                         </View>
                     </View>

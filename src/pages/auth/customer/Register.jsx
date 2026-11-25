@@ -95,10 +95,6 @@ export default function Register() {
                     <p className="text-muted mb-3 fw-semibold">
                         Your FlashiBuy account is ready. Start exploring thousands of products!
                     </p>
-                    <div className="eco-offer justify-content-center mb-3">
-                        <span className="eco-offer-icon">🎁</span>
-                        ₹200 welcome coupon has been added to your wallet!
-                    </div>
                     <Button className="eco-btn-main w-100 text-white" onClick={() => navigate("/auth/login")}>
                         Start Shopping →
                     </Button>
