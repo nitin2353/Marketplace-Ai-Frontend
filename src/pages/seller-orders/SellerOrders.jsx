@@ -8,7 +8,7 @@ import JWTService from "../../config/jwt.config";
 import "./SellerOrders.css";
 import { FMT, FMT_DATE_TIME, FORMATED_TIME } from "../../helper/GlobalHelper";
 import OrderDrawer from "../../components/OrderDrawer";
-import { PAYMENT_METHOD_META, ORDER_STATUSES } from "../../helper/Constraints";
+import { PAYMENT_METHOD_META, ORDER_STATUSES, FRONTEND_BASE_URL } from "../../helper/Constraints";
 import PayBadge from "../../components/PayBadge";
 import SellerSidebar from "../../components/SellerSidebar.jsx";
 import SellerNavbar from "../../components/SellerNavbar.jsx";
@@ -30,7 +30,7 @@ const fmtDate = (d) =>
 
 const PER_PAGE = 15;
 
-
+console.log('FRONTEND_BASE_URL', FRONTEND_BASE_URL)
 
 const PAYMENT_STATUSES = [
     { value: "pending", label: "Pending" },

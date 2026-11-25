@@ -8,7 +8,7 @@ import { FRONTEND_BASE_URL } from '../helper/Constraints';
 import AiMarketPlaceApi from '../api/AiMarketPlaceApi';
 
 const BASE_URL = FRONTEND_BASE_URL;
-
+console.log('BASE_URL', BASE_URL)
 const InvoiceDownloadPage = () => {
     const { id } = useParams();
 

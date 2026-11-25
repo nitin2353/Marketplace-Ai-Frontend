@@ -1,5 +1,5 @@
-const API_BASE_URL = `https://api.nitinverma.blog/api/v1`; 
-// const API_BASE_URL = `http://localhost:3000/api/v1`; 
+// const API_BASE_URL = `https://api.nitinverma.blog/api/v1`; 
+const API_BASE_URL = `http://localhost:3000/api/v1`; 
 const FRONTEND_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}`;
 const BUSINESS_EMAIL = 'nv5327260@gmail.com'
 
