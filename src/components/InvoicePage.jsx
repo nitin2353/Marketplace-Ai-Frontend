@@ -5,7 +5,7 @@ import Invoice, { invoiceNo } from "./Invoice";
 import styles from "../style/InvoicePage";
 import QRCode from "qrcode";
 import AiMarketPlaceApi from "../api/AiMarketPlaceApi";
-import { API_BASE_URL } from "../helper/Constraints";
+import { API_BASE_URL, FRONTEND_BASE_URL } from "../helper/Constraints";
 
 
 
@@ -80,7 +80,7 @@ const InvoicePage = () => {
       setOrder(data);
 
       const verifyUrl =
-        `${API_BASE_URL}/order/invoice/${firstId}/${secondId}`;
+        `${FRONTEND_BASE_URL}/order/invoice/${firstId}/${secondId}`;
 
       const qr = await generateQrDataUrl(verifyUrl);
       setQrUrl(qr);
