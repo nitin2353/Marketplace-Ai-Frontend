@@ -4,7 +4,6 @@ const FRONTEND_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${window.locatio
 const BUSINESS_EMAIL = 'nv5327260@gmail.com'
 
 
-
 const AVB_COUNTRIES = ["India"];
 
 
