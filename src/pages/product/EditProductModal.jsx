@@ -599,9 +599,9 @@ export default function EditProductModal({ show, handleClose, product, setRefres
                                 <Col sm={6} md={6}>
                                     <Field label="Dimensions (L×W×H cm) *">
                                         <Row className="g-1">
-                                            <Col><Form.Control className="cp-input" type="number" min="0" placeholder="L" {...register("length", { required: "length price required" })} /></Col>
-                                            <Col><Form.Control className="cp-input" type="number" min="0" placeholder="W" {...register("width", { required: "width price required" })} /></Col>
-                                            <Col><Form.Control className="cp-input" type="number" min="0" placeholder="H" {...register("height", { required: "height price required" })} /></Col>
+                                            <Col><Form.Control className="cp-input" type="number" min="0" step="0.01" placeholder="L" {...register("length", { required: "length price required" })} /></Col>
+                                            <Col><Form.Control className="cp-input" type="number" min="0" step="0.01" placeholder="W" {...register("width", { required: "width price required" })} /></Col>
+                                            <Col><Form.Control className="cp-input" type="number" min="0" step="0.01" placeholder="H" {...register("height", { required: "height price required" })} /></Col>
                                         </Row>
                                     </Field>
                                 </Col>

@@ -695,7 +695,7 @@ export default function ProductDetail() {
                   {activeTab === "desc" && <p className="mb-0 text-muted" style={{ lineHeight: 1.7 }}>{product.description}</p>}
                   {activeTab === "policy" && (
                     <div className="small">
-                      <p className="mb-2"><strong>Free Delivery:</strong> On orders above ₹499.</p>
+                      {/* <p className="mb-2"><strong>Free Delivery:</strong> On orders above ₹499.</p> */}
                       <p className="mb-2"><strong>Returns:</strong> {product.is_return ? `Easy returns within ${product.return_replace_duration} days.` : "Non-returnable."}</p>
                       <p className="mb-2"><strong>Replacements:</strong> {product.is_replace ? `Easy replacements within ${product.return_replace_duration} days.` : "Non-replaceable."}</p>
                       {product.return_replace_instructions && (
