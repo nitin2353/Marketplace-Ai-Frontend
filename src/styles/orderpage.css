@@ -1,0 +1,614 @@
+/* ═══════════════════════════════════════════════════════════════
+   OrdersPage.css  —  same orange/indigo theme
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+    --p: #ff6b35;
+    --p2: #f7931e;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --bg: #f1f4ff;
+    --white: #ffffff;
+    --border: #e8eaf6;
+    --r-md: 12px;
+    --r-lg: 16px;
+    --r-xl: 20px;
+}
+
+/* ── Animations ── */
+.ord-fu {
+    animation: ordFu 0.4s ease both;
+}
+
+@keyframes ordFu {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Page shell ── */
+.ord-page {
+    min-height: 100vh;
+    background: var(--bg);
+}
+
+/* ── Hero header ── */
+.ord-hero {
+    background: linear-gradient(135deg, var(--p), var(--p2));
+    padding: 28px 0 52px;
+    position: relative;
+    overflow: hidden;
+}
+
+.ord-hero::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 32px;
+    background: var(--bg);
+    border-radius: 32px 32px 0 0;
+}
+
+.ord-hero-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.ord-hero-sub {
+    font-size: 0.84rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 700;
+}
+
+/* ── Stat chips ── */
+.ord-stat-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.ord-stat {
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 10px;
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.ord-stat-val {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+}
+
+.ord-stat-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.75);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ── Filter tabs ── */
+.ord-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.ord-tab {
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    background: var(--white);
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 6px 16px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: "Nunito", sans-serif;
+    transition: all 0.15s;
+}
+
+.ord-tab:hover {
+    border-color: #fbbf9a;
+    color: var(--p);
+}
+
+.ord-tab.active {
+    background: linear-gradient(135deg, var(--p), var(--p2));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(255, 107, 53, 0.3);
+}
+
+/* ── Search bar ── */
+.ord-search-wrap {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.ord-search {
+    width: 100%;
+    border: 1.5px solid var(--border) !important;
+    border-radius: 12px !important;
+    padding: 11px 16px 11px 42px !important;
+    font-size: 0.88rem !important;
+    font-family: "Nunito", sans-serif !important;
+    color: var(--text) !important;
+    background: var(--white) !important;
+    transition: border-color 0.15s, box-shadow 0.15s !important;
+}
+
+.ord-search:focus {
+    outline: none !important;
+    border-color: var(--p) !important;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1) !important;
+}
+
+.ord-search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    pointer-events: none;
+}
+
+/* ── Order card ── */
+.ord-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    margin-bottom: 14px;
+    transition: border-color 0.15s, transform 0.12s;
+    cursor: pointer;
+}
+
+.ord-card:hover {
+    border-color: #fbbf9a;
+    transform: translateY(-1px);
+}
+
+/* ── Card header ── */
+.ord-card-header {
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid #f1f4ff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ord-number {
+    font-size: 0.82rem;
+    font-weight: 900;
+    color: var(--p);
+    letter-spacing: 0.03em;
+}
+
+.ord-date {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+/* ── Status badge ── */
+.ord-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    font-weight: 900;
+    border-radius: 20px;
+    padding: 4px 12px;
+    text-transform: capitalize;
+    letter-spacing: 0.02em;
+}
+
+.ord-status.placed {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.ord-status.confirmed {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.ord-status.processing {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.ord-status.shipped {
+    background: #fdf4ff;
+    color: #7e22ce;
+}
+
+.ord-status.delivered {
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.ord-status.cancelled {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.ord-status.payment_failed {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+/* ── Payment badge ── */
+.ord-pay-badge {
+    font-size: 0.68rem;
+    font-weight: 800;
+    border-radius: 6px;
+    padding: 2px 8px;
+}
+
+.ord-pay-badge.paid {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.ord-pay-badge.pending {
+    background: #fff7ed;
+    color: #92400e;
+}
+
+.ord-pay-badge.failed {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.ord-pay-badge.refunded {
+    background: #f0f4ff;
+    color: #4338ca;
+}
+
+/* ── Card body ── */
+.ord-card-body {
+    padding: 14px 18px;
+}
+
+/* ── Product image strip ── */
+.ord-img-strip {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    align-items: center;
+}
+
+.ord-product-img {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+}
+
+.ord-product-img.more {
+    background: #f1f4ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 900;
+    color: var(--p);
+    border: 1.5px dashed #c7d0f5;
+}
+
+.ord-item-title {
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: var(--text);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+.ord-item-meta {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+/* ── Card footer ── */
+.ord-card-footer {
+    padding: 12px 18px 14px;
+    border-top: 1px solid #f1f4ff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ord-total {
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--p);
+}
+
+.ord-total-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 1px;
+}
+
+/* ── Action buttons ── */
+.ord-btn-view {
+    border: none !important;
+    border-radius: 10px !important;
+    background: linear-gradient(135deg, var(--p), var(--p2)) !important;
+    color: #fff !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    padding: 7px 18px !important;
+    cursor: pointer;
+    font-family: "Nunito", sans-serif !important;
+    transition: opacity 0.15s !important;
+    white-space: nowrap;
+}
+
+.ord-btn-view:hover {
+    opacity: 0.9 !important;
+}
+
+.ord-btn-cancel {
+    border: 1.5px solid #fca5a5 !important;
+    border-radius: 10px !important;
+    background: #fff !important;
+    color: #dc2626 !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    padding: 7px 16px !important;
+    cursor: pointer;
+    font-family: "Nunito", sans-serif !important;
+    transition: background 0.12s !important;
+    white-space: nowrap;
+}
+
+.ord-btn-cancel:hover {
+    background: #fff0f0 !important;
+}
+
+.ord-btn-reorder {
+    border: 1.5px solid var(--border) !important;
+    border-radius: 10px !important;
+    background: #fff !important;
+    color: var(--p) !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    padding: 7px 16px !important;
+    cursor: pointer;
+    font-family: "Nunito", sans-serif !important;
+    transition: background 0.12s !important;
+    white-space: nowrap;
+}
+
+.ord-btn-reorder:hover {
+    background: #fff5f0 !important;
+    border-color: #fbbf9a !important;
+}
+
+/* ── Timeline (inside detail panel) ── */
+.ord-timeline {
+    position: relative;
+    padding-left: 24px;
+    margin-top: 4px;
+}
+
+.ord-timeline::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: #e8eaf6;
+    border-radius: 2px;
+}
+
+.ord-tl-item {
+    position: relative;
+    padding-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.ord-tl-item:last-child {
+    padding-bottom: 0;
+}
+
+.ord-tl-dot {
+    position: absolute;
+    left: -21px;
+    top: 4px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #e8eaf6;
+    border: 2px solid var(--white);
+    transition: background 0.2s;
+}
+
+.ord-tl-dot.done {
+    background: #22c55e;
+}
+
+.ord-tl-dot.active {
+    background: var(--p);
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, .2);
+}
+
+.ord-tl-label {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.ord-tl-time {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+/* ── Expandable detail ── */
+.ord-detail {
+    background: #fafbff;
+    border-top: 1px solid #f1f4ff;
+    padding: 16px 18px;
+    animation: ordFu 0.25s ease;
+}
+
+/* ── Empty state ── */
+.ord-empty {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--white);
+    border-radius: var(--r-xl);
+    border: 1.5px dashed var(--border);
+}
+
+/* ── Skeleton ── */
+.ord-skel {
+    background: linear-gradient(90deg, #e8eaf6 25%, #f1f4ff 50%, #e8eaf6 75%);
+    background-size: 200% 100%;
+    animation: ordSkel 1.4s infinite;
+    border-radius: 8px;
+}
+
+@keyframes ordSkel {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ── Color dot ── */
+.ord-color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, .12);
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* ── Address info ── */
+.ord-addr-box {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 12px 14px;
+    font-size: 0.82rem;
+    color: #374151;
+    font-weight: 700;
+    line-height: 1.6;
+}
+
+/* ── Responsive ── */
+@media (max-width: 576px) {
+    .ord-hero {
+        padding: 20px 0 44px;
+    }
+
+    .ord-card-header {
+        gap: 6px;
+    }
+
+    .ord-product-img {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+/* ── Pagination ── */
+.ord-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+    padding: 16px 0;
+}
+
+.ord-page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ord-page-btn {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--white);
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-family: "Nunito", sans-serif;
+    transition: all 0.15s;
+    min-width: 36px;
+    text-align: center;
+}
+
+.ord-page-btn:hover:not(:disabled) {
+    border-color: #fbbf9a;
+    color: var(--p);
+}
+
+.ord-page-btn.active {
+    background: linear-gradient(135deg, var(--p), var(--p2));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.2);
+}
+
+.ord-page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.ord-page-dots {
+    font-size: 0.9rem;
+    color: var(--muted);
+    padding: 0 4px;
+    font-weight: 700;
+}

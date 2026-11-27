@@ -1,0 +1,37 @@
+/* Calendar */
+.pickup-calendar {
+    border: 1px solid #e5e7eb !important;
+    border-radius: 10px !important;
+}
+
+.pickup-calendar .react-datepicker__day {
+    position: relative;
+    border-radius: 6px;
+}
+
+/* Booked date - Green background */
+.pickup-calendar .booked-pickup-date {
+    color: #000000 !important;
+    background-color: #e0c322 !important;
+    border-radius: 6px !important;
+    opacity: 1 !important;
+}
+
+.can-request{
+    color: #daba08
+}
+
+/* Remove cross */
+.pickup-calendar .booked-pickup-date::after {
+    content: none !important;
+    display: none !important;
+}
+
+.pickup-calendar .booked-pickup-date:hover {
+    background-color: #f4f7bb !important;
+}
+
+/* Selected booked date */
+.pickup-calendar .booked-pickup-date--selected {
+    background-color: #bbf7d0 !important;
+}

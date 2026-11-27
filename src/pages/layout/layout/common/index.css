@@ -1,0 +1,325 @@
+/* Sidebar Designed */
+.sidebar-content {
+  position: relative;
+  height: 100vh !important;
+  background-color: var(--secondary-color);
+  color: var(--highlight-color);
+}
+
+
+#sidebar {
+  background-color: var(--secondary-color);
+  width: 245px;
+  min-width: 245px;
+  max-width: 245px;
+  height: 100vh;
+  background-position: center;
+  background-size: cover;
+  color: var(--highlight-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateX(0);
+  margin-left: 0;
+  transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1),
+              margin-left 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+  will-change: transform, margin-left;
+  /* border-right: 1px solid var(--primary-color); */
+}
+
+#sidebar.hide {
+  transform: translateX(-100%);
+  margin-left: -215px;
+}
+
+#sidebar .sub-menus {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+#sidebar .sub-menus::-webkit-scrollbar {
+  width: 6px;
+}
+
+#sidebar .sub-menus::-webkit-scrollbar-thumb {
+  background-color: var(--highlight-color);
+  border-radius: 3px;
+}
+
+#sidebar .sub-menus {
+  overflow-y: auto;
+  height: calc(100vh - 150px);
+  scrollbar-width: thin;
+  scrollbar-color: var(--highlight-color) transparent;
+}
+
+#sidebar .user-details {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--primary-color);
+}
+
+/* Header Designed */
+.header-content {
+  background-color: var(--primary-color) !important; 
+  height: 50px;
+}
+
+.header_badge {
+  background-color: var(--secondary-color) !important;
+}
+
+/* Footer Designed */
+.footer-content {
+  position: fixed;
+  bottom: 0px;
+  background-color: var(--primary-color);
+  height: 50px;
+  /* background-color: var(--secondary-color); */
+  color: var(--dark-color);
+  height: 40px;
+  z-index: 1000;
+}
+
+.company-logo {
+  font-size: large;
+  font-weight: 500;
+}
+
+.user-profile {
+  padding: 3px;
+  margin: 5px;
+  border: 2px solid var(--highlight-color);
+  height: 130px;
+  width: 130px;
+  border-radius: 50%;
+}
+
+.company-logo-image {
+  height: 120px;
+  width: 120px;
+}
+
+  .company-logo-topbar-image {
+    height: 50px;
+    width: 120px;
+  }
+
+.menu-list {
+  height: 2rem;
+}
+
+.active-sidebar {
+  background-color: var(--body-hightlighter);
+  height: 2.5rem;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 0 8px 8px 0;
+  position: relative;
+}
+
+.active-sidebar::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: var(--highlight-color);
+  border-radius: 0 3px 3px 0;
+}
+
+.sub-menus a {
+  color: var(--secondary-color)
+}
+
+.menu-list {
+  cursor: pointer;
+}
+
+.inactive-sidebar {
+  background-color: var(--secondary-color);
+}
+
+.header_badge_img {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.user-group.custom-pill {
+  background-color: var(--secondary-color);
+  color: var(--highlight-color);
+}
+
+/* ============ */
+
+.slide-icons {
+  display: flex;
+  gap: 15px;
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%) scaleX(1);
+  transform-origin: right center;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  opacity: 1;
+}
+
+.slide-icons.open {
+  transform: translateY(-50%) scaleX(1);
+  opacity: 1;
+}
+
+.slide-icons:not(.open) {
+  transform: translateY(-50%) scaleX(0);
+  opacity: 0;
+}
+
+.content-wrapper {
+  min-height: 100vh;
+}
+
+.wrapper-content {
+  min-height: 100vh;
+  width: 100%;
+}
+
+.wrapper-content>.flex-column {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  margin-bottom: 60px;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-content.full-width {
+  margin-left: 0;
+}
+
+@media (max-width: 768px) {
+  main {
+    padding: 5px;
+    margin-top: 45px; 
+  }
+
+  .main-content.full-width {
+    margin-left: 0;
+  }
+
+  .wrapper-content {
+    overflow-x: hidden;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .table-responsive {
+    border: none;
+  }
+
+  .header-content {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+  }
+
+  .slide-icons{
+    flex-direction: column;
+  }
+
+  .toggle-btn{
+    transform: rotate(-90deg);
+  }
+
+  .slide-icons.open {
+    flex-direction: column;
+    transform: translateX(76%) translateY(20px);
+  }
+
+  /* Mobile Sidebar Styles */
+  #sidebar {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
+    height: calc(100vh - 50px);
+    z-index: 1050;
+    box-shadow: 2px 0 20px rgba(0,0,0,0.15);
+    transform: translateX(0);
+    margin-left: 0;
+    transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1),
+                box-shadow 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+    will-change: transform;
+  }
+
+  #sidebar.hide {
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+
+  #sidebar:not(.hide) {
+    animation: slideInFromLeft 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  /* Mobile Overlay */
+  .mobile-overlay {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - 50px);
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1040;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s cubic-bezier(0.25, 0.1, 0.25, 1), 
+                visibility 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+    backdrop-filter: blur(2px);
+    pointer-events: none;
+  }
+
+  .mobile-overlay.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* Mobile Animation Keyframes */
+  @keyframes slideInFromLeft {
+    0% {
+      transform: translateX(-100%);
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* Menu item hover effects on mobile */
+  .menu-list:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}

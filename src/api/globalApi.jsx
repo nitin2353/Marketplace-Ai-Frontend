@@ -1,0 +1,59 @@
+import apiConfig from "../config/axios-config";
+
+
+const getCategories = async (data) => {
+  try {
+    const response = await apiConfig.get("/global/product/category");
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || {
+      message: "Something went wrong",
+    };
+  }
+};
+
+
+const getPickupScheduledDate = async () => {
+  try {
+    const response = await apiConfig.get(`/global/pickup-scheduled/date`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || {
+      message: "Something went wrong",
+    };
+  }
+};
+
+
+const createUserFeedback = async (feedback) => {
+    try {
+        const response = await apiConfig.post(`/global/user-feedback`, { feedback });
+        return response.data;
+
+    } catch (error) {
+        throw error.response?.data || {
+            message: "Something went wrong",
+        };
+    }
+};
+
+
+
+const getUserFeedback = async () => {
+  try {
+    const response = await apiConfig.get(`/global/user-feedback`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || {
+      message: "Something went wrong",
+    };
+  }
+};
+
+
+export default {
+    getCategories,
+    getPickupScheduledDate,
+    createUserFeedback,
+    getUserFeedback
+}

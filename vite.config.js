@@ -1,0 +1,58 @@
+
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { VitePWA } from "vite-plugin-pwa";
+
+export default defineConfig({
+  plugins: [
+    react(),
+
+    VitePWA({
+      registerType: "autoUpdate",
+
+      // Disable service worker in development
+      devOptions: {
+        enabled: false,
+      },
+
+      // Production service worker configuration
+      workbox: {
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+      },
+
+      manifest: {
+        name: "AshoNex",
+        short_name: "AshoNex",
+        description: "Your online AI Marketplace",
+        theme_color: "#2563eb",
+        background_color: "#ffffff",
+        display: "standalone",
+        start_url: "/",
+        scope: "/",
+
+        icons: [
+          {
+            src: "/logo-image.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "/logo-image.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any",
+          },
+        ],
+      },
+    }),
+  ],
+
+  build: {
+    outDir: "build",
+    emptyOutDir: true,
+  },
+});

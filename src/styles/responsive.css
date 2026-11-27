@@ -1,0 +1,74 @@
+/* ═══════════════════════════════════════════════════════
+   AI MARKETPLACE — Responsive Breakpoints
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Mobile ── */
+@media (max-width: 575px) {
+  .app-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .app-container { padding: 0 12px; }
+  .summary-card  { position: static; }
+
+  /* Cart */
+  .ord-card-footer { flex-direction: column; align-items: stretch; }
+  .ord-btn-cancel,
+  .ord-btn-reorder,
+  .ord-btn-view { text-align: center; }
+
+  /* Seller dashboard KPI */
+  .sdh-kpi-card { padding: 14px 12px; }
+  .sdh-kpi-value { font-size: 1.1rem; }
+
+  /* Checkout stepper */
+  .co-stepper { gap: 2px; }
+  .co-step-circle { width: 28px; height: 28px; font-size: .78rem; }
+
+  /* Table horizontal scroll */
+  .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
+/* ── Tablet ── */
+@media (min-width: 576px) and (max-width: 991px) {
+  .app-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .pd-sidebar { display: none; }
+}
+
+/* ── Desktop ── */
+@media (min-width: 992px) {
+  .app-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .app-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* ── Horizontal overflow prevention ── */
+html, body { overflow-x: hidden !important; max-width: 100vw; }
+
+/* ── Mobile nav ── */
+@media (max-width: 767px) {
+  .app-sidebar { display: none; }
+  .wish-card-img-wrap { aspect-ratio: 1/1; }
+  .sdh-card { padding: 16px; }
+}
+
+/* ── Stack cart/checkout on mobile ── */
+@media (max-width: 991px) {
+  .summary-card { position: static; margin-top: 20px; }
+  .co-fu-1 { margin-top: 16px; }
+}
+
+/* ── Sellers sidebar always visible on large screens ── */
+@media (min-width: 992px) {
+  .pd-sidebar { display: flex; }
+}

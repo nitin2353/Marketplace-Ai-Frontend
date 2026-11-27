@@ -1,0 +1,226 @@
+/* installNotification.css
+   Top-center popup, themed with the app's CSS variables. */
+
+.install-notification,
+.install-update-notification {
+  position: fixed;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  width: min(480px, calc(100vw - 24px));
+  padding: 16px 16px 16px 16px;
+  border: 2px solid var(--border-light, #e8eaf6);
+  border-radius: 20px;
+  background: var(--bg-surface, #fff);
+  color: var(--text-main, #111827);
+  box-shadow: var(--shadow-lg, 0 18px 45px rgba(0, 0, 0, 0.18));
+  font-family: var(--font-main, 'Nunito', sans-serif);
+  overflow: hidden;
+  animation: installSlideDown 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+
+/* Brand accent bar */
+.install-notification::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-gradient, linear-gradient(135deg, #2563eb, #1d4ed8));
+}
+
+.install-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  margin-top: 4px;
+  border-radius: 15px;
+  background: var(--primary-gradient, linear-gradient(135deg, #2563eb, #1d4ed8));
+  box-shadow: var(--shadow-sm, 0 6px 14px rgba(0, 0, 0, 0.14));
+  font-size: 26px;
+}
+
+.install-content {
+  flex: 1;
+  min-width: 0;
+  padding-top: 4px;
+}
+
+.install-content strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--text-main, #111827);
+}
+
+.install-content p {
+  margin: 0 0 12px;
+  color: var(--text-muted, #6b7280);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* iOS manual steps */
+.install-steps {
+  margin: 0 0 12px;
+  padding: 12px 14px 12px 32px;
+  border-radius: 14px;
+  background: var(--bg-hover, #eef1ff);
+  color: var(--text-main, #111827);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.6;
+  animation: installFade 0.25s ease both;
+}
+
+.install-steps li + li {
+  margin-top: 2px;
+}
+
+.install-share {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 8px;
+  background: var(--bg-surface, #fff);
+  border: 1px solid var(--border-light, #e8eaf6);
+  color: var(--primary, #2563eb);
+  font-weight: 800;
+  vertical-align: middle;
+}
+
+.install-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.install-button,
+.install-update-notification button {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  background: var(--primary-gradient, linear-gradient(135deg, #2563eb, #1d4ed8));
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+}
+
+.install-button:hover:not(:disabled),
+.install-update-notification button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 10px 22px rgba(0, 0, 0, 0.18));
+}
+
+.install-button:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.install-later {
+  border: none;
+  background: transparent;
+  padding: 10px 6px;
+  color: var(--text-muted, #6b7280);
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.install-later:hover {
+  color: var(--primary, #2563eb);
+}
+
+.install-close {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--bg-hover, #eef1ff);
+  color: var(--text-muted, #6b7280);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.2s, color 0.15s;
+}
+
+.install-close:hover {
+  transform: rotate(90deg);
+  color: var(--primary, #2563eb);
+}
+
+.install-button:focus-visible,
+.install-later:focus-visible,
+.install-close:focus-visible {
+  outline: 3px solid var(--primary, #2563eb);
+  outline-offset: 2px;
+}
+
+@keyframes installSlideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes installFade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (max-width: 480px) {
+  .install-notification,
+  .install-update-notification {
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    gap: 10px;
+    padding: 14px 12px;
+    border-radius: 18px;
+  }
+
+  .install-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+
+  .install-actions {
+    gap: 6px;
+  }
+
+  .install-button {
+    flex: 1;
+    padding: 10px 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .install-notification,
+  .install-update-notification,
+  .install-steps {
+    animation: none;
+  }
+}
