@@ -211,7 +211,6 @@ const SellerDetails = () => {
 
     const isCancelledOrder =
         String(selectedPayment?.settlement_status || "").toLowerCase() === "cancelled";
-    console.log('selectedPayment', selectedPayment)
 
     const payableAmount = isCancelledOrder
         ? Number(selectedPayment?.refund_amount || 0) +
@@ -422,7 +421,6 @@ const SellerDetails = () => {
                             <small className="text-muted">Paid</small>
                         </span>
                     </h5>
-                    {console.log('payments', payments)}
                     <DataTable
                         tableData={payments}
                         isHeader={true}

@@ -116,7 +116,7 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                 <div className="card-expanded-content" onClick={(e) => e.stopPropagation()}>
                     <hr className="my-3 opacity-10" />
                     <Row className="g-4">
-                        <Col lg={9}>
+                        <Col lg={8}>
                             <h6 className="section-title">Order Items</h6>
                             <Stack gap={3}>
                                 {loadingDetails ? (
@@ -201,8 +201,8 @@ const LocalOrderCard = ({ order, onCancel, cancelling, onReturn, onReplace }) =>
                                 })}
                             </Stack>
                         </Col>
-                        <Col lg={3}>
-                            <div className="bg-light p-3 h-100 mb-5">
+                        <Col lg={4}>
+                            <div className="bg-light p-3 h-100 w-100 mb-5">
                                 <h6 className="section-title">Timeline & Delivery</h6>
                                 <OrderTimeline currentStatus={order.order_status} order={order} />
                                 {address && (

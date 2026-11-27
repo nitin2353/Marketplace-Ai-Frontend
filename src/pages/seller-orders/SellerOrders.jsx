@@ -30,7 +30,6 @@ const fmtDate = (d) =>
 
 const PER_PAGE = 15;
 
-console.log('FRONTEND_BASE_URL', FRONTEND_BASE_URL)
 
 const PAYMENT_STATUSES = [
     { value: "pending", label: "Pending" },

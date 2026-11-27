@@ -7,6 +7,7 @@ import GlobalLoader from "../../../components/GlobalLoader";
 import { useNavigate } from "react-router-dom";
 import PickupAvailabilityCheck from "../../../components/PickupAvailabilityCheck";
 import { AVB_COUNTRIES } from "../../../helper/Constraints";
+import JWTService from "../../../config/jwt.config";
 
 // ── Font + Style Injection ──────────────────────────────────────────────────
 const injectStyle = () => {
@@ -285,9 +286,7 @@ export default function SellerRegister() {
   const [step, setStep] = useState(1);
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
   const [apiError, setApiError] = useState(null);
-  const [submittedData, setSubmittedData] = useState(null);
   const [pickupResult, setPickupResult] = useState(null);
   const [isValidLocation, setIsValidLocation] = useState(true);
 
@@ -374,10 +373,9 @@ export default function SellerRegister() {
 
       if (res.success) {
         toast.success(res.message || "Your Account successfully Created");
-        localStorage.setItem("token", res?.data?.token);
+        JWTService.saveTokenDetails(res?.data?.token || "");
         localStorage.setItem('pickup_serviceable', res?.data.user.pickup_serviceable)
-        setSubmittedData({ name: payload.name, email: payload.email });
-        setDone(true);
+        navigate('/auth/login')
       }
     } catch (err) {
       console.error("Registration error:", err);
@@ -389,28 +387,6 @@ export default function SellerRegister() {
     }
   };
 
-  // ── SUCCESS SCREEN ────────────────────────────────────────────────────────
-  if (done) {
-    const v = submittedData || getValues();
-    return (
-      <Container fluid className="sr-hero d-flex align-items-center justify-content-center p-3" style={{ minHeight: "100vh" }}>
-        <Card className="sr-card text-center p-4 p-md-5" style={{ maxWidth: 480, width: "100%" }}>
-          <div className="sr-success-ring">🎊</div>
-          <h2 className="sr-section-title" style={{ fontSize: "1.8rem" }}>Seller account created!</h2>
-          <p className="text-muted fw-semibold mb-3">
-            Welcome, <strong style={{ color: "var(--primary)" }}>{v.name}</strong>! Your application is under review.
-            We'll notify you at <strong>{v.email}</strong> within 24–48 hours.
-          </p>
-          <div className="d-flex gap-2 flex-wrap justify-content-center mb-4">
-            {["📦 List Products", "📊 View Dashboard", "💬 Seller Support"].map((b) => (
-              <Badge key={b} bg="light" text="dark" className="px-3 py-2 fw-bold rounded-pill" style={{ fontSize: "0.8rem" }}>{b}</Badge>
-            ))}
-          </div>
-          <Button className="sr-btn-main w-100" onClick={() => navigate("/auth/login")}>Continue to login →</Button>
-        </Card>
-      </Container>
-    );
-  }
 
   const [title, sub] = STEP_TITLES[step];
 
@@ -770,7 +746,7 @@ export default function SellerRegister() {
                           <Field label="Account number *" icon="🏦" error={errors.account_number} className="">
                             <Form.Control
                               className={ic(errors.account_number, true, "sr-sensitive")}
-                              placeholder="123456789012"
+                              placeholder="Your Account Number"
                               maxLength={18}
                               inputMode="numeric"
                               {...register("account_number", {
@@ -784,7 +760,7 @@ export default function SellerRegister() {
                           <Field label="IFSC code *" icon="🔖" error={errors.ifsc} className="">
                             <Form.Control
                               className={ic(errors.ifsc, true, "sr-upper")}
-                              placeholder="SBIN0001234"
+                              placeholder="Your IFSC Code"
                               maxLength={11}
                               {...register("ifsc", {
                                 required: "IFSC code is required",
@@ -826,7 +802,7 @@ export default function SellerRegister() {
                           <Field label="UPI ID (optional)" icon="📲" error={errors.upi_id} className="">
                             <Form.Control
                               className={ic(errors.upi_id, true)}
-                              placeholder="rahul@upi"
+                              placeholder="Your Upi Id"
                               {...register("upi_id", {
                                 pattern: { value: /^[\w.\-_]{3,}@[a-zA-Z]{3,}$/, message: "Enter valid UPI ID" },
                               })}
@@ -840,7 +816,7 @@ export default function SellerRegister() {
                           <Field label="PAN number *" icon="🪪" error={errors.pan} className="">
                             <Form.Control
                               className={ic(errors.pan, true, "sr-upper")}
-                              placeholder="ABCDE1234F"
+                              placeholder="Your Pan Number"
                               maxLength={10}
                               {...register("pan", {
                                 required: "PAN number is required",
@@ -853,7 +829,7 @@ export default function SellerRegister() {
                           <Field label="GSTIN (optional)" error={errors.gstin} className="">
                             <Form.Control
                               className={ic(errors.gstin, false, "sr-upper")}
-                              placeholder="22AAAAA0000A1Z5"
+                              placeholder="Your GSTIN Number"
                               maxLength={15}
                               {...register("gstin", {
                                 pattern: { value: /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, message: "Enter valid GSTIN" },

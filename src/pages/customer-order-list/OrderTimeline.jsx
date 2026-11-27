@@ -1,5 +1,5 @@
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
     TIMELINE_STEPS,
@@ -11,73 +11,72 @@ import "./orderpage.css";
 
 const TRACKING_REFRESH_INTERVAL = 2 * 60 * 1000;
 
+const JOURNEY_STAGES = [
+    { key: "confirmed", label: "Order Confirmed" },
+    { key: "processing", label: "Processing / Ready For Pickup" },
+    { key: "manifested", label: "Manifested" },
+    { key: "picked_up", label: "Picked Up" },
+    { key: "in_transit", label: "In Transit" },
+    { key: "at_destination_hub", label: "At Destination Hub" },
+    { key: "out_for_delivery", label: "Out For Delivery" },
+    { key: "delivered", label: "Delivered" }
+];
+
+const STAGE_INDEX = Object.fromEntries(
+    JOURNEY_STAGES.map((stage, index) => [stage.key, index])
+);
+
 const STATUS_ALIASES = {
     placed: "confirmed",
     shipped: "in_transit",
+    ready_for_pickup: "processing",
+    ready_for_pickup_order: "processing",
+    manifested: "manifested",
+    pickedup: "picked_up",
+    pickup: "picked_up",
+    delivered: "delivered"
 };
 
-// Delhivery status mapping
-const normalizeCourierStatus = (shipment) => {
-    const rawStatus = String(
-        shipment?.Status?.Status || ""
-    ).trim().toLowerCase();
+const CANCELLED_STATUSES = new Set([
+    "cancelled",
+    "payment_failed"
+]);
 
-    if (!rawStatus) return null;
+const normalize = (value = "") =>
+    String(value)
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "");
 
-    if (
-        rawStatus.includes("undelivered") ||
-        rawStatus.includes("return to origin") ||
-        rawStatus.includes("rto")
-    ) {
-        return null;
-    }
+const normalizeSellerStatus = (status) => {
+    const value = normalize(status);
 
-    if (rawStatus.includes("delivered")) {
-        return "delivered";
-    }
-
-    if (rawStatus.includes("out for delivery")) {
-        return "out_for_delivery";
-    }
-
-    if (
-        rawStatus.includes("destination hub") ||
-        rawStatus.includes("reached destination") ||
-        rawStatus.includes("arrived at destination")
-    ) {
-        return "at_destination_hub";
-    }
-
-    if (
-        rawStatus.includes("in transit") ||
-        rawStatus.includes("in-transit")
-    ) {
-        return "in_transit";
-    }
-
-    if (
-        rawStatus.includes("picked up") ||
-        rawStatus.includes("picked-up") ||
-        rawStatus.includes("pickup done") ||
-        rawStatus.includes("shipment picked")
-    ) {
-        return "picked_up";
-    }
-
-    if (rawStatus.includes("manifest")) {
-        return "manifested";
-    }
-
-    return null;
+    return STATUS_ALIASES[value] || value;
 };
 
-// Extract Delhivery response
+const formatTrackingDate = (date) => {
+    if (!date) return "";
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) return "";
+
+    return parsedDate.toLocaleString("en-IN", {
+        timeZone: "Asia/Kolkata",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+    });
+};
+
+// Extract Delhivery response safely
 const extractShipments = (response) => {
     const payload = response?.data ?? response;
 
-    if (Array.isArray(payload)) {
-        return payload;
-    }
+    if (Array.isArray(payload)) return payload;
 
     if (Array.isArray(payload?.ShipmentData)) {
         return payload.ShipmentData;
@@ -90,188 +89,619 @@ const extractShipments = (response) => {
     return [];
 };
 
-// Format date
-const formatTrackingDate = (date) => {
-    if (!date) return "";
+// Delhivery shipment status
+const normalizeCourierStatus = (shipment) => {
+    const raw = normalize(shipment?.Status?.Status);
 
-    const parsedDate = new Date(date);
+    if (!raw) return null;
 
-    if (Number.isNaN(parsedDate.getTime())) {
-        return "";
+    if (
+        raw.includes("undelivered") ||
+        raw.includes("returntoorigin") ||
+        raw.includes("rto") ||
+        raw.includes("cancelled") ||
+        raw.includes("exception")
+    ) {
+        return null;
     }
 
-    return parsedDate.toLocaleString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-    });
+    if (raw.includes("delivered")) return "delivered";
+
+    if (raw.includes("outfordelivery")) {
+        return "out_for_delivery";
+    }
+
+    if (
+        raw.includes("destinationhub") ||
+        raw.includes("reacheddestination") ||
+        raw.includes("arrivedatdestination")
+    ) {
+        return "at_destination_hub";
+    }
+
+    if (
+        raw.includes("pickedup") ||
+        raw.includes("pickupdone") ||
+        raw.includes("shipmentpicked")
+    ) {
+        return "picked_up";
+    }
+
+    if (
+        raw.includes("manifest") ||
+        raw.includes("datareceived")
+    ) {
+        return "manifested";
+    }
+
+    if (
+        raw.includes("intransit") ||
+        raw.includes("dispatched") ||
+        raw.includes("arrivedathub") ||
+        raw.includes("departedfromhub") ||
+        raw.includes("shipmentarrived")
+    ) {
+        return "in_transit";
+    }
+
+    return null;
 };
+
+// Map individual tracking scans to journey stages
+const getScanStage = (scan) => {
+    const detail = scan?.ScanDetail || {};
+
+    const value = normalize(
+        `${detail.Scan || ""} ${detail.Instructions || ""}`
+    );
+
+    if (!value) return null;
+
+    // More specific matches first
+    if (
+        value.includes("undelivered") ||
+        value.includes("returntoorigin") ||
+        value.includes("rto") ||
+        value.includes("exception")
+    ) {
+        return null;
+    }
+
+    if (value.includes("delivered")) {
+        return "delivered";
+    }
+
+    if (
+        value.includes("outfordelivery") ||
+        value.includes("outfordel")
+    ) {
+        return "out_for_delivery";
+    }
+
+    if (
+        value.includes("destinationhub") ||
+        value.includes("reacheddestination") ||
+        value.includes("arrivedatdestination")
+    ) {
+        return "at_destination_hub";
+    }
+
+    if (
+        value.includes("pickedup") ||
+        value.includes("pickupdone") ||
+        value.includes("shipmentpicked")
+    ) {
+        return "picked_up";
+    }
+
+    if (
+        value.includes("manifest") ||
+        value.includes("datareceived")
+    ) {
+        return "manifested";
+    }
+
+    if (
+        value.includes("intransit") ||
+        value.includes("dispatched") ||
+        value.includes("arrivedathub") ||
+        value.includes("departedfromhub") ||
+        value.includes("shipmentarrived") ||
+        value.includes("forwarded")
+    ) {
+        return "in_transit";
+    }
+
+    return null;
+};
+
+const getSortedScans = (scans = []) => {
+    if (!Array.isArray(scans)) return [];
+
+    return scans
+        .filter(scan => scan?.ScanDetail)
+        .map((scan, index) => ({
+            ...scan,
+            _originalIndex: index
+        }))
+        .sort((a, b) => {
+            const dateA = new Date(
+                a.ScanDetail?.ScanDateTime || 0
+            ).getTime();
+
+            const dateB = new Date(
+                b.ScanDetail?.ScanDateTime || 0
+            ).getTime();
+
+            return dateB - dateA;
+        });
+};
+
+function ParcelJourney({
+    parcel,
+    orderStatus,
+    expandedStages,
+    onToggleStage
+}) {
+    const scans = useMemo(
+        () => getSortedScans(parcel.scans),
+        [parcel.scans]
+    );
+
+    const groupedScans = useMemo(() => {
+        const groups = Object.fromEntries(
+            JOURNEY_STAGES.map(stage => [stage.key, []])
+        );
+
+        scans.forEach(scan => {
+            const stage = getScanStage(scan);
+
+            if (stage && groups[stage]) {
+                groups[stage].push(scan);
+            }
+        });
+
+        return groups;
+    }, [scans]);
+
+    // Find the furthest confirmed tracking stage
+    const scanStages = scans
+        .map(getScanStage)
+        .filter(Boolean);
+
+    const latestScanStage = scanStages.reduce(
+        (latest, stage) =>
+            STAGE_INDEX[stage] > STAGE_INDEX[latest]
+                ? stage
+                : latest,
+        scanStages[0] || null
+    );
+
+    const courierStatus = normalizeCourierStatus({
+        Status: { Status: parcel.courierStatus }
+    });
+
+    const sellerStatus = normalizeSellerStatus(orderStatus);
+
+    const effectiveStatus =
+        courierStatus ||
+        latestScanStage ||
+        sellerStatus;
+
+    const currentIndex =
+        STAGE_INDEX[effectiveStatus] ?? -1;
+
+    const exceptionalStatus = normalize(
+        parcel.courierStatus
+    );
+
+    const hasException =
+        exceptionalStatus.includes("undelivered") ||
+        exceptionalStatus.includes("returntoorigin") ||
+        exceptionalStatus.includes("exception") ||
+        exceptionalStatus === "rto";
+
+    return (
+        <div className="parcel-journey">
+
+            {JOURNEY_STAGES.map((stage, index) => {
+                const stageScans = groupedScans[stage.key];
+
+                const isCompleted =
+                    currentIndex >= 0 &&
+                    index < currentIndex;
+
+                const isCurrent =
+                    index === currentIndex;
+
+                const isExpanded =
+                    Boolean(expandedStages[stage.key]);
+
+                const hasScans = stageScans.length > 0;
+
+                const collapseId =
+                    `journey-${parcel.awb}-${stage.key}`;
+
+                return (
+                    <div
+                        key={stage.key}
+                        className="d-flex gap-3 position-relative journey-stage"
+                    >
+                        {/* Timeline marker */}
+                        <div className="d-flex flex-column align-items-center">
+                            <div
+                                className={`journey-marker ${isCompleted
+                                    ? "completed"
+                                    : isCurrent
+                                        ? "current"
+                                        : "pending"
+                                    }`}
+                            >
+                                <i className={`fas ${isCompleted || (
+                                    isCurrent &&
+                                    stage.key === "delivered"
+                                )
+                                    ? "fa-check"
+                                    : "fa-circle"
+                                    }`} />
+                            </div>
+
+                            {index !== JOURNEY_STAGES.length - 1 && (
+                                <div
+                                    className={`journey-line ${isCompleted
+                                        ? "completed"
+                                        : ""
+                                        }`}
+                                />
+                            )}
+                        </div>
+
+                        {/* Stage content */}
+                        <div className="flex-grow-1 pb-3 min-w-0 cursor-pointer"
+                            onClick={() =>
+                                onToggleStage(stage.key)
+                            }
+                        >
+
+                            <div className="d-flex align-items-center justify-content-between gap-2">
+
+                                <div className="min-w-0">
+                                    <strong className="small">
+                                        {stage.label}
+                                    </strong>
+
+                                    {isCurrent && (
+                                        <span className="ms-2 badge bg-primary">
+                                            Current
+                                        </span>
+                                    )}
+                                </div>
+
+                                {hasScans && (
+                                    <button
+                                        type="button"
+                                        className="journey-toggle"
+                                        aria-expanded={isExpanded}
+                                        aria-controls={collapseId}
+                                        aria-label={`${isExpanded ? "Hide" : "Show"
+                                            } ${stage.label} tracking details`}
+                                    >
+
+
+                                        <i className={`fas ms-2 ${isExpanded
+                                            ? "fa-chevron-up"
+                                            : "fa-chevron-down"
+                                            }`} />
+                                    </button>
+                                )}
+                            </div>
+
+                            <small className="text-muted d-block mt-1">
+                                {hasScans
+                                    ? `${stageScans.length} tracking ${stageScans.length === 1
+                                        ? "update"
+                                        : "updates"
+                                    }`
+                                    : isCompleted
+                                        ? "Completed"
+                                        : isCurrent
+                                            ? "In progress"
+                                            : "Awaiting update"}
+                            </small>
+
+                            {/* Stage scan accordion */}
+                            {hasScans && isExpanded && (
+                                <div
+                                    id={collapseId}
+                                    className="rounded-3 border p-3 mt-2 bg-light"
+                                >
+                                    {stageScans.map((scan, scanIndex) => {
+                                        const detail =
+                                            scan.ScanDetail || {};
+
+                                        return (
+                                            <div
+                                                key={`${parcel.awb}-${scan._originalIndex}`}
+                                                className={
+                                                    scanIndex !== stageScans.length - 1
+                                                        ? "border-bottom pb-3 mb-3"
+                                                        : ""
+                                                }
+                                            >
+                                                <strong className="small d-block">
+                                                    {detail.Scan ||
+                                                        "Shipment Update"}
+                                                </strong>
+
+                                                {detail.ScannedLocation && (
+                                                    <small className="text-muted d-block mt-1">
+                                                        <i className="fas fa-map-marker-alt me-1" />
+                                                        {detail.ScannedLocation}
+                                                    </small>
+                                                )}
+
+                                                {detail.Instructions && (
+                                                    <small className="text-muted d-block mt-1">
+                                                        {detail.Instructions}
+                                                    </small>
+                                                )}
+
+                                                {detail.ScanDateTime && (
+                                                    <small className="text-muted d-block mt-2">
+                                                        <i className="far fa-clock me-1" />
+                                                        {formatTrackingDate(
+                                                            detail.ScanDateTime
+                                                        )}
+                                                    </small>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            })}
+
+            {hasException && (
+                <div className="alert alert-warning small mt-2 mb-3">
+                    <i className="fas fa-exclamation-triangle me-2" />
+                    {parcel.courierStatus}
+                </div>
+            )}
+
+            {parcel.expectedDelivery && (
+                <div className="rounded-3 p-3 mb-3 bg-light">
+                    <small className="text-muted d-block">
+                        Expected Delivery
+                    </small>
+
+                    <strong>
+                        {formatTrackingDate(
+                            parcel.expectedDelivery
+                        )}
+                    </strong>
+                </div>
+            )}
+
+            {parcel.deliveryDate && (
+                <div className="alert alert-success small mb-0">
+                    <i className="fas fa-check-circle me-2" />
+                    Delivered on{" "}
+                    {formatTrackingDate(parcel.deliveryDate)}
+                </div>
+            )}
+        </div>
+    );
+}
 
 function OrderTimeline({ currentStatus, order }) {
     const [parcels, setParcels] = useState([]);
     const [loading, setLoading] = useState(false);
     const [trackingError, setTrackingError] = useState("");
 
-    // Only one parcel expanded at a time
     const [expandedAwb, setExpandedAwb] = useState(null);
+    const [expandedStages, setExpandedStages] = useState({});
 
-    const normalizedStatus = String(currentStatus || "")
-        .trim()
-        .toLowerCase();
+    const normalizedStatus = normalize(currentStatus);
 
     const sellerStatus =
         STATUS_ALIASES[normalizedStatus] || normalizedStatus;
 
-    const isCancelled = [
-        "cancelled",
-        "payment_failed",
-    ].includes(normalizedStatus);
+    const isCancelled = CANCELLED_STATUSES.has(normalizedStatus);
 
-    // Unique AWBs
+    const orderItems = useMemo(
+        () => Array.isArray(order?.items) ? order.items : [],
+        [order?.items]
+    );
+
     const orderAwbs = useMemo(() => {
         return [
             ...new Set(
-                (order?.items || [])
+                orderItems
                     .map(item =>
                         String(
-                            item?.waybill || item?.awb || ""
+                            item?.waybill ||
+                            item?.awb ||
+                            ""
                         ).trim()
                     )
                     .filter(Boolean)
-            ),
+            )
         ];
-    }, [order?.items]);
+    }, [orderItems]);
 
-    const trackingKey = [
-        order?.order_number ||
-        order?.order_id ||
-        order?.id ||
-        "",
-        orderAwbs.join(","),
-    ].join("|");
+    const trackingKey = useMemo(
+        () => [
+            order?.order_number ||
+            order?.order_id ||
+            order?.id ||
+            "",
+            orderAwbs.join(",")
+        ].join("|"),
+        [
+            order?.order_number,
+            order?.order_id,
+            order?.id,
+            orderAwbs
+        ]
+    );
 
-    // Fetch tracking
-    useEffect(() => {
-        let isMounted = true;
-        let timer;
+    const fetchTracking = useCallback(async (signal) => {
+        if (
+            isCancelled ||
+            !order ||
+            !orderAwbs.length
+        ) {
+            setParcels([]);
+            setTrackingError("");
+            return;
+        }
 
-        const fetchTracking = async () => {
-            if (
-                isCancelled ||
-                !order ||
-                !orderAwbs.length
-            ) {
-                if (isMounted) {
-                    setParcels([]);
-                    setLoading(false);
-                    setTrackingError("");
+        setLoading(true);
+        setTrackingError("");
+
+        try {
+            const response =
+                await fetchOrderStatusByTracking(order);
+
+            if (signal.aborted) return;
+
+            const shipments = extractShipments(response);
+
+            const shipmentMap = new Map();
+
+            shipments.forEach(item => {
+                const shipment = item?.Shipment || item;
+
+                const awb = String(
+                    shipment?.AWB || ""
+                ).trim();
+
+                if (awb) {
+                    shipmentMap.set(awb, shipment);
                 }
-                return;
+            });
+
+            const formattedParcels = orderAwbs.map(awb => {
+                const shipment = shipmentMap.get(awb);
+
+                const item = orderItems.find(
+                    product =>
+                        String(
+                            product?.waybill ||
+                            product?.awb ||
+                            ""
+                        ).trim() === awb
+                );
+
+                return {
+                    awb,
+                    parcelName:
+                        item?.product_title ||
+                        item?.title ||
+                        "Shipment Parcel",
+
+                    refnum: shipment?.ReferenceNo || "",
+
+                    status:
+                        normalizeCourierStatus(shipment) ||
+                        sellerStatus,
+
+                    courierStatus:
+                        shipment?.Status?.Status || "",
+
+                    location:
+                        shipment?.Status?.StatusLocation || "",
+
+                    statusDate:
+                        shipment?.Status?.StatusDateTime || null,
+
+                    expectedDelivery:
+                        shipment?.ExpectedDeliveryDate || null,
+
+                    deliveryDate:
+                        shipment?.DeliveryDate || null,
+
+                    scans: Array.isArray(shipment?.Scans)
+                        ? shipment.Scans
+                        : [],
+
+                    trackingAvailable: Boolean(shipment)
+                };
+            });
+
+            if (!signal.aborted) {
+                setParcels(formattedParcels);
             }
 
-            try {
-                if (isMounted) {
-                    setLoading(true);
-                    setTrackingError("");
-                }
-
-                const response =
-                    await fetchOrderStatusByTracking(order);
-
-                const shipments = extractShipments(response);
-
-                const shipmentMap = new Map();
-
-                shipments.forEach((item) => {
-                    const shipment = item?.Shipment || item;
-
-                    if (shipment?.AWB) {
-                        shipmentMap.set(
-                            String(shipment.AWB).trim(),
-                            shipment
-                        );
-                    }
-                });
-                const formattedParcels = orderAwbs.map((awb) => {
-                    const shipment = shipmentMap.get(awb);
-
-                    const courierStatus =
-                        normalizeCourierStatus(shipment);
-
-                    return {
-                        awb,
-                        parcelName: order.items.map(ele => ({waybill: ele.waybill, title: ele.product_title})),
-                        refnum: shipment?.ReferenceNo || "",
-
-                        status: courierStatus || sellerStatus,
-
-                        courierStatus:
-                            shipment?.Status?.Status || "",
-
-                        location:
-                            shipment?.Status?.StatusLocation || "",
-
-                        statusDate:
-                            shipment?.Status?.StatusDateTime || null,
-
-                        expectedDelivery:
-                            shipment?.ExpectedDeliveryDate || null,
-
-                        deliveryDate:
-                            shipment?.DeliveryDate || null,
-
-                        scans: shipment?.Scans || [],
-
-                        trackingAvailable: Boolean(shipment),
-                    };
-                });
-
-                if (isMounted) {
-                    setParcels(formattedParcels);
-                }
-
-            } catch (error) {
+        } catch (error) {
+            if (!signal.aborted) {
                 console.error("Tracking API Error:", error);
 
-                if (isMounted) {
-                    setTrackingError(
-                        "Unable to refresh shipping updates."
-                    );
-                }
+                setTrackingError(
+                    "Unable to refresh shipping updates. Please try again."
+                );
+            }
+        } finally {
+            if (!signal.aborted) {
+                setLoading(false);
+            }
+        }
+    }, [
+        trackingKey,
+        sellerStatus,
+        isCancelled,
+        order,
+        orderItems,
+        orderAwbs
+    ]);
 
-            } finally {
-                if (isMounted) {
-                    setLoading(false);
+    // Controlled polling with cleanup
+    useEffect(() => {
+        const controller = new AbortController();
 
-                    timer = setTimeout(
-                        fetchTracking,
-                        TRACKING_REFRESH_INTERVAL
-                    );
-                }
+        let timer;
+
+        const refresh = async () => {
+            await fetchTracking(controller.signal);
+
+            if (!controller.signal.aborted) {
+                timer = setTimeout(
+                    refresh,
+                    TRACKING_REFRESH_INTERVAL
+                );
             }
         };
 
         setParcels([]);
         setExpandedAwb(null);
-        fetchTracking();
+        setExpandedStages({});
+
+        refresh();
 
         return () => {
-            isMounted = false;
+            controller.abort();
             clearTimeout(timer);
         };
-    }, [trackingKey, sellerStatus]);
+    }, [fetchTracking]);
 
-    // Toggle parcel
     const toggleParcel = (awb) => {
-        setExpandedAwb((previous) =>
+        setExpandedAwb(previous =>
             previous === awb ? null : awb
         );
+
+        setExpandedStages({});
     };
 
-    // Timeline UI
+    const toggleStage = (stageKey) => {
+        setExpandedStages(previous => ({
+            ...previous,
+            [stageKey]: !previous[stageKey]
+        }));
+    };
+
     const renderTimeline = (status) => {
         const activeIdx = TIMELINE_STEPS.indexOf(status);
 
@@ -290,19 +720,18 @@ function OrderTimeline({ currentStatus, order }) {
                     return (
                         <div
                             key={step}
-                            className={`timeline-step ${
-                                isDone
-                                    ? "done"
-                                    : isActive
+                            className={`timeline-step ${isDone
+                                ? "done"
+                                : isActive
                                     ? "active"
                                     : ""
-                            }`}
+                                }`}
                         >
                             <div className="step-marker">
-                                <div className="step-dot"></div>
+                                <div className="step-dot" />
 
                                 {index < TIMELINE_STEPS.length - 1 && (
-                                    <div className="step-line"></div>
+                                    <div className="step-line" />
                                 )}
                             </div>
 
@@ -324,14 +753,14 @@ function OrderTimeline({ currentStatus, order }) {
         );
     };
 
-    // Cancelled
+    // Cancelled and payment failed
     if (isCancelled) {
         return (
             <div className="d-flex align-items-center gap-2 p-3 rounded-3 bg-danger bg-opacity-10 border border-danger border-opacity-10">
-                <i className="fas fa-times-circle text-danger"></i>
+                <i className="fas fa-times-circle text-danger" />
 
                 <span className="small fw-bold text-danger">
-                    {normalizedStatus === "payment_failed"
+                    {normalizedStatus === "paymentfailed"
                         ? "Payment Failed"
                         : "Order Cancelled"}
                 </span>
@@ -339,12 +768,7 @@ function OrderTimeline({ currentStatus, order }) {
         );
     }
 
-    // // Confirmed
-    if (sellerStatus === "confirmed") {
-        return renderTimeline("confirmed");
-    }
-
-    // No AWB
+    // No parcel AWB yet
     if (!orderAwbs.length) {
         return (
             <div>
@@ -360,30 +784,21 @@ function OrderTimeline({ currentStatus, order }) {
     }
 
     // Initial loading
-    if (!parcels.length) {
+    if (!parcels.length && loading) {
         return (
-            <div>
-                {/* {renderTimeline(sellerStatus)} */}
+            <div className="text-center py-3">
+                <div
+                    className="spinner-border spinner-border-sm text-primary mb-2"
+                    role="status"
+                />
 
-                <div className="text-center py-3">
-                   
-                        <>
-                            <div
-                                className="spinner-border spinner-border-sm text-primary mb-2"
-                                role="status"
-                            ></div>
-
-                            <p className="small text-muted mb-0">
-                                Loading parcel tracking...
-                            </p>
-                        </>
-                 
-                </div>
+                <p className="small text-muted mb-0">
+                    Loading parcel tracking...
+                </p>
             </div>
         );
     }
 
-    // Parcel-wise accordion
     return (
         <div className="parcel-tracking-wrapper">
 
@@ -394,21 +809,21 @@ function OrderTimeline({ currentStatus, order }) {
                     </h6>
 
                     <small className="text-muted">
-                        {parcels.length} parcels in this order
+                        {orderAwbs.length} parcels in this order
                     </small>
                 </div>
 
                 <span className="small text-muted">
                     {loading ? (
-                        <span>
-                            <i className="fas fa-sync-alt fa-spin me-1"></i>
+                        <>
+                            <i className="fas fa-sync-alt fa-spin me-1" />
                             Updating
-                        </span>
+                        </>
                     ) : (
-                        <span>
-                            <i className="fas fa-check-circle text-success me-1"></i>
+                        <>
+                            <i className="fas fa-check-circle text-success me-1" />
                             Tracking
-                        </span>
+                        </>
                     )}
                 </span>
             </div>
@@ -419,34 +834,28 @@ function OrderTimeline({ currentStatus, order }) {
                 </div>
             )}
 
-            {parcels.map((parcel, index) => {
+            {parcels.length === 0 && (
+                <div className="alert alert-info small">
+                    Courier tracking information is not available yet.
+                    Your order status is still being maintained.
+                </div>
+            )}
+
+            {parcels.map(parcel => {
                 const isExpanded =
                     expandedAwb === parcel.awb;
 
                 const meta =
                     TIMELINE_STATUS_META[parcel.status];
 
-                // Latest scan first
-                const scans = [...parcel.scans].sort(
-                    (a, b) =>
-                        new Date(
-                            b?.ScanDetail?.ScanDateTime || 0
-                        ) -
-                        new Date(
-                            a?.ScanDetail?.ScanDateTime || 0
-                        )
-                );
-
                 return (
                     <div
                         key={parcel.awb}
-                        className={`parcel-accordion border rounded-3 mb-3 ${
-                            isExpanded
-                                ? "border-primary shadow-sm"
-                                : ""
-                        }`}
+                        className={`parcel-accordion border rounded-3 mb-3 ${isExpanded
+                            ? "border-primary shadow-sm"
+                            : ""
+                            }`}
                     >
-                        {/* Parcel Header */}
                         <button
                             type="button"
                             className="w-100 border-0 bg-transparent p-3 text-start"
@@ -458,19 +867,19 @@ function OrderTimeline({ currentStatus, order }) {
                                 <div
                                     className="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
                                     style={{
-                                        width: "44px",
-                                        height: "44px",
+                                        width: 44,
+                                        height: 44,
                                         background: "#f0edff",
-                                        color: "#6534dc",
+                                        color: "#6534dc"
                                     }}
                                 >
-                                    <i className="fas fa-box fa-lg"></i>
+                                    <i className="fas fa-box fa-lg" />
                                 </div>
 
                                 <div className="flex-grow-1 overflow-hidden">
                                     <div className="d-flex justify-content-between align-items-center gap-2">
                                         <strong className="text-dark column-text-truncate">
-                                          {parcel.parcelName.filter(ele => ele.waybill == parcel.awb)[0].title}
+                                            {parcel.parcelName}
                                         </strong>
 
                                         <span className="badge bg-primary">
@@ -484,23 +893,21 @@ function OrderTimeline({ currentStatus, order }) {
 
                                     {parcel.location && (
                                         <small className="text-muted d-block mt-1">
-                                            <i className="fas fa-map-marker-alt me-1"></i>
+                                            <i className="fas fa-map-marker-alt me-1" />
                                             {parcel.location}
                                         </small>
                                     )}
                                 </div>
 
                                 <i
-                                    className={`fas ${
-                                        isExpanded
-                                            ? "fa-chevron-up"
-                                            : "fa-chevron-down"
-                                    } text-muted`}
-                                ></i>
+                                    className={`fas ${isExpanded
+                                        ? "fa-chevron-up"
+                                        : "fa-chevron-down"
+                                        } text-muted`}
+                                />
                             </div>
                         </button>
 
-                        {/* Expanded Parcel Details */}
                         {isExpanded && (
                             <div className="border-top p-3">
 
@@ -510,100 +917,26 @@ function OrderTimeline({ currentStatus, order }) {
                                     </div>
                                 )}
 
-                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                <div className="d-flex justify-content-between align-items-center mb-3">
                                     <strong className="small">
                                         Parcel Journey
                                     </strong>
 
                                     {parcel.statusDate && (
                                         <small className="text-muted">
-                                            {formatTrackingDate(parcel.statusDate)}
+                                            {formatTrackingDate(
+                                                parcel.statusDate
+                                            )}
                                         </small>
                                     )}
                                 </div>
 
-                                {renderTimeline(parcel.status)}
-
-                                {parcel.expectedDelivery && (
-                                    <div className="rounded-3 p-3 mb-3 bg-light">
-                                        <small className="text-muted d-block">
-                                            Expected Delivery
-                                        </small>
-
-                                        <strong>
-                                            {formatTrackingDate(
-                                                parcel.expectedDelivery
-                                            )}
-                                        </strong>
-                                    </div>
-                                )}
-
-                                {/* Actual Delhivery scan history */}
-                                {scans.length > 0 && (
-                                    <div className="mt-3">
-                                        <h6 className="small fw-bold mb-3">
-                                            Tracking History
-                                        </h6>
-
-                                        {scans.map((scan, scanIndex) => {
-                                            const detail =
-                                                scan?.ScanDetail || {};
-
-                                            return (
-                                                <div
-                                                    key={`${parcel.awb}-${scanIndex}`}
-                                                    className="d-flex gap-3 mb-3"
-                                                >
-                                                    <div
-                                                        className="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0"
-                                                        style={{
-                                                            width: "30px",
-                                                            height: "30px",
-                                                        }}
-                                                    >
-                                                        <i className="fas fa-map-marker-alt text-primary small"></i>
-                                                    </div>
-
-                                                    <div className="flex-grow-1">
-                                                        <strong className="small d-block">
-                                                            {detail.Scan || "Shipment Update"}
-                                                        </strong>
-
-                                                        {detail.ScannedLocation && (
-                                                            <small className="text-muted d-block">
-                                                                {detail.ScannedLocation}
-                                                            </small>
-                                                        )}
-
-                                                        {detail.Instructions && (
-                                                            <small className="text-muted d-block">
-                                                                {detail.Instructions}
-                                                            </small>
-                                                        )}
-
-                                                        {detail.ScanDateTime && (
-                                                            <small className="text-muted d-block mt-1">
-                                                                {formatTrackingDate(
-                                                                    detail.ScanDateTime
-                                                                )}
-                                                            </small>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-
-                                {parcel.deliveryDate && (
-                                    <div className="alert alert-success small mb-0">
-                                        <i className="fas fa-check-circle me-2"></i>
-                                        Delivered on{" "}
-                                        {formatTrackingDate(
-                                            parcel.deliveryDate
-                                        )}
-                                    </div>
-                                )}
+                                <ParcelJourney
+                                    parcel={parcel}
+                                    orderStatus={sellerStatus}
+                                    expandedStages={expandedStages}
+                                    onToggleStage={toggleStage}
+                                />
                             </div>
                         )}
                     </div>

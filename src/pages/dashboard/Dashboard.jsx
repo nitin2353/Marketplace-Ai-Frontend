@@ -99,14 +99,14 @@ const getProductTitle = (product) =>
 
 
 const TRUST_ITEMS = [
-    // { icon: "🚚", title: "Free delivery", text: "On orders above ₹499" },
     {
         icon: "🖊️",
         title: "Customization Available",
-        text: "Customize your order to match your preferences."
+        text: "Personalize your order to suit your preferences."
     },
-    { icon: "🔒", title: "Secure payments", text: "100% protected checkout" },
-    { icon: "💬", title: "24/7 support", text: "We're always here to help" },
+    { icon: "🚚", title: "Fast & Reliable Delivery", text: "Quick and convenient delivery right to your doorstep." },
+    { icon: "🔒", title: "Secure payments", text: "Shop with confidence using secure payment options." },
+    { icon: "💬", title: "24/7 support", text: "We're always here to assist you whenever you need us." },
 ];
 
 
@@ -753,7 +753,6 @@ export default function ProductDashboard() {
             toast.error("Code: " + WELCOME_COUPON);
         }
     };
-    console.log('filtered', filtered)
     const totalPages = Math.ceil((filtered?.length || 0) / PER_PAGE);
     const paged = (filtered || []).slice((page - 1) * PER_PAGE, page * PER_PAGE);
 

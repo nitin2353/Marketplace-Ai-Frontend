@@ -40,7 +40,6 @@ const SellerPayments = () => {
                 paymentApi.getSellerTransactions(filters),
                 paymentApi.getSellerChartData()
             ]);
-            console.log('summaryRes.data', summaryRes.data)
             setSummary(summaryRes.data);
 
             // Map data for DataTable compatibility

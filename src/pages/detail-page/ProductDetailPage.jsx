@@ -427,26 +427,88 @@ export default function ProductDetail() {
     );
   }
 
+
   const handleShare = async () => {
-    const shareData = {
-      title: product?.title || "Product",
-      text: `Check out this ${product?.title} on our marketplace!`,
-      url: window.location.href,
-    };
+    const productUrl = window.location.href;
+    const productTitle = product?.title || "Amazing Product";
+    const rawImage = product?.image || product?.images?.[0];
+
+    const imageUrl =
+      typeof rawImage === "string"
+        ? rawImage
+        : rawImage?.url || rawImage?.image_url;
+
+    const shareText = `🛍️ ${productTitle}
+
+      Check out this amazing product on AshoNex!
+
+      Shop Now:
+      ${productUrl}`;
 
     try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        toast.success("Link copied to clipboard! 🔗");
+      // Check browser sharing support
+      if (!navigator.share) {
+        await navigator.clipboard.writeText(shareText);
+        toast.success("Product link copied!");
+        return;
       }
-    } catch (err) {
-      if (err.name !== "AbortError") {
-        toast.error("Failed to share.");
+
+      // Try sharing product image with text
+      if (imageUrl) {
+        try {
+          const response = await fetch(imageUrl);
+
+          if (!response.ok) {
+            throw new Error("Image fetch failed");
+          }
+
+          const blob = await response.blob();
+
+          const mimeType = blob.type || "image/jpeg";
+          const extension = mimeType.split("/")[1]?.split("+")[0] || "jpg";
+
+          const imageFile = new File(
+            [blob],
+            `ashonex-product.${extension}`,
+            { type: mimeType }
+          );
+
+          const shareData = {
+            files: [imageFile],
+            title: productTitle,
+            text: shareText,
+          };
+
+          if (navigator.canShare?.({ files: [imageFile] })) {
+            await navigator.share(shareData);
+            return;
+          }
+        } catch (imageError) {
+          console.warn("Image sharing unavailable:", imageError);
+        }
+      }
+
+      // Fallback: Share product title, text and URL
+      await navigator.share({
+        title: productTitle,
+        text: shareText,
+        url: productUrl,
+      });
+
+    } catch (error) {
+      if (error.name === "AbortError") return;
+
+      console.error("Share failed:", error);
+
+      try {
+        await navigator.clipboard.writeText(shareText);
+        toast.success("Product details copied!");
+      } catch {
+        toast.error("Unable to share product.");
       }
     }
   };
+
 
   return (
     <>
@@ -658,7 +720,7 @@ export default function ProductDetail() {
                   <Button
                     variant="primary"
                     className="rounded-pill px-4 m-3 ms-auto"
-                    
+
                     title="Customize your product"
                     onClick={handleCustomizeWithSeller}
                   >

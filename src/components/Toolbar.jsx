@@ -131,7 +131,6 @@ const Toolbar = ({
                 const rows = Array.isArray(res?.data)
                     ? res.data
                     : [];
-                console.log('rows', rows)
 
                 setSuggestions(
                     rows.filter(item => item?.keyword?.trim())

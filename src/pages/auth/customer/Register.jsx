@@ -71,7 +71,7 @@ export default function Register() {
             const res = await authApi?.signupCustomer(payload);
             if (res.success) {
                 toast.success(res.message || "Your Account successfully Created");
-                setSubmitted(true); // only show the success screen when signup really worked
+                navigate('/auth/login')
             } else {
                 toast.error(res.message || "Something went wrong!!");
             }
@@ -85,26 +85,6 @@ export default function Register() {
 
     const handleLogin = () => navigate("/auth/login");
 
-    // ── SUCCESS STATE ──
-    if (submitted) {
-        return (
-            <Container fluid className="eco-hero d-flex align-items-center justify-content-center p-3" style={{ minHeight: "100vh" }}>
-                <Card className="eco-card text-center p-4 p-md-5" style={{ maxWidth: 440, width: "100%" }}>
-                    <div className="eco-success-ring mb-4">🎉</div>
-                    <h2 className="eco-title mb-2">You're in!</h2>
-                    <p className="text-muted mb-3 fw-semibold">
-                        Your AshoNex account is ready. Start exploring thousands of products!
-                    </p>
-                    <Button className="eco-btn-main w-100 text-white" onClick={() => navigate("/auth/login")}>
-                        Start Shopping →
-                    </Button>
-                    <div className="mt-3">
-                        <small className="text-muted fw-semibold">Check your email for the verification link</small>
-                    </div>
-                </Card>
-            </Container>
-        );
-    }
 
     // ── MAIN FORM ──
     return (
@@ -116,13 +96,17 @@ export default function Register() {
                 {/* ── LEFT PANEL ── */}
                 <Col lg={5} className="eco-hero d-none d-lg-flex flex-column justify-content-between p-5">
                     <div>
-                        <div className="text-white mb-1" style={{ fontSize: "2.4rem", fontWeight: 900 }}>
-                            🛍️ AshoNex
+                        <div className="text-white mb-1" style={{ fontSize: "2.4rem", fontWeight: 700 }}>
+                            <img src="/Light-logo.png" alt="AshoNex" style={{
+                                width: "190px",
+                                height: "auto",
+                                objectFit: "contain"
+                            }} />
                         </div>
                         <div className="text-white fw-semibold mb-4" style={{ opacity: 0.9, fontSize: "1rem" }}>
                             India's Most Loved Shopping App
                         </div>
-                        <div className="text-white" style={{ fontSize: "1.9rem", fontWeight: 900, lineHeight: 1.2, maxWidth: 380 }}>
+                        <div className="text-white" style={{ fontSize: "1.9rem", fontWeight: 700, lineHeight: 1.2, maxWidth: 380 }}>
                             Create your account and start saving today.
                         </div>
                     </div>
@@ -146,7 +130,11 @@ export default function Register() {
 
                 {/* ── RIGHT FORM PANEL ── */}
                 <Col xs={12} lg={7} className="d-flex flex-column">
-                    <div className="eco-mobile-brand d-lg-none">🛍️ AshoNex</div>
+                    <div className="eco-mobile-brand d-lg-none d-flex justify-content-center"> <img src="/Light-logo.png" alt="AshoNex" style={{
+                        width: "190px",
+                        height: "auto",
+                        objectFit: "contain"
+                    }} /></div>
 
                     <div className="flex-grow-1 d-flex align-items-center justify-content-center p-3 p-md-4 p-lg-5 eco-pull">
                         <div style={{ width: "100%", maxWidth: 510 }}>
@@ -207,8 +195,8 @@ export default function Register() {
                                 </Field>
 
                                 {/* Phone — field is registered as "phone", so errors.phone (was errors.mobile) */}
-                                <Field label="Mobile number *"  error={errors.phone}>
-                                    
+                                <Field label="Mobile number *" error={errors.phone}>
+
                                     <Form.Control
                                         className={inputCls(errors.phone, "has-prefix")}
                                         type="tel"
