@@ -24,8 +24,8 @@ export default defineConfig({
       },
 
       manifest: {
-        name: "FlashiBuy",
-        short_name: "FlashiBuy",
+        name: "AshoNex",
+        short_name: "AshoNex",
         description: "Your online AI Marketplace",
         theme_color: "#2563eb",
         background_color: "#ffffff",

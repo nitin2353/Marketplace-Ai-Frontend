@@ -57,7 +57,7 @@ export default function SellerSidebar({ stats = [] }) {
                         >
                             <img
                                 src="/Logo.png"
-                                alt="FlashiBuy Logo"
+                                alt="AshoNex Logo"
                                 style={{
                                     width: "180px",
                                     height: "auto",

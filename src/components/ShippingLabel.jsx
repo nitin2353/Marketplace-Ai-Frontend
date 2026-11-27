@@ -62,7 +62,7 @@ const getSellerData = (order = {}, item = {}) => {
                 }`.trim() ||
             seller?.name ||
             item?.seller_name ||
-            "FlashiBuy Seller",
+            "AshoNex Seller",
 
         phone:
             seller?.phone ||
@@ -425,7 +425,7 @@ const ShippingParcelLabel = ({
                             height: "auto",
                         }}
                     />
-                    {/* <Text style={s.brand}>FlashiBuy</Text> */}
+                    {/* <Text style={s.brand}>AshoNex</Text> */}
                     <Text style={s.brandSub}>
                         EXPRESS DELIVERY
                     </Text>
@@ -687,7 +687,7 @@ const ShippingParcelLabel = ({
                 </Text>
 
                 <Text style={s.footerText}>
-                    Courier: FlashiBuy Express
+                    Courier: AshoNex Express
                 </Text>
             </View>
         </View>

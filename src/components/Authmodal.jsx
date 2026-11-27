@@ -146,7 +146,7 @@ function SignupTab({ onSubmit, isLoading }) {
 
     return (
         <div className="auth-form-wrap">
-            <div className="auth-form-title">Join FlashiBuy! ✨</div>
+            <div className="auth-form-title">Join AshoNex! ✨</div>
             <p className="auth-form-sub">Create an account to get started</p>
 
             {/* User type selector */}

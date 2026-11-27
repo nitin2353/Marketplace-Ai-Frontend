@@ -77,7 +77,7 @@ export default function Sidebar({ cart, sidebarOpen, navSection, wishlist, IoLog
                         >
                             <img
                                 src="/Logo.png"
-                                alt="FlashiBuy"
+                                alt="AshoNex"
                                  style={{
                                     width: "180px",
                                     height: "auto",

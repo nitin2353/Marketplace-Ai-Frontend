@@ -5,7 +5,7 @@ import globalApi from "../api/globalApi";
 import '../styles/feedback.css'
 
 const TermsAndConditions = ({
-    siteName = "FlashiBuy",
+    siteName = "AshoNex",
     userRole = "all",
     lastUpdated = "26 October 2026",
     contactEmail = BUSINESS_EMAIL,

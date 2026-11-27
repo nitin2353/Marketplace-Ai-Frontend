@@ -93,7 +93,7 @@ export default function Register() {
                     <div className="eco-success-ring mb-4">🎉</div>
                     <h2 className="eco-title mb-2">You're in!</h2>
                     <p className="text-muted mb-3 fw-semibold">
-                        Your FlashiBuy account is ready. Start exploring thousands of products!
+                        Your AshoNex account is ready. Start exploring thousands of products!
                     </p>
                     <Button className="eco-btn-main w-100 text-white" onClick={() => navigate("/auth/login")}>
                         Start Shopping →
@@ -117,7 +117,7 @@ export default function Register() {
                 <Col lg={5} className="eco-hero d-none d-lg-flex flex-column justify-content-between p-5">
                     <div>
                         <div className="text-white mb-1" style={{ fontSize: "2.4rem", fontWeight: 900 }}>
-                            🛍️ FlashiBuy
+                            🛍️ AshoNex
                         </div>
                         <div className="text-white fw-semibold mb-4" style={{ opacity: 0.9, fontSize: "1rem" }}>
                             India's Most Loved Shopping App
@@ -146,7 +146,7 @@ export default function Register() {
 
                 {/* ── RIGHT FORM PANEL ── */}
                 <Col xs={12} lg={7} className="d-flex flex-column">
-                    <div className="eco-mobile-brand d-lg-none">🛍️ FlashiBuy</div>
+                    <div className="eco-mobile-brand d-lg-none">🛍️ AshoNex</div>
 
                     <div className="flex-grow-1 d-flex align-items-center justify-content-center p-3 p-md-4 p-lg-5 eco-pull">
                         <div style={{ width: "100%", maxWidth: 510 }}>
@@ -309,7 +309,7 @@ export default function Register() {
                                         type="checkbox"
                                         label={
                                             <span>
-                                                I agree to FlashiBuy's <a href="/en/policy">Terms of Service</a> &amp; <a href="/en/policy">Privacy Policy</a>
+                                                I agree to AshoNex's <a href="/en/policy">Terms of Service</a> &amp; <a href="/en/policy">Privacy Policy</a>
                                             </span>
                                         }
                                         {...register("agreed", { required: "You must accept Terms & Conditions" })}

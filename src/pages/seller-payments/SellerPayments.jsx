@@ -101,7 +101,7 @@ const SellerPayments = () => {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>FlashiBuy - Payment Receipt</title>
+            <title>AshoNex - Payment Receipt</title>
             <meta charset="UTF-8" />
             <style>
                 @page {
@@ -687,7 +687,7 @@ const SellerPayments = () => {
                     {selectedTransaction && (
                         <div ref={receiptRef} className="receipt-print-area">
                             <div className="receipt-header">
-                                <h3>FlashiBuy</h3>
+                                <h3>AshoNex</h3>
                                 <hr />
                                 <h5>Payment Receipt</h5>
                                 <p>
@@ -832,7 +832,7 @@ const SellerPayments = () => {
                             </Row>
                             <hr />
                             <div className="receipt-footer fw-bold">
-                                Thank you for using FlashiBuy.
+                                Thank you for using AshoNex.
                             </div>
                         </div>
                     )}
